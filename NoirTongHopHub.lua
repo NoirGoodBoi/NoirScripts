@@ -23,7 +23,25 @@ PlayerTab:CreateSlider({
    end
 })
 
---🌟 2. Slider JumpPower
+--🌟 2. Toggle Speed
+PlayerTab:CreateToggle({
+   Name = "Tăng tốc độ",
+   CurrentValue = false,
+   Callback = function(state)
+      local plr = game.Players.LocalPlayer
+      while state do
+         task.wait()
+         if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character.Humanoid.WalkSpeed = walkspeed
+         end
+      end
+      if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+         plr.Character.Humanoid.WalkSpeed = 16
+      end
+   end
+})
+
+--🌟 3. Slider JumpPower
 local jumppower = 50
 PlayerTab:CreateSlider({
    Name = "Power Jump",
@@ -35,7 +53,25 @@ PlayerTab:CreateSlider({
    end
 })
 
---🌟 3. Infinity Jump (fix leak + ổn định)
+--🌟 4. Toggle Power Jump
+PlayerTab:CreateToggle({
+   Name = "Tăng power jump",
+   CurrentValue = false,
+   Callback = function(state)
+      local plr = game.Players.LocalPlayer
+      while state do
+         task.wait()
+         if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character.Humanoid.JumpPower = jumppower
+         end
+      end
+      if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+         plr.Character.Humanoid.JumpPower = 50
+      end
+   end
+})
+
+--🌟 5. Infinity Jump (fix leak + ổn định)
 local infJumpConnection
 PlayerTab:CreateToggle({
    Name = "Infinity Jump",
@@ -56,3 +92,6 @@ PlayerTab:CreateToggle({
       end
    end
 })
+
+
+
