@@ -35,18 +35,24 @@ PlayerTab:CreateSlider({
    end
 })
 
---🌟 3. Infinity Jump
+--🌟 3. Infinity Jump (fix leak + ổn định)
+local infJumpConnection
 PlayerTab:CreateToggle({
    Name = "Infinity Jump",
    CurrentValue = false,
    Callback = function(state)
       if state then
-         game:GetService("UserInputService").JumpRequest:Connect(function()
-            if game.Players.LocalPlayer.Character then
-               game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+         infJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChildOfClass("Humanoid") then
+               char:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
             end
          end)
+      else
+         if infJumpConnection then
+            infJumpConnection:Disconnect()
+            infJumpConnection = nil
+         end
       end
    end
 })
-         
