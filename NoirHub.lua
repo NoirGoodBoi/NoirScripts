@@ -228,3 +228,194 @@ PlayerTab:CreateButton({
         end
     end
 })
+
+local PacksTab = Window:CreateTab("Packs", 4483362458)
+
+-- 📦 Không FE
+PacksTab:CreateButton({
+    Name = "Korblox",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Korblox.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Headless",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Headless.lua"))()
+    end,
+})
+
+-- ----------------------------- --
+
+-- ✨ FE
+PacksTab:CreateButton({
+    Name = "Ninja",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Ninja.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Robot",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Robot.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Levitate",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Levitate.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Mage",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Mage.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Stylish",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Stylish.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Hero",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Hero.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Astronaut",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Astronaut.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Bubbly",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Bubbly.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Cartoony",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Cartoony.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Elder",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Elder.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Ghost",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Ghost.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Knight",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Knight.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Vampire",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Vampire.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Werewolf",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Werewolf.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Zombie",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Zombie.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Oldschool",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Oldschool.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Bold",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Bold.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Adidas",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Adidas.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Adidas2",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Adidas2.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Catwalk",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Catwalk.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Walmart",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Walmart.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Wicked",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Wicked.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "NFL",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/NFL.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Pirate",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Pirate.lua"))()
+    end,
+})
+
+-- 📝 Note: Có thể gõ "/e stop" để tắt pack
+
