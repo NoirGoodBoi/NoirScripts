@@ -15,7 +15,7 @@ local PlayerTab = Window:CreateTab("Player", 4483362458)
 local walkspeed = 16
 PlayerTab:CreateSlider({
     Name = "Speed",
-    Range = {16, 300},
+    Range = {16, 100},
     Increment = 1,
     CurrentValue = 16,
     Callback = function(v)
@@ -55,7 +55,7 @@ PlayerTab:CreateToggle({
 local jumppower = 50
 PlayerTab:CreateSlider({
     Name = "Power Jump",
-    Range = {50, 300},
+    Range = {50, 200},
     Increment = 1,
     CurrentValue = 50,
     Callback = function(v)
