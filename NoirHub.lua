@@ -417,5 +417,175 @@ PacksTab:CreateButton({
     end,
 })
 
--- 📝 Note: Có thể gõ "/e stop" để tắt pack
+local ScriptsTab = Window:CreateTab("Scripts", 4483362458)
+
+ScriptsTab:CreateButton({
+    Name = "Fly",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Vehicle%20Fly%20Gui"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Funny by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirFunny.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "PvP by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirPvP.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Wallhop",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Aim Bot",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Aimbot-Universal-For-Mobile-and-PC-29153"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Animation v2.5",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Emerson2-creator/Scripts-Roblox/refs/heads/main/ScriptR6/AnimGuiV2.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Keyboard",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "GhostHub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/GhostHub"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Trolling GUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Krystal Dance v3",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sparezirt/Script/refs/heads/main/.github/workflows/JustABaseplate.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "AK Gaming Ez Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "TBS (by YQANTG)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YQANTG/YQANTG/refs/heads/main/YQANTGV31.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Forsaken",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/notzanocoddz4/BobHub/main/main.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "MM2 (X Hub)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Au0yX/Community/main/XhubMM2"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "MeMe Sea",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaqueHub/ShinyHub-MMSea/main/MEME%20SEA%20PROTECT.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Ink Game",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/wefwef127382/inkgames.github.io/refs/heads/main/ringta.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Deadrail",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/wefwef127382/DEADRAILS.github.io/refs/heads/main/mainringta.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Farm Bond (Skull Hub)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hungquan99/SkullHub/main/loader.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Blade Ball",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/AgentX771/ArgonHubX/main/Loader.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Break In 1",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Iptxt/AXHub-Loader/refs/heads/main/Loader"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Break In 2",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EnesXVC/Breakin2/main/script"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Doors",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Iliankytb/Iliankytb/main/NewBestDoorsScriptIliankytb"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Dangerous Night",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Bac0nHck/Scripts/refs/heads/main/dangerousnight.lua"))()
+    end,
+})
+
+
 
