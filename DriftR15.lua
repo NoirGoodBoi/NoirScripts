@@ -10,7 +10,7 @@ local hrp = char:WaitForChild("HumanoidRootPart")
 local iceMode = false
 local slidePower = 0.6 -- lực trượt khi di chuyển
 local friction = 0.92 -- ma sát (thấp hơn = trượt lâu hơn)
-local maxSpeed = 16 -- tốc độ tối đa (giữ bằng WalkSpeed chuẩn)
+local maxSpeed = 40 -- tốc độ tối đa (giữ bằng WalkSpeed chuẩn)
 
 -- UI Toggle
 local screenGui = Instance.new("ScreenGui")
