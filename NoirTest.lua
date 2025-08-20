@@ -113,7 +113,8 @@ PlayerTab:CreateToggle({
     end
 })
 
--- 6. PlayerTab:CreateToggle({
+--6. Noclip
+PlayerTab:CreateToggle({
     Name = "NoClip",
     CurrentValue = false,
     Callback = function(state)
@@ -294,51 +295,56 @@ local MapGui, MapFrame, MapObjects = nil, nil, {}
 local MapEnabled = false
 
 local function createMap()
-    MapGui = Instance.new("ScreenGui")
-    MapGui.IgnoreGuiInset = true
-    MapGui.ResetOnSpawn = false
-    MapGui.Parent = game.CoreGui
+MapGui = Instance.new("ScreenGui")
+MapGui.IgnoreGuiInset = true
+MapGui.ResetOnSpawn = false
+MapGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+MapGui.Parent = game.CoreGui
 
-    MapFrame = Instance.new("Frame")
-    MapFrame.Size = UDim2.new(0,150,0,150)
-    MapFrame.Position = UDim2.new(1,-150,0,10) 
-    MapFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    MapFrame.BackgroundTransparency = 0.4
-    MapFrame.BorderSizePixel = 0
-    MapFrame.Parent = MapGui
-    MapFrame.ClipsDescendants = true
-    MapFrame.AnchorPoint = Vector2.new(0,0)
+MapFrame = Instance.new("Frame")  
+MapFrame.Size = UDim2.new(0,150,0,150)  
+MapFrame.Position = UDim2.new(1,-160,0,10)   
+MapFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)  
+MapFrame.BackgroundTransparency = 0.4  
+MapFrame.BorderSizePixel = 0  
+MapFrame.Parent = MapGui  
+MapFrame.ClipsDescendants = true
 
-    local UICorner = Instance.new("UICorner", MapFrame)
-    UICorner.CornerRadius = UDim.new(0,100)
 end
 
 local function getDotColor(player)
-    if player == LocalPlayer then
-        return Color3.fromRGB(0,255,0), Color3.fromRGB(0,150,0)
-    elseif LocalPlayer:IsFriendsWith(player.UserId) then
-        return Color3.fromRGB(0,100,255), Color3.fromRGB(0,0,150)
-    else
-        return Color3.fromRGB(255,255,255), Color3.fromRGB(0,0,0) 
-    end
+if player == LocalPlayer then
+return Color3.fromRGB(0,255,0), Color3.fromRGB(0,150,0), 3
+elseif LocalPlayer:IsFriendsWith(player.UserId) then
+return Color3.fromRGB(0,170,255), Color3.fromRGB(0,100,200), 2
+else
+return Color3.fromRGB(255,255,255), Color3.fromRGB(80,80,80), 1
+end
 end
 
 local function createDot(player)
-    local dot = Instance.new("Frame")
-    dot.Size = UDim2.new(0,8,0,8)
-    dot.AnchorPoint = Vector2.new(0.5,0.5)
-    dot.BackgroundTransparency = 0
-    local color, border = getDotColor(player)
-    dot.BackgroundColor3 = color
-    dot.ZIndex = (color == Color3.fromRGB(255,255,255)) and 1 or 2
-    dot.Parent = MapFrame
+if MapObjects[player] then return end
 
-    local UIStroke = Instance.new("UIStroke")
-    UIStroke.Thickness = 2
-    UIStroke.Color = border
-    UIStroke.Parent = dot
+local dot = Instance.new("Frame")  
+dot.Size = UDim2.new(0,8,0,8)  
+dot.AnchorPoint = Vector2.new(0.5,0.5)  
 
-    MapObjects[player] = dot
+local color, border, zindex = getDotColor(player)  
+dot.BackgroundColor3 = color  
+dot.ZIndex = zindex  
+dot.Parent = MapFrame  
+
+local UICorner = Instance.new("UICorner")  
+UICorner.CornerRadius = UDim.new(1,0) -- dot tròn  
+UICorner.Parent = dot  
+
+local UIStroke = Instance.new("UIStroke")  
+UIStroke.Thickness = 2  
+UIStroke.Color = border  
+UIStroke.Parent = dot  
+
+MapObjects[player] = dot
+
 end
 
 local function updateDots()
@@ -346,20 +352,23 @@ local function updateDots()
     local center = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not center then return end
 
-    local camYaw = -math.atan2(Camera.CFrame.LookVector.X, Camera.CFrame.LookVector.Z)
+    -- góc xoay theo camera + nghiêng 45° sang trái
+    local camYaw = math.atan2(Camera.CFrame.LookVector.Z, Camera.CFrame.LookVector.X) + math.rad(45)
 
     for player, dot in pairs(MapObjects) do
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local hrp = player.Character.HumanoidRootPart
-            local offset = (hrp.Position - center.Position) / 500 * 100
-            local rx = offset.X*math.cos(camYaw) - offset.Z*math.sin(camYaw)
-            local rz = offset.X*math.sin(camYaw) + offset.Z*math.cos(camYaw)
+            local offset = (hrp.Position - center.Position) / 4
 
-            if math.abs(rx) <= 100 and math.abs(rz) <= 100 then
+            -- xoay offset theo yaw đã nghiêng
+            local rx = offset.X*math.cos(camYaw) + offset.Z*math.sin(camYaw)
+            local rz = -offset.X*math.sin(camYaw) + offset.Z*math.cos(camYaw)
+
+            if math.abs(rx) <= 70 and math.abs(rz) <= 70 then
                 dot.Visible = true
                 dot.Position = UDim2.new(0.5,rx,0.5,rz)
             else
-                dot.Visible = false
+            dot.Visible = false
             end
         else
             dot.Visible = false
@@ -368,30 +377,30 @@ local function updateDots()
 end
 
 local function initMap()
-    createMap()
-    for _,p in pairs(Players:GetPlayers()) do
-        createDot(p)
-    end
-    Players.PlayerAdded:Connect(createDot)
-    Players.PlayerRemoving:Connect(function(p)
-        if MapObjects[p] then MapObjects[p]:Destroy() MapObjects[p]=nil end
-    end)
-    RunService.RenderStepped:Connect(updateDots)
+createMap()
+for _,p in pairs(Players:GetPlayers()) do
+createDot(p)
+end
+Players.PlayerAdded:Connect(createDot)
+Players.PlayerRemoving:Connect(function(p)
+if MapObjects[p] then MapObjects[p]:Destroy() MapObjects[p]=nil end
+end)
+RunService.RenderStepped:Connect(updateDots)
 end
 
 PlayerTab:CreateToggle({
-    Name = "MiniMap",
-    CurrentValue = false,
-    Flag = "MiniMapToggle",
-    Callback = function(state)
-        MapEnabled = state
-        if state then
-            if not MapGui then initMap() end
-            MapGui.Enabled = true
-        else
-            if MapGui then MapGui.Enabled = false end
-        end
-    end
+Name = "MiniMap",
+CurrentValue = false,
+Flag = "MiniMapToggle",
+Callback = function(state)
+MapEnabled = state
+if state then
+if not MapGui then initMap() end
+MapGui.Enabled = true
+else
+if MapGui then MapGui.Enabled = false end
+end
+end
 })
 
 -- 10. Anti-AFK (Button)
