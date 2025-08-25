@@ -9,6 +9,118 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
+-Tab0
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+local MainTab = Window:CreateTab("Main", "home")
+
+-- Info
+MainTab:CreateSection("Thông Tin Bản Thân")
+MainTab:CreateLabel("Username: " .. LocalPlayer.Name)
+MainTab:CreateLabel("DisplayName: " .. LocalPlayer.DisplayName)
+MainTab:CreateLabel("UserId: " .. LocalPlayer.UserId)
+MainTab:CreateLabel("Account Age: " .. LocalPlayer.AccountAge .. " days")
+
+local PingLabel = MainTab:CreateLabel("Ping: ...")
+RunService.Heartbeat:Connect(function()
+    PingLabel:Set("Ping: " .. tostring(math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())) .. " ms")
+end)
+
+-- Self Tools
+MainTab:CreateSection("Công Cụ")
+
+-- Spin
+local spinning = false
+local spinSpeed = 5
+MainTab:CreateToggle({
+    Name = "Spin",
+    CurrentValue = false,
+    Callback = function(v)
+        spinning = v
+    end
+})
+MainTab:CreateSlider({
+    Name = "Spin Speed",
+    Range = {1,50},
+    Increment = 1,
+    CurrentValue = 5,
+    Callback = function(v)
+        spinSpeed = v
+    end
+})
+RunService.RenderStepped:Connect(function()
+    if spinning and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(spinSpeed), 0)
+    end
+end)
+
+-- Sit
+MainTab:CreateButton({
+    Name = "Sit",
+    Callback = function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.Sit = true
+        end
+    end
+})
+
+-- Gravity
+local gravityToggle = false
+local customGravity = workspace.Gravity
+MainTab:CreateToggle({
+    Name = "Gravity Toggle",
+    CurrentValue = false,
+    Callback = function(v)
+        gravityToggle = v
+        if v then
+            workspace.Gravity = customGravity
+        else
+            workspace.Gravity = 196.2
+        end
+    end
+})
+MainTab:CreateSlider({
+    Name = "Gravity",
+    Range = {-500,1000},
+    Increment = 1,
+    CurrentValue = 196,
+    Callback = function(v)
+        customGravity = v
+        if gravityToggle then
+            workspace.Gravity = v
+        end
+    end
+})
+
+-- Unlock Thirdp
+MainTab:CreateButton({
+    Name = "Unlock Third Person",
+    Callback = function()
+        LocalPlayer.CameraMode = Enum.CameraMode.Classic
+        LocalPlayer.CameraMinZoomDistance = 0.5
+        LocalPlayer.CameraMaxZoomDistance = 128
+    end
+})
+
+-- Lock firstp
+MainTab:CreateButton({
+    Name = "Lock First Person",
+    Callback = function()
+        LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+        LocalPlayer.CameraMinZoomDistance = 0
+        LocalPlayer.CameraMaxZoomDistance = 0
+    end
+})
+
+MainTab:CreateButton({
+   Name = "Reset GUI Rayfield",
+   Callback = function() Rayfield:Destroy() end,
+})
+
+-Tab1
 local PlayerTab = Window:CreateTab("Player", "user")
 
 -- 1. Slider Speed
@@ -88,6 +200,30 @@ PlayerTab:CreateToggle({
                 plr.Character.Humanoid.JumpPower = 50
             end
         end
+    end
+})
+
+-FOV
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+PlayerTab:CreateSlider({
+    Name = "Field Of View",
+    Range = {30,120},
+    Increment = 1,
+    CurrentValue = Camera.FieldOfView,
+    Callback = function(v)
+        Camera.FieldOfView = v
+    end
+})
+
+--toggle FOV
+PlayerTab:CreateButton({
+    Name = "Increase FOV (+20)",
+    Callback = function()
+        local newFOV = math.clamp(Camera.FieldOfView + 20, 30, 120)
+        Camera.FieldOfView = newFOV
     end
 })
 
@@ -352,7 +488,6 @@ local function updateDots()
     local center = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not center then return end
 
-    -- góc xoay theo camera + nghiêng 45° sang trái
     local camYaw = math.atan2(Camera.CFrame.LookVector.Z, Camera.CFrame.LookVector.X) + math.rad(45)
 
     for player, dot in pairs(MapObjects) do
@@ -360,7 +495,6 @@ local function updateDots()
             local hrp = player.Character.HumanoidRootPart
             local offset = (hrp.Position - center.Position) / 4
 
-            -- xoay offset theo yaw đã nghiêng
             local rx = offset.X*math.cos(camYaw) + offset.Z*math.sin(camYaw)
             local rz = -offset.X*math.sin(camYaw) + offset.Z*math.cos(camYaw)
 
@@ -413,8 +547,47 @@ PlayerTab:CreateButton({
     end
 })
 
+--11. Boost FPS
+PlayerTab:CreateButton({
+    Name = "Boost FPS",
+    Callback = function()
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.Reflectance = 0
+            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                obj:Destroy()
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+                obj:Destroy()
+            end
+        end
+
+        sethiddenproperty(workspace, "Terrain", Enum.Material.Air)
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        game:GetService("Lighting").GlobalShadows = false
+        game:GetService("Lighting").FogEnd = 9e9
+        game:GetService("Lighting").Brightness = 1
+        game:GetService("Lighting").Ambient = Color3.new(1,1,1)
+    end
+})
+
+12. Restore FPS
+PlayerTab:CreateButton({
+    Name = "Restore FPS",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+        Lighting.GlobalShadows = true
+        Lighting.FogEnd = 1000
+        Lighting.Brightness = 2
+        Lighting.Ambient = Color3.new(0.5,0.5,0.5)
+    end
+})
+
+-Tab2.
 local PacksTab = Window:CreateTab("Packs", "package")
 
+PacksTab:CreateSection("Not Fe & just use for R15")
 PacksTab:CreateButton({
     Name = "Korblox",
     Callback = function()
@@ -429,8 +602,7 @@ PacksTab:CreateButton({
     end,
 })
 
--- ----------------------------- --
-
+PacksTab:CreateSection("FE & just use for R15")
 PacksTab:CreateButton({
     Name = "Ninja",
     Callback = function()
@@ -599,8 +771,10 @@ PacksTab:CreateButton({
     end,
 })
 
+-Tab3.
 local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 
+ScriptsTab:CreateSection("Funny Scripts")
 ScriptsTab:CreateButton({
     Name = "Fly",
     Callback = function()
@@ -623,16 +797,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Infinite Yield",
+    Name = "Wallhop",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "Wallhop",
+    Name = "Keyboard",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
     end,
 })
 
@@ -651,19 +825,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "M1 reset",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/M1Reset.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "ResetUI by Noir",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetUi.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetUI.lua"))()
     end,
 })
 
+ScriptsTab:CreateSection("Animation & Emote Scripts")
 ScriptsTab:CreateButton({
     Name = "Animation v2.5",
     Callback = function()
@@ -672,23 +840,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Emote R15",
+    Name = "Emote Admin GUI",
     Callback = function()
-        loadstring(game:HttpGet("https://scriptblox.com/raw/Brookhaven-RP-all-emotes-6849"))
+        loadstring(game:HttpGet("https://angelical.me/ak.lua"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "Keyboard",
+    Name = "Emote Tiktok",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Trolling GUI",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Free-emote/refs/heads/main/Delta%20mad%20stuffs"))()
     end,
 })
 
@@ -699,10 +860,11 @@ ScriptsTab:CreateButton({
     end,
 })
 
+ScriptsTab:CreateSection("Admin Scripts & All in One Scripts")
 ScriptsTab:CreateButton({
-    Name = "AK Gaming Ez Hub",
+    Name = "Infinite Yield",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
     end,
 })
 
@@ -714,9 +876,60 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "NodeX",
+    Name = "Cryton v3",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NodeX-Enc/NodeX/refs/heads/main/Main.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/thesigmacorex/Crypton/main/Free"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "XVC hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/Piw5bqGq"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Trolling GUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
+    end,
+})
+
+ScriptsTab:CreateSection("Funny FE Scripts :))")
+ScriptsTab:CreateButton({
+    Name = "Sandevistan FE",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/idbiRMZG"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE invincible v1",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Rayfield/main/FE_invincible_v1"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Wally West Scripts",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/VDxFA1Ze"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Car Drift",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
+    end,
+})
+
+ScriptsTab:CreateSection("For Some Game")
+ScriptsTab:CreateButton({
+    Name = "M1 reset",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/M1Reset.lua"))()
     end,
 })
 
@@ -724,6 +937,13 @@ ScriptsTab:CreateButton({
     Name = "TBS (by YQANTG)",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Kietba/Fr/refs/heads/main/Wekinda.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "AK Gaming Ez Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
     end,
 })
 
@@ -797,4 +1017,136 @@ ScriptsTab:CreateButton({
     end,
 })
 
+-Tab4
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
+local Tab4 = Window:CreateTab("People", "users")
+
+local currentTarget = nil
+local loopTeleport = false
+local watching = false
+
+local playerDropdown = Tab4:CreateDropdown({
+    Name = "Player List",
+    Options = {},
+    CurrentOption = {},
+    Multi = false,
+    Flag = "obj_playerlist",
+    Callback = function(option)
+        if type(option) == "table" and #option > 0 then
+            currentTarget = option[1]
+        else
+            currentTarget = nil
+        end
+    end
+})
+
+local function refreshPlayers()
+    local opts = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(opts, p.Name)
+        end
+    end
+    playerDropdown:Refresh(opts, true) -- true = gi la chn nu còn trong list
+    if not table.find(opts, currentTarget) then
+        currentTarget = nil
+    end
+end
+
+Players.PlayerAdded:Connect(refreshPlayers)
+Players.PlayerRemoving:Connect(refreshPlayers)
+refreshPlayers()
+
+local function getTarget()
+    if not currentTarget then return nil end
+    return Players:FindFirstChild(currentTarget)
+end
+
+local function getChar(p)
+    if not p then return nil end
+    return p.Character
+end
+
+Tab4:CreateButton({
+    Name = "Teleport to player",
+    Callback = function()
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+            if hrp1 and hrp2 then
+                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
+            end
+        end
+    end
+})
+
+Tab4:CreateToggle({
+    Name = "Teleport loop",
+    CurrentValue = false,
+    Callback = function(v)
+        loopTeleport = v
+    end
+})
+
+RunService.Heartbeat:Connect(function()
+    if loopTeleport then
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+            if hrp1 and hrp2 then
+                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
+            end
+        end
+    end
+end)
+
+Tab4:CreateToggle({
+    Name = "Watch player",
+    CurrentValue = false,
+    Callback = function(v)
+        watching = v
+        if not v then
+            Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        end
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if watching then
+    local t = getTarget()
+        if t and getChar(t) then
+            local hum = getChar(t):FindFirstChildOfClass("Humanoid")
+            if hum then
+                Camera.CameraSubject = hum
+            end
+        end
+    end
+end)
+
+local aimingTarget = false
+
+Tab4:CreateToggle({
+    Name = "Aim to player",
+    CurrentValue = false,
+    Callback = function(v)
+        aimingTarget = v
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if aimingTarget then
+        local t = getTarget()
+        if t and getChar(t) then
+            local hrp = getChar(t):FindFirstChild("HumanoidRootPart") or getChar(t):FindFirstChild("Head")
+            if hrp then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, hrp.Position)
+            end
+        end
+    end
+end)
