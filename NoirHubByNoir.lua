@@ -1,12 +1,20 @@
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
     Name = "Noir Hub",
-    LoadingTitle = "Loading NoirHub...",
-    LoadingSubtitle = "Script By Noir",
+    LoadingTitle = "NoirHub is Loading...",
+    LoadingSubtitle = "by Noir",
     ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "NoirHub",
+        FileName = "NoirHubConfig"
+    },
+    Discord = {
         Enabled = false,
-    }
+        Invite = "discord.gg/none",
+        RememberJoins = false
+    },
+    KeySystem = false
 })
 
 -Tab0
