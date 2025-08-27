@@ -1,20 +1,12 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
     Name = "Noir Hub",
-    LoadingTitle = "NoirHub is Loading...",
-    LoadingSubtitle = "by Noir",
+    LoadingTitle = "Loading NoirHub...",
+    LoadingSubtitle = "Script By Noir",
     ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "NoirHub",
-        FileName = "NoirHubConfig"
-    },
-    Discord = {
         Enabled = false,
-        Invite = "discord.gg/none",
-        RememberJoins = false
-    },
-    KeySystem = false
+    }
 })
 
 -Tab0
@@ -479,7 +471,7 @@ dot.ZIndex = zindex
 dot.Parent = MapFrame  
 
 local UICorner = Instance.new("UICorner")  
-UICorner.CornerRadius = UDim.new(1,0) -- dot tròn  
+UICorner.CornerRadius = UDim.new(1,0) 
 UICorner.Parent = dot  
 
 local UIStroke = Instance.new("UIStroke")  
@@ -596,6 +588,7 @@ PlayerTab:CreateButton({
 local PacksTab = Window:CreateTab("Packs", "package")
 
 PacksTab:CreateSection("Not Fe & just use for R15")
+
 PacksTab:CreateButton({
     Name = "Korblox",
     Callback = function()
@@ -611,6 +604,7 @@ PacksTab:CreateButton({
 })
 
 PacksTab:CreateSection("FE & just use for R15")
+
 PacksTab:CreateButton({
     Name = "Ninja",
     Callback = function()
@@ -783,6 +777,7 @@ PacksTab:CreateButton({
 local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 
 ScriptsTab:CreateSection("Funny Scripts")
+
 ScriptsTab:CreateButton({
     Name = "Fly",
     Callback = function()
@@ -840,6 +835,7 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateSection("Animation & Emote Scripts")
+
 ScriptsTab:CreateButton({
     Name = "Animation v2.5",
     Callback = function()
@@ -869,6 +865,7 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateSection("Admin Scripts & All in One Scripts")
+
 ScriptsTab:CreateButton({
     Name = "Infinite Yield",
     Callback = function()
@@ -905,6 +902,7 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateSection("Funny FE Scripts :))")
+
 ScriptsTab:CreateButton({
     Name = "Sandevistan FE",
     Callback = function()
@@ -934,6 +932,7 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateSection("For Some Game")
+
 ScriptsTab:CreateButton({
     Name = "M1 reset",
     Callback = function()
