@@ -547,43 +547,6 @@ PlayerTab:CreateButton({
     end
 })
 
---11. Boost FPS
-PlayerTab:CreateButton({
-    Name = "Boost FPS",
-    Callback = function()
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") then
-                obj.Material = Enum.Material.SmoothPlastic
-                obj.Reflectance = 0
-            elseif obj:IsA("Decal") or obj:IsA("Texture") then
-                obj:Destroy()
-            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
-                obj:Destroy()
-            end
-        end
-
-        sethiddenproperty(workspace, "Terrain", Enum.Material.Air)
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-        game:GetService("Lighting").GlobalShadows = false
-        game:GetService("Lighting").FogEnd = 9e9
-        game:GetService("Lighting").Brightness = 1
-        game:GetService("Lighting").Ambient = Color3.new(1,1,1)
-    end
-})
-
-12. Restore FPS
-PlayerTab:CreateButton({
-    Name = "Restore FPS",
-    Callback = function()
-        local Lighting = game:GetService("Lighting")
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
-        Lighting.GlobalShadows = true
-        Lighting.FogEnd = 1000
-        Lighting.Brightness = 2
-        Lighting.Ambient = Color3.new(0.5,0.5,0.5)
-    end
-})
-
 -Tab2.
 local PacksTab = Window:CreateTab("Packs", "package")
 
