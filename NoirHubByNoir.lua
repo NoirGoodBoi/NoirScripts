@@ -9,7 +9,6 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
--Tab0
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Lighting = game:GetService("Lighting")
@@ -17,7 +16,6 @@ local RunService = game:GetService("RunService")
 
 local MainTab = Window:CreateTab("Main", "home")
 
--- Info
 MainTab:CreateSection("Thông Tin Bản Thân")
 MainTab:CreateLabel("Username: " .. LocalPlayer.Name)
 MainTab:CreateLabel("DisplayName: " .. LocalPlayer.DisplayName)
@@ -29,10 +27,8 @@ RunService.Heartbeat:Connect(function()
     PingLabel:Set("Ping: " .. tostring(math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())) .. " ms")
 end)
 
--- Self Tools
 MainTab:CreateSection("Công Cụ")
 
--- Spin
 local spinning = false
 local spinSpeed = 5
 MainTab:CreateToggle({
@@ -57,7 +53,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Sit
 MainTab:CreateButton({
     Name = "Sit",
     Callback = function()
@@ -67,7 +62,6 @@ MainTab:CreateButton({
     end
 })
 
--- Gravity
 local gravityToggle = false
 local customGravity = workspace.Gravity
 MainTab:CreateToggle({
@@ -95,7 +89,6 @@ MainTab:CreateSlider({
     end
 })
 
--- Unlock Thirdp
 MainTab:CreateButton({
     Name = "Unlock Third Person",
     Callback = function()
@@ -105,7 +98,6 @@ MainTab:CreateButton({
     end
 })
 
--- Lock firstp
 MainTab:CreateButton({
     Name = "Lock First Person",
     Callback = function()
@@ -120,10 +112,8 @@ MainTab:CreateButton({
    Callback = function() Rayfield:Destroy() end,
 })
 
--Tab1
 local PlayerTab = Window:CreateTab("Player", "user")
 
--- 1. Slider Speed
 local walkspeed = 16
 PlayerTab:CreateSlider({
     Name = "Speed",
@@ -135,7 +125,6 @@ PlayerTab:CreateSlider({
     end
 })
 
--- 2. Toggle increase speed
 local speedLoop = nil
 PlayerTab:CreateToggle({
     Name = "Increase Speed",
@@ -163,7 +152,6 @@ PlayerTab:CreateToggle({
     end
 })
 
--- 3. Slider Power Jump
 local jumppower = 50
 PlayerTab:CreateSlider({
     Name = "Power Jump",
@@ -175,7 +163,6 @@ PlayerTab:CreateSlider({
     end
 })
 
--- 4. Toggle increase power jump 
 local jumpLoop = nil
 PlayerTab:CreateToggle({
     Name = "Increase Power Jump",
@@ -203,7 +190,6 @@ PlayerTab:CreateToggle({
     end
 })
 
--FOV
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -218,16 +204,6 @@ PlayerTab:CreateSlider({
     end
 })
 
---toggle FOV
-PlayerTab:CreateButton({
-    Name = "Increase FOV (+20)",
-    Callback = function()
-        local newFOV = math.clamp(Camera.FieldOfView + 20, 30, 120)
-        Camera.FieldOfView = newFOV
-    end
-})
-
--- 5. Infinity Jump
 local infJumpConnection
 PlayerTab:CreateToggle({
     Name = "Infinity Jump",
@@ -249,7 +225,6 @@ PlayerTab:CreateToggle({
     end
 })
 
---6. Noclip
 PlayerTab:CreateToggle({
     Name = "NoClip",
     CurrentValue = false,
@@ -283,7 +258,6 @@ PlayerTab:CreateToggle({
     end
 })
 
--- 7. ESP (tên+dist)
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
@@ -372,7 +346,6 @@ PlayerTab:CreateToggle({
     end
 })
 
---8. Show Ping & FPS
 local statsGui
 local showStats = false
 
@@ -421,7 +394,6 @@ PlayerTab:CreateToggle({
     end
 })
 
---9. Mini Map
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -537,7 +509,6 @@ end
 end
 })
 
--- 10. Anti-AFK (Button)
 PlayerTab:CreateButton({
     Name = "Anti-AFK",
     Callback = function()
@@ -547,7 +518,6 @@ PlayerTab:CreateButton({
     end
 })
 
--Tab2.
 local PacksTab = Window:CreateTab("Packs", "package")
 
 PacksTab:CreateSection("Not Fe & just use for R15")
@@ -736,7 +706,6 @@ PacksTab:CreateButton({
     end,
 })
 
--Tab3.
 local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 
 ScriptsTab:CreateSection("Funny Scripts")
@@ -807,13 +776,6 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Emote Admin GUI",
-    Callback = function()
-        loadstring(game:HttpGet("https://angelical.me/ak.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "Emote Tiktok",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Free-emote/refs/heads/main/Delta%20mad%20stuffs"))()
@@ -876,7 +838,14 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "FE invincible v1",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Rayfield/main/FE_invincible_v1"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Tap to TP",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Tap_to_TP"))()
     end,
 })
 
@@ -987,7 +956,6 @@ ScriptsTab:CreateButton({
     end,
 })
 
--Tab4
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
