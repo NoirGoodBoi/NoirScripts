@@ -753,6 +753,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Hitbox Extender (aimbot)",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/UI_LimbExtender.lua'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "SilentAim by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAim.lua"))()
@@ -873,6 +880,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Grab Part",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Grab_Part"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Sandevistan FE",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/idbiRMZG"))()
@@ -904,6 +918,27 @@ ScriptsTab:CreateButton({
     Name = "Car Drift",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Hamster Ball",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/KaterHub-Inc/scripts/refs/heads/main/unofficial-Projects/FEHamsterBall.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "F3X Panel (building script)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SkireScripts/F3X-Panel/main/Main.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Server Menu Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/lumpiasallad/Roblox_ServerHop/refs/heads/main/ServerHopScript.lua"))()
     end,
 })
 
