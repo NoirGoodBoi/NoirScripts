@@ -746,6 +746,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Delta Keyboard",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sparezirt/Script/refs/heads/main/.github/workflows/JustABaseplate.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Aim Bot",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Aimbot-Universal-For-Mobile-and-PC-29153"))()
@@ -767,7 +774,7 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "ResetUI by Noir",
+    Name = "Reset UI",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetUI.lua"))()
     end,
@@ -806,7 +813,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Krystal Dance v3",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/sparezirt/Script/refs/heads/main/.github/workflows/JustABaseplate.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/somethingsimade/KDV3-Fixed/refs/heads/main/KrystalDance3"))()
     end,
 })
 
