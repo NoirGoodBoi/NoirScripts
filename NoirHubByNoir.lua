@@ -811,6 +811,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Reanimation",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Reanimation"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Krystal Dance v3",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/somethingsimade/KDV3-Fixed/refs/heads/main/KrystalDance3"))()
@@ -866,7 +873,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateSection("Funny FE Scripts :))")
 
 ScriptsTab:CreateButton({
-    Name = "Stalkie",
+    Name = "Stalkie (key is: pizza)",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Stalkie"))()
     end,
