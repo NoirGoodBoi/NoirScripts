@@ -1,63 +1,63 @@
-local Rayfield = loadstring(readfile("Sirius/Rayfield.lua"))()
-
-local Window = Rayfield:CreateWindow({
-    Name = "Noir Loader",
-    LoadingTitle = "NoirHub by Noir",
-    LoadingSubtitle = "Key System",
-    ConfigurationSaving = {Enabled=false},
-    Discord = {Enabled=false},
-    KeySystem = false
-})
-
-local Tab = Window:CreateTab("Key")
-local current = ""
-local fails = 0
-local msgs = {
-    "Key Sai",
-    "lại sai",
-    "ĐM SAI",
-    'Đm key đây: "NOIRDEPTRAIHH"',
-    'Ko thì đây cũng đc: "KEYDAYNE"',
-    "đm m có vấn đề đọc hiểu à >:(",
-    ".",
-    "...",
-    "...",
-    "thôi bỏ đi, dùng làm j nữa, có cái key, t gợi ý rồi cũng nhập sai",
-    'Key là: "NOIRDEPTRAIHH" & "KEYDAYNE"',
-    "Thôi bỏ >:("
-    "..."
+local validKeys = {
+    ["NOIRDEPTRAIHH"] = true,
+    ["KEYDAYNE"] = true,
+    ["3107210"] = true,
+    ["6697"] = true,
+    ["7"] = true,
 }
-local keys = {"NOIRDEPTRAIHH","KEYDAYNE","1"}
 
-local function valid(k)
-    for _,v in ipairs(keys) do
-        if string.lower(k) == string.lower(v) then return true end
-    end
-    return false
-end
+local SCRIPT_URL = "https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirHubByNoir.lua"
 
-Tab:CreateInput({
-    Name = "Nhập key để mở",
-    PlaceholderText = "Key...",
-    RemoveTextAfterFocusLost = false,
-    OnEnter = true,
-    Callback = function(v) current = v end
-})
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local Frame = Instance.new("Frame", ScreenGui)
+local UICorner = Instance.new("UICorner", Frame)
+local TextBox = Instance.new("TextBox", Frame)
+local Button = Instance.new("TextButton", Frame)
+local Label = Instance.new("TextLabel", Frame)
 
-Tab:CreateButton({
-    Name = "Mở khoá",
-    Callback = function()
-        if valid(current) then
-            fails = 0
-            Rayfield:Notify({Title="Thành công", Content="Key đúng", Duration=2})
-            task.delay(0.2,function() Rayfield:Destroy() end)
-            task.delay(0.1,function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirHubByNoir.lua"))()
-            end)
+Frame.Size = UDim2.new(0, 250, 0, 140)
+Frame.Position = UDim2.new(0.5, -125, 0.5, -70)
+Frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Frame.Active = true
+Frame.Draggable = true
+UICorner.CornerRadius = UDim.new(0,12)
+
+TextBox.Size = UDim2.new(0, 200, 0, 30)
+TextBox.Position = UDim2.new(0.5, -100, 0, 20)
+TextBox.PlaceholderText = "Nhập key..."
+TextBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+TextBox.TextColor3 = Color3.fromRGB(255,255,255)
+TextBox.ClearTextOnFocus = false
+Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0,8)
+
+Button.Size = UDim2.new(0, 200, 0, 30)
+Button.Position = UDim2.new(0.5, -100, 0, 60)
+Button.BackgroundColor3 = Color3.fromRGB(70,70,70)
+Button.Text = "Load Script"
+Button.TextColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", Button).CornerRadius = UDim.new(0,8)
+
+Label.Size = UDim2.new(0, 200, 0, 20)
+Label.Position = UDim2.new(0.5, -100, 0, 100)
+Label.BackgroundTransparency = 1
+Label.Text = "Chưa nhập key"
+Label.TextColor3 = Color3.fromRGB(255,255,255)
+Label.TextScaled = true
+
+Button.MouseButton1Click:Connect(function()
+    local key = TextBox.Text
+    if validKeys[key] then
+        Label.Text = "Key hợp lệ ✔, đang load..."
+        local ok,err = pcall(function()
+            loadstring(game:HttpGet(SCRIPT_URL))()
+        end)
+        if ok then
+            Label.Text = "Load thành công!"
+            Frame:Destroy()
         else
-            fails = fails + 1
-            local m = msgs[fails] or msgs[#msgs]
-            Rayfield:Notify({Title="Sai key", Content=m, Duration=3})
+            Label.Text = "Lỗi: "..tostring(err)
         end
+    else
+        Label.Text = "Key sai ❌"
     end
-})
+end)
