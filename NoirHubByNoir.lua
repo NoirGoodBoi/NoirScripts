@@ -783,9 +783,32 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "FREE UGC EMOTES",
+    Callback = function()
+        loadstring(game:HttpGet("https://angelical.me/ak.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Sandevistan FE",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Animation_GUI"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Krystal Dance v3",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/sparezirt/Script/refs/heads/main/.github/workflows/JustABaseplate.txt"))()
+    end,
+})
+
+ScriptsTab:CreateSection("Shaders")
+
+ScriptsTab:CreateButton({
+    Name = "Shaders Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/pshade-ultimate/refs/heads/main/src/cd.lua"))()
     end,
 })
 
@@ -827,6 +850,27 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateSection("Funny FE Scripts :))")
+
+ScriptsTab:CreateButton({
+    Name = "Stalkie",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Stalkie"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Inventory Viewer",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/View_Inventory"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Part Controller GUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Part_Controller"))()
+    end,
+})
 
 ScriptsTab:CreateButton({
     Name = "Sandevistan FE",
