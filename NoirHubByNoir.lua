@@ -739,6 +739,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Fake Wallhop",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/AliframadiRealYT/Scripts/refs/heads/main/FakeWalhoop.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Keyboard",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
@@ -776,7 +783,14 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Reset UI",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetUI.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetGUI"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Sword Kill Aura",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/08Hk0qNq"))()
     end,
 })
 
@@ -797,9 +811,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "FE Emote (emote walk)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "FREE UGC EMOTES",
     Callback = function()
-        loadstring(game:HttpGet("https://angelical.me/ak.lua"))()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Free-UGC-Emotes-Script-48649"))()
     end,
 })
 
@@ -850,6 +871,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Lua Land Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelo-Gitland/LuaLandHubV4Keyless/refs/heads/main/Lua%20Land%20Hub%20%7C%20V4%20Keyless%20Script%20Hub"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Cryton v3",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/thesigmacorex/Crypton/main/Free"))()
@@ -882,7 +910,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Inventory Viewer",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/View_Inventory"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
     end,
 })
 
@@ -908,11 +936,35 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE invincible v1",
+    Name = "FE Emperor Crimson v3.5",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/p4QY0AsL"))()
     end,
 })
+
+ScriptsTab:CreateButton({
+    Name = "FE Sharingan [only R6]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Sharingan [for mobile]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("(E)Fireball Jutsu")
+
+ScriptsTab:CreateLabel("(Q)Sharingan (copy movement)")
+
+ScriptsTab:CreateLabel("(R)Kamui")
+
+ScriptsTab:CreateLabel("(F)Amaterasu")
+
+ScriptsTab:CreateLabel("(P)Pose")
 
 ScriptsTab:CreateButton({
     Name = "Tap to TP",
@@ -924,7 +976,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "FE Wally West Scripts",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/VDxFA1Ze"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zNHefpgc"))()
     end,
 })
 
@@ -932,13 +984,6 @@ ScriptsTab:CreateButton({
     Name = "Car Drift",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Hamster Ball",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/KaterHub-Inc/scripts/refs/heads/main/unofficial-Projects/FEHamsterBall.lua"))()
     end,
 })
 
