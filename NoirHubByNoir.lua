@@ -94,7 +94,7 @@ MainTab:CreateButton({
     Callback = function()
         LocalPlayer.CameraMode = Enum.CameraMode.Classic
         LocalPlayer.CameraMinZoomDistance = 0.5
-        LocalPlayer.CameraMaxZoomDistance = 128
+        LocalPlayer.CameraMaxZoomDistance = 777
     end
 })
 
@@ -194,16 +194,6 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
-PlayerTab:CreateSlider({
-    Name = "Field Of View",
-    Range = {30,120},
-    Increment = 1,
-    CurrentValue = Camera.FieldOfView,
-    Callback = function(v)
-        Camera.FieldOfView = v
-    end
-})
-
 local infJumpConnection
 PlayerTab:CreateToggle({
     Name = "Infinity Jump",
@@ -223,6 +213,43 @@ PlayerTab:CreateToggle({
             end
         end
     end
+})
+
+PlayerTab:CreateSlider({
+    Name = "Field Of View",
+    Range = {30,120},
+    Increment = 1,
+    CurrentValue = Camera.FieldOfView,
+    Callback = function(v)
+        Camera.FieldOfView = v
+    end
+})
+
+local Players = game:GetService("Players")
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+local locked = false
+local savedCFrame
+local conn
+
+PlayerTab:CreateToggle({
+    Name = "Lock Camera",
+    CurrentValue = false,
+    Callback = function(Value)
+        locked = Value
+        if locked then
+            savedCFrame = Camera.CFrame
+            conn = RunService.RenderStepped:Connect(function()
+                if locked and savedCFrame then
+                    Camera.CFrame = savedCFrame
+                end
+            end)
+        else
+            if conn then conn:Disconnect() conn = nil end
+            savedCFrame = nil
+        end
+    end,
 })
 
 PlayerTab:CreateToggle({
@@ -760,6 +787,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Keystrokes",
+    Callback = function()
+        loadstring(game:HttpGet(" https://pastebin.com/raw/EScgKreb"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Aim Bot",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Aimbot-Universal-For-Mobile-and-PC-29153"))()
@@ -781,16 +815,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Reset UI",
+    Name = "Reset UI by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetGUI"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "Sword Kill Aura",
+    Name = "BloxsTrap",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/08Hk0qNq"))()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/qwertyui-is-back/Bloxstrap/main/Initiate.lua'), 'lol')()
     end,
 })
 
@@ -825,14 +859,14 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Animation GUI",
+    Name = "Animation GUI by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Animation_GUI"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "Reanimation",
+    Name = "Reanimation by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Reanimation"))()
     end,
@@ -885,6 +919,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Solara Hub",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/samuraa1/Solara-Hub/refs/heads/main/SH.lua'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Cryton v3",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/thesigmacorex/Crypton/main/Free"))()
@@ -915,21 +956,21 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Inventory Viewer",
+    Name = "Inventory Viewer by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "Part Controller GUI",
+    Name = "Part Controller GUI by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Part_Controller"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "Grab Part",
+    Name = "Grab Part by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Grab_Part"))()
     end,
@@ -938,7 +979,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Sandevistan FE",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/idbiRMZG"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Sandevistan"))()
     end,
 })
 
@@ -950,16 +991,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Sharingan [only R6]",
+    Name = "FE Sharingan [for mobile]",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Sharingan [for mobile]",
+    Name = "FE Sharingan [only R6]",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
     end,
 })
 
@@ -981,16 +1022,37 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Wally West Scripts",
+    Name = "FE Wally West",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/zNHefpgc"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "Car Drift",
+    Name = "FE Wally West [For R15]",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/XQZ-official/XQZscripts/refs/heads/main/WallyWest.txt'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Silly Car",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-SILLY-CAR-V1-48227"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Car Drift [Recommend for R6]",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Replication UI",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/tMYrf22E"))()
     end,
 })
 
@@ -1018,9 +1080,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "TBS (by YQANTG)",
+    Name = "TSB (by YQANTG v3.3)",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Kietba/Fr/refs/heads/main/Wekinda.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yqantg-pixel/Find/refs/heads/main/Protected_3334988263341522.lua.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "tsb by EBHUBR (key is: THESERVERARECRAZY!)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/r3k33551-bot/Acortador-de-scripts/refs/heads/main/EBHUBR%20V7.txt"))()
     end,
 })
 
@@ -1039,9 +1108,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "MM2 (X Hub)",
+    Name = "Murder Mystery 2",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Au0yX/Community/main/XhubMM2"))()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/real-bluez/MM2/refs/heads/main/AutoFarm'))()
     end,
 })
 
