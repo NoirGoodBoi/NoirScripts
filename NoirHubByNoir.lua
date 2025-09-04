@@ -789,7 +789,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Keystrokes",
     Callback = function()
-        loadstring(game:HttpGet(" https://pastebin.com/raw/EScgKreb"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/a1EessEX"))()
     end,
 })
 
@@ -888,7 +888,7 @@ ScriptsTab:CreateButton({
     end,
 })
 
-ScriptsTab:CreateSection("Admin Scripts & All in One Scripts")
+ScriptsTab:CreateSection("Admin Scripts")
 
 ScriptsTab:CreateButton({
     Name = "Infinite Yield",
@@ -898,9 +898,53 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "IndexZ Hub",
+    Name = "Infinite Fun (IY)",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/IndexZHub/Loader/main/Loader"))()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/Xane123/InfiniteFun_IY/master/source'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "NameLess",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "NameLess version Testing",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "CMD-X",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source", true))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Fates Admin",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/fatesc/fates-admin/main/main.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Reviz Admin",
+    Callback = function()
+        loadstring(game:HttpGetAsync("https://pastebin.com/raw/gQg0G6iA"))()
+    end,
+})
+
+ScriptsTab:CreateSection("All in One Scripts")
+
+ScriptsTab:CreateButton({
+    Name = "Anon Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sa435125/AnonHub/refs/heads/main/anonhub.lua"))()
     end,
 })
 
@@ -922,6 +966,13 @@ ScriptsTab:CreateButton({
     Name = "Solara Hub",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/samuraa1/Solara-Hub/refs/heads/main/SH.lua'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "KRware Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/KRWareHub/KRWare/refs/heads/main/KRWare%20Hub%20Loader.lua"))()
     end,
 })
 
@@ -950,6 +1001,13 @@ ScriptsTab:CreateButton({
     Name = "FE Trolling GUI",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "IndexZ Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/IndexZHub/Loader/main/Loader"))()
     end,
 })
 
