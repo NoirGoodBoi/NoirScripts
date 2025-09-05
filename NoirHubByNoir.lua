@@ -1159,7 +1159,7 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "tsb by EBHUBR (key is: THESERVERARECRAZY!)",
+    Name = "tsb by EBHUBR (key is: PLSDONATE!)",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/r3k33551-bot/Acortador-de-scripts/refs/heads/main/EBHUBR%20V7.txt"))()
     end,
