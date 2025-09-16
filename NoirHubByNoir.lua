@@ -13,6 +13,8 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local Stats = game:GetService("Stats")
 
 local MainTab = Window:CreateTab("Main", "home")
 
@@ -22,90 +24,85 @@ MainTab:CreateLabel("DisplayName: " .. LocalPlayer.DisplayName)
 MainTab:CreateLabel("UserId: " .. LocalPlayer.UserId)
 MainTab:CreateLabel("Account Age: " .. LocalPlayer.AccountAge .. " days")
 
+-- Ping
 local PingLabel = MainTab:CreateLabel("Ping: ...")
 RunService.Heartbeat:Connect(function()
     PingLabel:Set("Ping: " .. tostring(math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())) .. " ms")
 end)
 
-MainTab:CreateSection("Công Cụ")
-
-local spinning = false
-local spinSpeed = 5
-MainTab:CreateToggle({
-    Name = "Spin",
-    CurrentValue = false,
-    Callback = function(v)
-        spinning = v
-    end
-})
-MainTab:CreateSlider({
-    Name = "Spin Speed",
-    Range = {1,50},
-    Increment = 1,
-    CurrentValue = 5,
-    Callback = function(v)
-        spinSpeed = v
-    end
-})
+-- Thời gian chơi (tính từ lúc join)
+local joinTime = tick()
+local TimePlayedLabel = MainTab:CreateLabel("Time Played: 0s")
 RunService.RenderStepped:Connect(function()
-    if spinning and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(spinSpeed), 0)
+    local elapsed = math.floor(tick() - joinTime)
+    local mins = math.floor(elapsed / 60)
+    local secs = elapsed % 60
+    TimePlayedLabel:Set(string.format("Time Played: %d min %02d s", mins, secs))
+end)
+
+-- Toạ độ
+local PosLabel = MainTab:CreateLabel("Position: ...")
+RunService.RenderStepped:Connect(function()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local pos = hrp.Position
+        PosLabel:Set(string.format("Position: %.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z))
+    else
+        PosLabel:Set("Position: -")
     end
 end)
 
-MainTab:CreateButton({
-    Name = "Sit",
-    Callback = function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.Sit = true
-        end
+-- Tên game
+pcall(function()
+    local info = MarketplaceService:GetProductInfo(game.PlaceId)
+    MainTab:CreateLabel("Game Name: " .. info.Name)
+end)
+
+-- PlaceId, GameId, JobId, Version
+MainTab:CreateLabel("PlaceId: " .. game.PlaceId)
+MainTab:CreateLabel("GameId: " .. game.GameId)
+MainTab:CreateLabel("JobId: " .. game.JobId)
+MainTab:CreateLabel("Game Version: " .. game.PlaceVersion)
+
+-- Số người chơi trong server
+local PlayerCountLabel = MainTab:CreateLabel("Players: " .. #Players:GetPlayers())
+
+Players.PlayerAdded:Connect(function()
+    PlayerCountLabel:Set("Players: " .. #Players:GetPlayers())
+end)
+
+Players.PlayerRemoving:Connect(function()
+    PlayerCountLabel:Set("Players: " .. #Players:GetPlayers())
+end)
+
+-- Dropdown danh sách người chơi
+local function GetPlayerNames()
+    local names = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        table.insert(names, plr.Name)
     end
+    return names
+end
+
+local PlayerDropdown = MainTab:CreateDropdown({
+    Name = "Danh Sách Người Chơi",
+    Options = GetPlayerNames(),
+    CurrentOption = {},
+    MultipleOptions = false,
+    Flag = "PlayerDropdown",
+    Callback = function(Option)
+        print("Chọn: " .. Option)
+    end,
 })
 
-local gravityToggle = false
-local customGravity = workspace.Gravity
-MainTab:CreateToggle({
-    Name = "Gravity Toggle",
-    CurrentValue = false,
-    Callback = function(v)
-        gravityToggle = v
-        if v then
-            workspace.Gravity = customGravity
-        else
-            workspace.Gravity = 196.2
-        end
-    end
-})
-MainTab:CreateSlider({
-    Name = "Gravity",
-    Range = {-500,1000},
-    Increment = 1,
-    CurrentValue = 196,
-    Callback = function(v)
-        customGravity = v
-        if gravityToggle then
-            workspace.Gravity = v
-        end
-    end
-})
+-- Tự động refresh danh sách khi có thay đổi
+local function RefreshDropdown()
+    PlayerDropdown:Refresh(GetPlayerNames())
+end
 
-MainTab:CreateButton({
-    Name = "Unlock Third Person",
-    Callback = function()
-        LocalPlayer.CameraMode = Enum.CameraMode.Classic
-        LocalPlayer.CameraMinZoomDistance = 0.5
-        LocalPlayer.CameraMaxZoomDistance = 777
-    end
-})
-
-MainTab:CreateButton({
-    Name = "Lock First Person",
-    Callback = function()
-        LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
-        LocalPlayer.CameraMinZoomDistance = 0
-        LocalPlayer.CameraMaxZoomDistance = 0
-    end
-})
+Players.PlayerAdded:Connect(RefreshDropdown)
+Players.PlayerRemoving:Connect(RefreshDropdown)
 
 MainTab:CreateButton({
    Name = "Reset GUI Rayfield",
@@ -113,6 +110,8 @@ MainTab:CreateButton({
 })
 
 local PlayerTab = Window:CreateTab("Player", "user")
+
+PlayerTab:CreateSection("Tools")
 
 local walkspeed = 16
 PlayerTab:CreateSlider({
@@ -215,43 +214,6 @@ PlayerTab:CreateToggle({
     end
 })
 
-PlayerTab:CreateSlider({
-    Name = "Field Of View",
-    Range = {30,120},
-    Increment = 1,
-    CurrentValue = Camera.FieldOfView,
-    Callback = function(v)
-        Camera.FieldOfView = v
-    end
-})
-
-local Players = game:GetService("Players")
-local Camera = workspace.CurrentCamera
-local RunService = game:GetService("RunService")
-
-local locked = false
-local savedCFrame
-local conn
-
-PlayerTab:CreateToggle({
-    Name = "Lock Camera",
-    CurrentValue = false,
-    Callback = function(Value)
-        locked = Value
-        if locked then
-            savedCFrame = Camera.CFrame
-            conn = RunService.RenderStepped:Connect(function()
-                if locked and savedCFrame then
-                    Camera.CFrame = savedCFrame
-                end
-            end)
-        else
-            if conn then conn:Disconnect() conn = nil end
-            savedCFrame = nil
-        end
-    end,
-})
-
 PlayerTab:CreateToggle({
     Name = "NoClip",
     CurrentValue = false,
@@ -340,7 +302,183 @@ local function createESP(plr)
 end
 
 PlayerTab:CreateToggle({
-    Name = "ESP",
+    Name = "ESP (@name)",
+    CurrentValue = false,
+    Callback = function(state)
+        espEnabled = state
+        removeAllESP()
+        if not state then return end
+
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer then
+                if plr.Character then
+                    createESP(plr)
+                end
+                
+                table.insert(espConnections, plr.CharacterAdded:Connect(function()
+                    if espEnabled then
+                        task.wait(0.5)
+                        createESP(plr)
+                    end
+                end))
+            end
+        end
+
+        table.insert(espConnections, game.Players.PlayerAdded:Connect(function(plr)
+            if espEnabled then
+                plr.CharacterAdded:Connect(function()
+                    task.wait(0.5)
+                    createESP(plr)
+                end)
+            end
+        end))
+    end
+})
+
+local espEnabled = false
+local espConnections = {}
+local espInstances = {}
+
+local function removeAllESP()
+    for _, gui in pairs(espInstances) do
+        if gui and gui.Parent then
+            gui:Destroy()
+        end
+    end
+    for _, conn in pairs(espConnections) do
+        conn:Disconnect()
+    end
+    espInstances = {}
+    espConnections = {}
+end
+
+local function createESP(plr)
+    if plr == game.Players.LocalPlayer then return end
+    if not plr.Character then return end
+    local head = plr.Character:FindFirstChild("Head")
+    if not head then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NoirESP"
+    billboard.AlwaysOnTop = true
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.LightInfluence = 0
+    billboard.MaxDistance = math.huge
+    billboard.Parent = head
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, 0, 1, 0)
+    txt.BackgroundTransparency = 1
+    txt.TextScaled = false
+    txt.Font = Enum.Font.SourceSansBold
+    txt.TextSize = 14
+    txt.TextColor3 = Color3.new(1, 1, 1)
+    txt.TextStrokeTransparency = 0.5
+    txt.Text = plr.Name
+    txt.Parent = billboard
+
+    local conn = game:GetService("RunService").RenderStepped:Connect(function()
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+            txt.Text = plr.DisplayName .. " | " .. math.floor(dist) .. "m"
+        end
+    end)
+
+    table.insert(espInstances, billboard)
+    table.insert(espConnections, conn)
+end
+
+PlayerTab:CreateToggle({
+    Name = "ESP (display name)",
+    CurrentValue = false,
+    Callback = function(state)
+        espEnabled = state
+        removeAllESP()
+        if not state then return end
+
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer then
+                if plr.Character then
+                    createESP(plr)
+                end
+                
+                table.insert(espConnections, plr.CharacterAdded:Connect(function()
+                    if espEnabled then
+                        task.wait(0.5)
+                        createESP(plr)
+                    end
+                end))
+            end
+        end
+
+        table.insert(espConnections, game.Players.PlayerAdded:Connect(function(plr)
+            if espEnabled then
+                plr.CharacterAdded:Connect(function()
+                    task.wait(0.5)
+                    createESP(plr)
+                end)
+            end
+        end))
+    end
+})
+
+local espEnabled = false
+local espConnections = {}
+local espInstances = {}
+
+local function removeAllESP()
+    for _, gui in pairs(espInstances) do
+        if gui and gui.Parent then
+            gui:Destroy()
+        end
+    end
+    for _, conn in pairs(espConnections) do
+        conn:Disconnect()
+    end
+    espInstances = {}
+    espConnections = {}
+end
+
+local function createESP(plr)
+    if plr == game.Players.LocalPlayer then return end
+    if not plr.Character then return end
+    local head = plr.Character:FindFirstChild("Head")
+    if not head then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NoirESP"
+    billboard.AlwaysOnTop = true
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.LightInfluence = 0
+    billboard.MaxDistance = math.huge
+    billboard.Parent = head
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, 0, 1, 0)
+    txt.BackgroundTransparency = 1
+    txt.TextScaled = false
+    txt.Font = Enum.Font.SourceSansBold
+    txt.TextSize = 14
+    txt.TextColor3 = Color3.new(1, 1, 1)
+    txt.TextStrokeTransparency = 0.5
+    txt.Text = plr.Name
+    txt.Parent = billboard
+
+    local conn = game:GetService("RunService").RenderStepped:Connect(function()
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+            txt.Text = plr.DisplayName .. " (@" .. plr.Name .. ") | " .. math.floor(dist) .. "m"
+        end
+    end)
+
+    table.insert(espInstances, billboard)
+    table.insert(espConnections, conn)
+end
+
+PlayerTab:CreateToggle({
+    Name = "ESP (@name+display name)",
     CurrentValue = false,
     Callback = function(state)
         espEnabled = state
@@ -541,6 +679,182 @@ PlayerTab:CreateButton({
     Callback = function()
         for _, conn in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
             conn:Disable()
+        end
+    end
+})
+
+PlayerTab:CreateSection("Funny Tools")
+
+local regen = false
+local regenRate = 0.5 -- mặc định
+
+MainTab:CreateSlider({
+    Name = "Regen Rate",
+    Range = {0.1, 10}, -- hồi từ từ → hồi cực nhanh
+    Increment = 0.1,
+    CurrentValue = 0.5,
+    Callback = function(v)
+        regenRate = v
+    end
+})
+
+MainTab:CreateToggle({
+    Name = "Regeneration",
+    CurrentValue = false,
+    Callback = function(v)
+        regen = v
+    end
+})
+
+RunService.Heartbeat:Connect(function()
+    if regen and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum and hum.Health < hum.MaxHealth then
+            hum.Health = math.min(hum.Health + regenRate, hum.MaxHealth)
+        end
+    end
+end)
+
+MainTab:CreateButton({
+    Name = "Instant Heal",
+    Callback = function()
+        if LocalPlayer.Character then
+            local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Health = hum.MaxHealth
+            end
+        end
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "Spin Speed",
+    Range = {1,50},
+    Increment = 1,
+    CurrentValue = 5,
+    Callback = function(v)
+        spinSpeed = v
+    end
+})
+RunService.RenderStepped:Connect(function()
+    if spinning and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(spinSpeed), 0)
+    end
+end)
+
+local spinning = false
+local spinSpeed = 5
+PlayerTab:CreateToggle({
+    Name = "Spin",
+    CurrentValue = false,
+    Callback = function(v)
+        spinning = v
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "Sit",
+    CurrentValue = false,
+    Callback = function(state)
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            if state then
+                LocalPlayer.Character.Humanoid.Sit = true
+            else
+                LocalPlayer.Character.Humanoid.Sit = false
+                LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "Gravity",
+    Range = {0, 500},
+    Increment = 1,
+    CurrentValue = math.floor(workspace.Gravity),
+    Callback = function(v)
+        customGravity = v
+        if gravityToggle then
+            workspace.Gravity = v
+        end
+    end
+})
+
+local gravityToggle = false
+local customGravity = workspace.Gravity
+PlayerTab:CreateToggle({
+    Name = "Gravity Toggle",
+    CurrentValue = false,
+    Callback = function(v)
+        gravityToggle = v
+        if v then
+            workspace.Gravity = customGravity
+        else
+            workspace.Gravity = 196.2
+        end
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "Field Of View",
+    Range = {30,120},
+    Increment = 1,
+    CurrentValue = Camera.FieldOfView,
+    Callback = function(v)
+        Camera.FieldOfView = v
+    end
+})
+
+local Players = game:GetService("Players")
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+local locked = false
+local savedCFrame
+local conn
+
+PlayerTab:CreateToggle({
+    Name = "Lock Camera",
+    CurrentValue = false,
+    Callback = function(Value)
+        locked = Value
+        if locked then
+            savedCFrame = Camera.CFrame
+            conn = RunService.RenderStepped:Connect(function()
+                if locked and savedCFrame then
+                    Camera.CFrame = savedCFrame
+                end
+            end)
+        else
+            if conn then conn:Disconnect() conn = nil end
+            savedCFrame = nil
+        end
+    end,
+})
+
+PlayerTab:CreateButton({
+    Name = "Lock First Person",
+    Callback = function()
+        LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+        LocalPlayer.CameraMinZoomDistance = 0
+        LocalPlayer.CameraMaxZoomDistance = 0
+    end
+})
+
+PlayerTab:CreateButton({
+    Name = "Unlock Third Person",
+    Callback = function()
+        LocalPlayer.CameraMode = Enum.CameraMode.Classic
+        LocalPlayer.CameraMinZoomDistance = 0
+        LocalPlayer.CameraMaxZoomDistance = 1000
+    end
+})
+
+PlayerTab:CreateButton({
+    Name = "Reset Character",
+    Callback = function()
+        if LocalPlayer.Character then
+            LocalPlayer.Character:BreakJoints()
         end
     end
 })
@@ -963,6 +1277,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Altair Script Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/MxnvA12M/raw"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Solara Hub",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/samuraa1/Solara-Hub/refs/heads/main/SH.lua'))()
@@ -1035,9 +1356,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Grab Part by Noir",
+    Name = "FE Telekinesis V5",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Grab_Part"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/ FE_Telekinesis"))()
     end,
 })
 
@@ -1094,7 +1415,7 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Wally West",
+    Name = "FE Wally West [Mobile]",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/zNHefpgc"))()
     end,
@@ -1104,6 +1425,13 @@ ScriptsTab:CreateButton({
     Name = "FE Wally West [For R15]",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/XQZ-official/XQZscripts/refs/heads/main/WallyWest.txt'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Wally West [for mobile v2]",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Wally-West-Roblox-51462"))()
     end,
 })
 
@@ -1175,7 +1503,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Forsaken",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/notzanocoddz4/BobHub/main/main.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Snowt69/SNT-HUB/refs/heads/main/Forsaken"))()
     end,
 })
 
@@ -1190,6 +1518,13 @@ ScriptsTab:CreateButton({
     Name = "MeMe Sea",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaqueHub/ShinyHub-MMSea/main/MEME%20SEA%20PROTECT.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "99 Night In The Forest",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/loader.lua", true))()
     end,
 })
 
@@ -1275,7 +1610,7 @@ local function refreshPlayers()
             table.insert(opts, p.Name)
         end
     end
-    playerDropdown:Refresh(opts, true) -- true = gi la chn nu còn trong list
+    playerDropdown:Refresh(opts, true)
     if not table.find(opts, currentTarget) then
         currentTarget = nil
     end
