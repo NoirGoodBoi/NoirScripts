@@ -1,0 +1,142 @@
+-- 🎯 Aimbot NPC/Dummy — Fix: reset target khi bật lại
+-- Noir Hub Edition
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+local Player = Players.LocalPlayer
+
+local isAiming = false
+local validNPCs = {}
+local CurrentTarget = nil
+
+-- 🟢 GUI (đen, bo góc, on xanh / off xám, kéo mượt)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 140, 0, 44)
+ToggleButton.Position = UDim2.new(0, 10, 0, 10)
+ToggleButton.Text = "AIMBOT: OFF"
+ToggleButton.BackgroundColor3 = Color3.fromRGB(50,50,50) -- off = xám
+ToggleButton.TextColor3 = Color3.fromRGB(240,240,240)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 14
+ToggleButton.Parent = ScreenGui
+ToggleButton.AutoButtonColor = false
+ToggleButton.TextScaled = true
+
+local UICorner = Instance.new("UICorner", ToggleButton)
+UICorner.CornerRadius = UDim.new(0, 10)
+
+-- 🟢 Kiểm tra NPC (bỏ qua Player)
+local function isNPC(obj)
+    return obj and obj:IsA("Model")
+        and obj:FindFirstChild("Humanoid")
+        and obj:FindFirstChild("Head")
+        and obj:FindFirstChild("HumanoidRootPart")
+        and obj.Humanoid.Health > 0
+        and not Players:GetPlayerFromCharacter(obj)
+end
+
+-- 🟢 Cập nhật danh sách NPC (scan nhanh)
+local function updateNPCs()
+    validNPCs = {}
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if isNPC(obj) then
+            table.insert(validNPCs, obj)
+        end
+    end
+end
+
+-- 🟢 Lấy NPC gần nhất (theo khoảng cách đến camera)
+local function getNearestNPC()
+    local nearest, minDist = nil, math.huge
+    for _, npc in ipairs(validNPCs) do
+        if isNPC(npc) then
+            local head = npc:FindFirstChild("Head")
+            local dist = (head.Position - Camera.CFrame.Position).Magnitude
+            if dist < minDist then
+                minDist = dist
+                nearest = npc
+            end
+        end
+    end
+    return nearest
+end
+
+-- 🟢 Aim chặt (thẳng vào Head)
+local function aimAt(target)
+    if target and target:FindFirstChild("Head") then
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Head.Position)
+    end
+end
+
+-- 🟢 Toggle behaviour: khi bật -> reset target + cập nhật list + chọn nearest ngay
+ToggleButton.MouseButton1Click:Connect(function()
+    isAiming = not isAiming
+    ToggleButton.Text = "AIMBOT: " .. (isAiming and "ON" or "OFF")
+    ToggleButton.BackgroundColor3 = isAiming and Color3.fromRGB(0,200,0) or Color3.fromRGB(50,50,50)
+
+    if isAiming then
+        -- reset và chọn target mới ngay khi bật
+        CurrentTarget = nil
+        updateNPCs()
+        CurrentTarget = getNearestNPC()
+        if CurrentTarget then
+            aimAt(CurrentTarget)
+        end
+    else
+        -- tắt thì bỏ target
+        CurrentTarget = nil
+    end
+end)
+
+-- 🟢 Drag GUI (mượt)
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+ToggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = ToggleButton.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+ToggleButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- 🟢 Vòng lặp chính: nếu target chết -> update list và chọn nearest kế tiếp
+RunService.Heartbeat:Connect(function()
+    if isAiming then
+        -- nếu không có target hoặc target chết/không hợp lệ => cập nhật và chọn lại
+        if not CurrentTarget or not CurrentTarget.Parent or not CurrentTarget:FindFirstChild("Humanoid") or CurrentTarget.Humanoid.Health <= 0 then
+            updateNPCs()
+            CurrentTarget = getNearestNPC()
+        end
+
+        -- aim chặt vào target hiện tại (nếu có)
+        if CurrentTarget and isNPC(CurrentTarget) then
+            aimAt(CurrentTarget)
+        end
+    end
+end)
