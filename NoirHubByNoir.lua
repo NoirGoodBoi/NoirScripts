@@ -685,28 +685,6 @@ PlayerTab:CreateButton({
 
 PlayerTab:CreateSection("Funny Tools")
 
-local regen = false
-
-PlayerTab:CreateToggle({
-    Name = "Regeneration (0.5 HP/s)",
-    CurrentValue = false,
-    Callback = function(v)
-        regen = v
-    end
-})
-
-task.spawn(function()
-    while true do
-        task.wait(1) -- mỗi giây
-        if regen and LocalPlayer.Character then
-            local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health < hum.MaxHealth then
-                hum.Health = math.min(hum.Health + 0.5, hum.MaxHealth)
-            end
-        end
-    end
-end)
-
 PlayerTab:CreateSlider({
     Name = "Spin Speed",
     Range = {1,50},
@@ -1069,13 +1047,6 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Fake Wallhop",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/AliframadiRealYT/Scripts/refs/heads/main/FakeWalhoop.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "Keyboard",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
@@ -1090,13 +1061,6 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Keystrokes",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/a1EessEX"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "Aim Bot",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Aimbot-Universal-For-Mobile-and-PC-29153"))()
@@ -1107,6 +1071,13 @@ ScriptsTab:CreateButton({
     Name = "Hitbox Extender (aimbot)",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/UI_LimbExtender.lua'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Aimbot by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/Aimbot"))()
     end,
 })
 
