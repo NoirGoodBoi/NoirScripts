@@ -1,0 +1,193 @@
+-- 🎯 Noir Aimbot (NPC / Dummy Only) - bản có vòng FOV
+-- yêu cầu: vòng FOV to, aim chặt, GUI đẹp
+
+local fov = 200 -- 👈 chỉnh 150–200 tuỳ ý
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Cam = workspace.CurrentCamera
+local Player = game:GetService("Players").LocalPlayer
+
+-- Vòng FOV
+local FOVring = Drawing.new("Circle")
+FOVring.Visible = false
+FOVring.Thickness = 2
+FOVring.Color = Color3.fromRGB(0, 255, 0)
+FOVring.Filled = false
+FOVring.Radius = fov
+FOVring.Position = Cam.ViewportSize / 2
+
+local isAiming = false
+local validNPCs = {}
+local raycastParams = RaycastParams.new()
+raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 140, 0, 45)
+ToggleButton.Position = UDim2.new(0, 20, 0, 20)
+ToggleButton.Text = "AIMBOT: OFF"
+ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ToggleButton.TextColor3 = Color3.fromRGB(160, 160, 160)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 16
+ToggleButton.AutoButtonColor = false
+ToggleButton.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = ToggleButton
+
+-- Kiểm tra NPC
+local function isNPC(obj)
+    return obj:IsA("Model")
+        and obj:FindFirstChild("Humanoid")
+        and obj.Humanoid.Health > 0
+        and obj:FindFirstChild("Head")
+        and obj:FindFirstChild("HumanoidRootPart")
+        and not game:GetService("Players"):GetPlayerFromCharacter(obj)
+end
+
+-- Cập nhật NPC list
+local function updateNPCs()
+    local tempTable = {}
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if isNPC(obj) then
+            tempTable[obj] = true
+        end
+    end
+    for i = #validNPCs, 1, -1 do
+        if not tempTable[validNPCs[i]] then
+            table.remove(validNPCs, i)
+        end
+    end
+    for obj in pairs(tempTable) do
+        if not table.find(validNPCs, obj) then
+            table.insert(validNPCs, obj)
+        end
+    end
+end
+
+-- Predict vị trí Head
+local function predictPos(target)
+    local rootPart = target:FindFirstChild("HumanoidRootPart")
+    local head = target:FindFirstChild("Head")
+    if not rootPart or not head then
+        return head and head.Position or rootPart and rootPart.Position
+    end
+    local velocity = rootPart.Velocity
+    local predictionTime = 0.02
+    local basePosition = rootPart.Position + velocity * predictionTime
+    local headOffset = head.Position - rootPart.Position
+    return basePosition + headOffset
+end
+
+-- Tìm NPC gần nhất trong vòng FOV
+local function getTarget()
+    local nearest = nil
+    local minDistance = math.huge
+    local viewportCenter = Cam.ViewportSize / 2
+    raycastParams.FilterDescendantsInstances = {Player.Character}
+    for _, npc in ipairs(validNPCs) do
+        local predictedPos = predictPos(npc)
+        local screenPos, visible = Cam:WorldToViewportPoint(predictedPos)
+        if visible and screenPos.Z > 0 then
+            local ray = workspace:Raycast(
+                Cam.CFrame.Position,
+                (predictedPos - Cam.CFrame.Position).Unit * 1000,
+                raycastParams
+            )
+            if ray and ray.Instance:IsDescendantOf(npc) then
+                local distance = (Vector2.new(screenPos.X, screenPos.Y) - viewportCenter).Magnitude
+                if distance < minDistance and distance < fov then
+                    minDistance = distance
+                    nearest = npc
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+-- Aim chặt (không smooth)
+local function aim(targetPosition)
+    local currentCF = Cam.CFrame
+    local targetDirection = (targetPosition - currentCF.Position).Unit
+    Cam.CFrame = CFrame.new(currentCF.Position, currentCF.Position + targetDirection)
+end
+
+-- Main loop
+local heartbeat = RunService.Heartbeat
+local lastUpdate = 0
+local UPDATE_INTERVAL = 0.4
+
+heartbeat:Connect(function(dt)
+    FOVring.Position = Cam.ViewportSize / 2
+    FOVring.Radius = fov * (Cam.ViewportSize.Y / 1080)
+
+    lastUpdate = lastUpdate + dt
+    if lastUpdate >= UPDATE_INTERVAL then
+        updateNPCs()
+        lastUpdate = 0
+    end
+
+    if isAiming then
+        local target = getTarget()
+        if target then
+            local predictedPosition = predictPos(target)
+            aim(predictedPosition)
+        end
+    end
+end)
+
+-- Toggle Button
+ToggleButton.MouseButton1Click:Connect(function()
+    isAiming = not isAiming
+    FOVring.Visible = isAiming
+    if isAiming then
+        ToggleButton.Text = "AIMBOT: ON"
+        ToggleButton.TextColor3 = Color3.fromRGB(50, 255, 50)
+    else
+        ToggleButton.Text = "AIMBOT: OFF"
+        ToggleButton.TextColor3 = Color3.fromRGB(160, 160, 160)
+    end
+end)
+
+-- Drag Button
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+ToggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = ToggleButton.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+ToggleButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Cleanup khi thoát
+game:GetService("Players").PlayerRemoving:Connect(function()
+    FOVring:Remove()
+    ScreenGui:Destroy()
+end)
+
+updateNPCs()
