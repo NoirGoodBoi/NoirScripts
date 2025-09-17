@@ -113,6 +113,7 @@ local PlayerTab = Window:CreateTab("Player", "user")
 
 PlayerTab:CreateSection("Tools")
 
+--Speed
 local walkspeed = 16
 PlayerTab:CreateSlider({
     Name = "Speed",
@@ -124,6 +125,7 @@ PlayerTab:CreateSlider({
     end
 })
 
+--InSpeed
 local speedLoop = nil
 PlayerTab:CreateToggle({
     Name = "Increase Speed",
@@ -151,6 +153,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--Jumpslider
 local jumppower = 50
 PlayerTab:CreateSlider({
     Name = "Power Jump",
@@ -162,6 +165,7 @@ PlayerTab:CreateSlider({
     end
 })
 
+--InJump
 local jumpLoop = nil
 PlayerTab:CreateToggle({
     Name = "Increase Power Jump",
@@ -189,6 +193,8 @@ PlayerTab:CreateToggle({
     end
 })
 
+
+--infJump
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -214,6 +220,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--noclip
 PlayerTab:CreateToggle({
     Name = "NoClip",
     CurrentValue = false,
@@ -247,6 +254,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--esp1
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
@@ -335,6 +343,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--esp2
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
@@ -423,6 +432,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--esp3
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
@@ -511,6 +521,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--ping&fps
 local statsGui
 local showStats = false
 
@@ -559,6 +570,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--minimap
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -674,6 +686,7 @@ end
 end
 })
 
+--anti afk
 PlayerTab:CreateButton({
     Name = "Anti-AFK",
     Callback = function()
@@ -685,6 +698,7 @@ PlayerTab:CreateButton({
 
 PlayerTab:CreateSection("Funny Tools")
 
+--spin
 PlayerTab:CreateSlider({
     Name = "Spin Speed",
     Range = {1,50},
@@ -700,6 +714,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+--active spin
 local spinning = false
 local spinSpeed = 5
 PlayerTab:CreateToggle({
@@ -725,6 +740,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--gravity
 PlayerTab:CreateSlider({
     Name = "Gravity",
     Range = {0, 500},
@@ -738,6 +754,7 @@ PlayerTab:CreateSlider({
     end
 })
 
+--toggle gravity
 local gravityToggle = false
 local customGravity = workspace.Gravity
 PlayerTab:CreateToggle({
@@ -753,6 +770,7 @@ PlayerTab:CreateToggle({
     end
 })
 
+--FOV
 PlayerTab:CreateSlider({
     Name = "Field Of View",
     Range = {30,120},
@@ -763,6 +781,7 @@ PlayerTab:CreateSlider({
     end
 })
 
+--Lock cam
 local Players = game:GetService("Players")
 local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
@@ -790,6 +809,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
+--firstp
 PlayerTab:CreateButton({
     Name = "Lock First Person",
     Callback = function()
@@ -799,6 +819,7 @@ PlayerTab:CreateButton({
     end
 })
 
+--thirdp
 PlayerTab:CreateButton({
     Name = "Unlock Third Person",
     Callback = function()
@@ -808,6 +829,7 @@ PlayerTab:CreateButton({
     end
 })
 
+--resetchar
 PlayerTab:CreateButton({
     Name = "Reset Character",
     Callback = function()
@@ -817,8 +839,9 @@ PlayerTab:CreateButton({
     end
 })
 
+--respawn
 PlayerTab:CreateButton({
-    Name = "Force Respawn",
+    Name = "Respawn",
     Callback = function()
         if LocalPlayer.Character then
             LocalPlayer.Character:Destroy()
