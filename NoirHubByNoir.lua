@@ -770,6 +770,30 @@ end
 end
 })
 
+-- Vẽ tâm ảo 
+local crosshair = Drawing.new("Circle")
+crosshair.Visible = false
+crosshair.Color = Color3.fromRGB(0, 255, 0) -- xanh lá, ông đổi được
+crosshair.Thickness = 1
+crosshair.Radius = 2.5 -- bán kính 2.5px = đường kính ~5px
+crosshair.Filled = false
+crosshair.Position = workspace.CurrentCamera.ViewportSize / 2
+
+-- Cập nhật vị trí khi đổi độ phân giải
+game:GetService("RunService").RenderStepped:Connect(function()
+    crosshair.Position = workspace.CurrentCamera.ViewportSize / 2
+end)
+
+-- Toggle Rayfield
+PlayerTab:CreateToggle({
+    Name = "Crosshair",
+    CurrentValue = false,
+    Flag = "CrosshairToggle",
+    Callback = function(Value)
+        crosshair.Visible = Value
+    end,
+})
+
 --FOV
 PlayerTab:CreateSlider({
     Name = "Field Of View",
