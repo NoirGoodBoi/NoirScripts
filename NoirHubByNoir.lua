@@ -521,6 +521,90 @@ PlayerTab:CreateToggle({
     end
 })
 
+--anti afk
+PlayerTab:CreateButton({
+    Name = "Anti-AFK",
+    Callback = function()
+        for _, conn in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+            conn:Disable()
+        end
+    end
+})
+
+PlayerTab:CreateSection("Funny Tools")
+
+--spin
+PlayerTab:CreateSlider({
+    Name = "Spin Speed",
+    Range = {1,50},
+    Increment = 1,
+    CurrentValue = 5,
+    Callback = function(v)
+        spinSpeed = v
+    end
+})
+RunService.RenderStepped:Connect(function()
+    if spinning and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(spinSpeed), 0)
+    end
+end)
+
+--active spin
+local spinning = false
+local spinSpeed = 5
+PlayerTab:CreateToggle({
+    Name = "Spin",
+    CurrentValue = false,
+    Callback = function(v)
+        spinning = v
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "Sit",
+    CurrentValue = false,
+    Callback = function(state)
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            if state then
+                LocalPlayer.Character.Humanoid.Sit = true
+            else
+                LocalPlayer.Character.Humanoid.Sit = false
+                LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end
+    end
+})
+
+--gravity
+PlayerTab:CreateSlider({
+    Name = "Gravity",
+    Range = {0, 500},
+    Increment = 1,
+    CurrentValue = math.floor(workspace.Gravity),
+    Callback = function(v)
+        customGravity = v
+        if gravityToggle then
+            workspace.Gravity = v
+        end
+    end
+})
+
+--toggle gravity
+local gravityToggle = false
+local customGravity = workspace.Gravity
+PlayerTab:CreateToggle({
+    Name = "Gravity Toggle",
+    CurrentValue = false,
+    Callback = function(v)
+        gravityToggle = v
+        if v then
+            workspace.Gravity = customGravity
+        else
+            workspace.Gravity = 196.2
+        end
+    end
+})
+
 --ping&fps
 local statsGui
 local showStats = false
@@ -684,90 +768,6 @@ else
 if MapGui then MapGui.Enabled = false end
 end
 end
-})
-
---anti afk
-PlayerTab:CreateButton({
-    Name = "Anti-AFK",
-    Callback = function()
-        for _, conn in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
-            conn:Disable()
-        end
-    end
-})
-
-PlayerTab:CreateSection("Funny Tools")
-
---spin
-PlayerTab:CreateSlider({
-    Name = "Spin Speed",
-    Range = {1,50},
-    Increment = 1,
-    CurrentValue = 5,
-    Callback = function(v)
-        spinSpeed = v
-    end
-})
-RunService.RenderStepped:Connect(function()
-    if spinning and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(spinSpeed), 0)
-    end
-end)
-
---active spin
-local spinning = false
-local spinSpeed = 5
-PlayerTab:CreateToggle({
-    Name = "Spin",
-    CurrentValue = false,
-    Callback = function(v)
-        spinning = v
-    end
-})
-
-PlayerTab:CreateToggle({
-    Name = "Sit",
-    CurrentValue = false,
-    Callback = function(state)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            if state then
-                LocalPlayer.Character.Humanoid.Sit = true
-            else
-                LocalPlayer.Character.Humanoid.Sit = false
-                LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-            end
-        end
-    end
-})
-
---gravity
-PlayerTab:CreateSlider({
-    Name = "Gravity",
-    Range = {0, 500},
-    Increment = 1,
-    CurrentValue = math.floor(workspace.Gravity),
-    Callback = function(v)
-        customGravity = v
-        if gravityToggle then
-            workspace.Gravity = v
-        end
-    end
-})
-
---toggle gravity
-local gravityToggle = false
-local customGravity = workspace.Gravity
-PlayerTab:CreateToggle({
-    Name = "Gravity Toggle",
-    CurrentValue = false,
-    Callback = function(v)
-        gravityToggle = v
-        if v then
-            workspace.Gravity = customGravity
-        else
-            workspace.Gravity = 196.2
-        end
-    end
 })
 
 --FOV
@@ -1108,6 +1108,20 @@ ScriptsTab:CreateButton({
     Name = "SilentAim by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAim.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "SilentAimNPC by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAimNPC"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "AimNPC by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/AimNPC"))()
     end,
 })
 
