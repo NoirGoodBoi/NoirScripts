@@ -686,46 +686,26 @@ PlayerTab:CreateButton({
 PlayerTab:CreateSection("Funny Tools")
 
 local regen = false
-local regenRate = 0.5 -- mặc định
 
-MainTab:CreateSlider({
-    Name = "Regen Rate",
-    Range = {0.1, 10}, -- hồi từ từ → hồi cực nhanh
-    Increment = 0.1,
-    CurrentValue = 0.5,
-    Callback = function(v)
-        regenRate = v
-    end
-})
-
-MainTab:CreateToggle({
-    Name = "Regeneration",
+PlayerTab:CreateToggle({
+    Name = "Regeneration (0.5 HP/s)",
     CurrentValue = false,
     Callback = function(v)
         regen = v
     end
 })
 
-RunService.Heartbeat:Connect(function()
-    if regen and LocalPlayer.Character then
-        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum and hum.Health < hum.MaxHealth then
-            hum.Health = math.min(hum.Health + regenRate, hum.MaxHealth)
-        end
-    end
-end)
-
-MainTab:CreateButton({
-    Name = "Instant Heal",
-    Callback = function()
-        if LocalPlayer.Character then
+task.spawn(function()
+    while true do
+        task.wait(1) -- mỗi giây
+        if regen and LocalPlayer.Character then
             local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.Health = hum.MaxHealth
+            if hum and hum.Health < hum.MaxHealth then
+                hum.Health = math.min(hum.Health + 0.5, hum.MaxHealth)
             end
         end
     end
-})
+end)
 
 PlayerTab:CreateSlider({
     Name = "Spin Speed",
@@ -855,6 +835,15 @@ PlayerTab:CreateButton({
     Callback = function()
         if LocalPlayer.Character then
             LocalPlayer.Character:BreakJoints()
+        end
+    end
+})
+
+PlayerTab:CreateButton({
+    Name = "Force Respawn",
+    Callback = function()
+        if LocalPlayer.Character then
+            LocalPlayer.Character:Destroy()
         end
     end
 })
