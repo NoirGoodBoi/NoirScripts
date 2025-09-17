@@ -773,7 +773,7 @@ end
 -- Vẽ tâm ảo 
 local crosshair = Drawing.new("Circle")
 crosshair.Visible = false
-crosshair.Color = Color3.fromRGB(255, 255, 255) 
+crosshair.Color = Color3.fromRGB(255, 255, 255)
 crosshair.Thickness = 1
 crosshair.Radius = 2
 crosshair.Filled = true
@@ -1420,6 +1420,19 @@ ScriptsTab:CreateLabel("(R)Kamui")
 ScriptsTab:CreateLabel("(F)Amaterasu")
 
 ScriptsTab:CreateLabel("(P)Pose")
+
+ScriptsTab:CreateButton({
+    Name = "Conqueror's Haki",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/eALfcADv"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("(E) to active")
+
+ScriptsTab:CreateLabel("freezes any npc near u for 8s")
+
+ScriptsTab:CreateLabel("cooldown 10s")
 
 ScriptsTab:CreateButton({
     Name = "Tap to TP",
