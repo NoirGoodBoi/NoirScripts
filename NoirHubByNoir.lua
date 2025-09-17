@@ -773,10 +773,10 @@ end
 -- Vẽ tâm ảo 
 local crosshair = Drawing.new("Circle")
 crosshair.Visible = false
-crosshair.Color = Color3.fromRGB(0, 255, 0) -- xanh lá, ông đổi được
+crosshair.Color = Color3.fromRGB(255, 255, 255) 
 crosshair.Thickness = 1
-crosshair.Radius = 2.5 -- bán kính 2.5px = đường kính ~5px
-crosshair.Filled = false
+crosshair.Radius = 2
+crosshair.Filled = true
 crosshair.Position = workspace.CurrentCamera.ViewportSize / 2
 
 -- Cập nhật vị trí khi đổi độ phân giải
