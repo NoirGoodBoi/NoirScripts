@@ -105,8 +105,6 @@ end
 Players.PlayerAdded:Connect(RefreshDropdown)
 Players.PlayerRemoving:Connect(RefreshDropdown)
 
-Main:CreateDivider()
-
 MainTab:CreateButton({
    Name = "Reset GUI Rayfield",
    Callback = function() Rayfield:Destroy() end,
@@ -872,6 +870,8 @@ local LocalPlayer = Players.LocalPlayer
 -- ESP Tab
 local ESP = Window:CreateTab("Visual", "eye")
 
+ESP:CreateSection("ESP")
+
 --esp1
 local espEnabled = false
 local espConnections = {}
@@ -1139,7 +1139,7 @@ ESP:CreateToggle({
     end
 })
 
-ESP:CreateDivider()
+ESP:CreateSection("highlight")
 
 -- GLOBAL SETTINGS
 local espSettings = {
@@ -1274,7 +1274,7 @@ ESP:CreateColorPicker({
     end,
 })
 
-ESP:CreateDivider()
+ESP:CreateSection("hitbox")
 
 ESP:CreateToggle({
     Name = "Show Hitbox",
