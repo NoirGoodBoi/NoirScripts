@@ -76,15 +76,16 @@ Players.PlayerRemoving:Connect(function()
     PlayerCountLabel:Set("Players: " .. #Players:GetPlayers())
 end)
 
--- Dropdown danh sách người chơi
+-- Lấy danh sách player dạng DisplayName (@Username)
 local function GetPlayerNames()
     local names = {}
     for _, plr in ipairs(Players:GetPlayers()) do
-        table.insert(names, plr.Name)
+        table.insert(names, plr.DisplayName .. " (@" .. plr.Name .. ")")
     end
     return names
 end
 
+-- Dropdown danh sách người chơi
 local PlayerDropdown = MainTab:CreateDropdown({
     Name = "Danh Sách Người Chơi",
     Options = GetPlayerNames(),
@@ -96,13 +97,15 @@ local PlayerDropdown = MainTab:CreateDropdown({
     end,
 })
 
--- Tự động refresh danh sách khi có thay đổi
+-- Tự động refresh khi có người join/leave
 local function RefreshDropdown()
-    PlayerDropdown:Refresh(GetPlayerNames())
+    PlayerDropdown:Refresh(GetPlayerNames(), true)
 end
 
 Players.PlayerAdded:Connect(RefreshDropdown)
 Players.PlayerRemoving:Connect(RefreshDropdown)
+
+Main:CreateDivider()
 
 MainTab:CreateButton({
    Name = "Reset GUI Rayfield",
@@ -863,14 +866,458 @@ PlayerTab:CreateButton({
     end
 })
 
---respawn
-PlayerTab:CreateButton({
-    Name = "Respawn",
-    Callback = function()
-        if LocalPlayer.Character then
-            LocalPlayer.Character:Destroy()
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- ESP Tab
+local ESP = Window:CreateTab("Visual", "eye")
+
+--esp1
+local espEnabled = false
+local espConnections = {}
+local espInstances = {}
+
+local function removeAllESP()
+    for _, gui in pairs(espInstances) do
+        if gui and gui.Parent then
+            gui:Destroy()
         end
     end
+    for _, conn in pairs(espConnections) do
+        conn:Disconnect()
+    end
+    espInstances = {}
+    espConnections = {}
+end
+
+local function createESP(plr)
+    if plr == game.Players.LocalPlayer then return end
+    if not plr.Character then return end
+    local head = plr.Character:FindFirstChild("Head")
+    if not head then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NoirESP"
+    billboard.AlwaysOnTop = true
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.LightInfluence = 0
+    billboard.MaxDistance = math.huge
+    billboard.Parent = head
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, 0, 1, 0)
+    txt.BackgroundTransparency = 1
+    txt.TextScaled = false
+    txt.Font = Enum.Font.SourceSansBold
+    txt.TextSize = 14
+    txt.TextColor3 = Color3.new(1, 1, 1)
+    txt.TextStrokeTransparency = 0.5
+    txt.Text = plr.Name
+    txt.Parent = billboard
+
+    local conn = game:GetService("RunService").RenderStepped:Connect(function()
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+            txt.Text = plr.Name .. " | " .. math.floor(dist) .. "m"
+        end
+    end)
+
+    table.insert(espInstances, billboard)
+    table.insert(espConnections, conn)
+end
+
+ESP:CreateToggle({
+    Name = "ESP (@name)",
+    CurrentValue = false,
+    Callback = function(state)
+        espEnabled = state
+        removeAllESP()
+        if not state then return end
+
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer then
+                if plr.Character then
+                    createESP(plr)
+                end
+                
+                table.insert(espConnections, plr.CharacterAdded:Connect(function()
+                    if espEnabled then
+                        task.wait(0.5)
+                        createESP(plr)
+                    end
+                end))
+            end
+        end
+
+        table.insert(espConnections, game.Players.PlayerAdded:Connect(function(plr)
+            if espEnabled then
+                plr.CharacterAdded:Connect(function()
+                    task.wait(0.5)
+                    createESP(plr)
+                end)
+            end
+        end))
+    end
+})
+
+--esp2
+local espEnabled = false
+local espConnections = {}
+local espInstances = {}
+
+local function removeAllESP()
+    for _, gui in pairs(espInstances) do
+        if gui and gui.Parent then
+            gui:Destroy()
+        end
+    end
+    for _, conn in pairs(espConnections) do
+        conn:Disconnect()
+    end
+    espInstances = {}
+    espConnections = {}
+end
+
+local function createESP(plr)
+    if plr == game.Players.LocalPlayer then return end
+    if not plr.Character then return end
+    local head = plr.Character:FindFirstChild("Head")
+    if not head then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NoirESP"
+    billboard.AlwaysOnTop = true
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.LightInfluence = 0
+    billboard.MaxDistance = math.huge
+    billboard.Parent = head
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, 0, 1, 0)
+    txt.BackgroundTransparency = 1
+    txt.TextScaled = false
+    txt.Font = Enum.Font.SourceSansBold
+    txt.TextSize = 14
+    txt.TextColor3 = Color3.new(1, 1, 1)
+    txt.TextStrokeTransparency = 0.5
+    txt.Text = plr.Name
+    txt.Parent = billboard
+
+    local conn = game:GetService("RunService").RenderStepped:Connect(function()
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+            txt.Text = plr.DisplayName .. " | " .. math.floor(dist) .. "m"
+        end
+    end)
+
+    table.insert(espInstances, billboard)
+    table.insert(espConnections, conn)
+end
+
+ESP:CreateToggle({
+    Name = "ESP (display name)",
+    CurrentValue = false,
+    Callback = function(state)
+        espEnabled = state
+        removeAllESP()
+        if not state then return end
+
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer then
+                if plr.Character then
+                    createESP(plr)
+                end
+                
+                table.insert(espConnections, plr.CharacterAdded:Connect(function()
+                    if espEnabled then
+                        task.wait(0.5)
+                        createESP(plr)
+                    end
+                end))
+            end
+        end
+
+        table.insert(espConnections, game.Players.PlayerAdded:Connect(function(plr)
+            if espEnabled then
+                plr.CharacterAdded:Connect(function()
+                    task.wait(0.5)
+                    createESP(plr)
+                end)
+            end
+        end))
+    end
+})
+
+--esp3
+local espEnabled = false
+local espConnections = {}
+local espInstances = {}
+
+local function removeAllESP()
+    for _, gui in pairs(espInstances) do
+        if gui and gui.Parent then
+            gui:Destroy()
+        end
+    end
+    for _, conn in pairs(espConnections) do
+        conn:Disconnect()
+    end
+    espInstances = {}
+    espConnections = {}
+end
+
+local function createESP(plr)
+    if plr == game.Players.LocalPlayer then return end
+    if not plr.Character then return end
+    local head = plr.Character:FindFirstChild("Head")
+    if not head then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NoirESP"
+    billboard.AlwaysOnTop = true
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.LightInfluence = 0
+    billboard.MaxDistance = math.huge
+    billboard.Parent = head
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, 0, 1, 0)
+    txt.BackgroundTransparency = 1
+    txt.TextScaled = false
+    txt.Font = Enum.Font.SourceSansBold
+    txt.TextSize = 14
+    txt.TextColor3 = Color3.new(1, 1, 1)
+    txt.TextStrokeTransparency = 0.5
+    txt.Text = plr.Name
+    txt.Parent = billboard
+
+    local conn = game:GetService("RunService").RenderStepped:Connect(function()
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+            txt.Text = plr.DisplayName .. " (@" .. plr.Name .. ") | " .. math.floor(dist) .. "m"
+        end
+    end)
+
+    table.insert(espInstances, billboard)
+    table.insert(espConnections, conn)
+end
+
+ESP:CreateToggle({
+    Name = "ESP (@name+display name)",
+    CurrentValue = false,
+    Callback = function(state)
+        espEnabled = state
+        removeAllESP()
+        if not state then return end
+
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= game.Players.LocalPlayer then
+                if plr.Character then
+                    createESP(plr)
+                end
+                
+                table.insert(espConnections, plr.CharacterAdded:Connect(function()
+                    if espEnabled then
+                        task.wait(0.5)
+                        createESP(plr)
+                    end
+                end))
+            end
+        end
+
+        table.insert(espConnections, game.Players.PlayerAdded:Connect(function(plr)
+            if espEnabled then
+                plr.CharacterAdded:Connect(function()
+                    task.wait(0.5)
+                    createESP(plr)
+                end)
+            end
+        end))
+    end
+})
+
+ESP:CreateDivider()
+
+-- GLOBAL SETTINGS
+local espSettings = {
+    UseOutline = false,
+    UseFill = false,
+    Color = Color3.fromRGB(0,255,0),
+    ShowHitbox = false,
+    HitboxTransparency = 0.5,
+    HitboxColor = Color3.fromRGB(255,0,0),
+}
+
+-- Tạo highlight cho 1 player
+local function createHighlight(char)
+    if char and not char:FindFirstChild("ESPHighlight") then
+        local h = Instance.new("Highlight")
+        h.Name = "ESPHighlight"
+        h.Adornee = char
+        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        h.Parent = char
+        h.Enabled = true
+        h.FillTransparency = espSettings.UseFill and 0.5 or 1
+        h.OutlineTransparency = espSettings.UseOutline and 0 or 1
+        h.FillColor = espSettings.Color
+        h.OutlineColor = espSettings.Color
+    end
+end
+
+-- Update highlight settings
+local function updateHighlight(char)
+    local h = char and char:FindFirstChild("ESPHighlight")
+    if h then
+        h.FillTransparency = espSettings.UseFill and 0.5 or 1
+        h.OutlineTransparency = espSettings.UseOutline and 0 or 1
+        h.FillColor = espSettings.Color
+        h.OutlineColor = espSettings.Color
+    end
+end
+
+-- Tạo hitbox (BoxHandleAdornment vào HumanoidRootPart)
+local function createHitbox(char)
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if hrp and not hrp:FindFirstChild("ESPHitbox") then
+        local box = Instance.new("BoxHandleAdornment")
+        box.Name = "ESPHitbox"
+        box.Adornee = hrp
+        box.Size = hrp.Size * 2
+        box.AlwaysOnTop = true
+        box.ZIndex = 0
+        box.Color3 = espSettings.HitboxColor
+        box.Transparency = espSettings.HitboxTransparency
+        box.Parent = hrp
+    end
+end
+
+-- Update hitbox settings
+local function updateHitbox(char)
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local box = hrp and hrp:FindFirstChild("ESPHitbox")
+    if box then
+        box.Color3 = espSettings.HitboxColor
+        box.Transparency = espSettings.HitboxTransparency
+    end
+end
+
+-- Apply ESP cho tất cả players
+local function applyESP(player)
+    if player.Character then
+        createHighlight(player.Character)
+        updateHighlight(player.Character)
+        if espSettings.ShowHitbox then
+            createHitbox(player.Character)
+            updateHitbox(player.Character)
+        end
+    end
+    player.CharacterAdded:Connect(function(char)
+        task.wait(1)
+        createHighlight(char)
+        updateHighlight(char)
+        if espSettings.ShowHitbox then
+            createHitbox(char)
+            updateHitbox(char)
+        end
+    end)
+end
+
+-- Gán ESP cho tất cả player hiện tại + player mới
+for _, p in ipairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then
+        applyESP(p)
+    end
+end
+Players.PlayerAdded:Connect(function(p)
+    if p ~= LocalPlayer then
+        applyESP(p)
+    end
+end)
+
+-------------------------------------------------
+-- GUI Controls
+-------------------------------------------------
+
+ESP:CreateToggle({
+    Name = "Highlight Outline",
+    CurrentValue = false,
+    Callback = function(v)
+        espSettings.UseOutline = v
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character then updateHighlight(p.Character) end
+        end
+    end,
+})
+
+ESP:CreateToggle({
+    Name = "Highlight Fill",
+    CurrentValue = false,
+    Callback = function(v)
+        espSettings.UseFill = v
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character then updateHighlight(p.Character) end
+        end
+    end,
+})
+
+ESP:CreateColorPicker({
+    Name = "Highlight Color",
+    Color = espSettings.Color,
+    Callback = function(c)
+        espSettings.Color = c
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character then updateHighlight(p.Character) end
+        end
+    end,
+})
+
+ESP:CreateDivider()
+
+ESP:CreateToggle({
+    Name = "Show Hitbox",
+    CurrentValue = false,
+    Callback = function(v)
+        espSettings.ShowHitbox = v
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character then
+                if v then
+                    createHitbox(p.Character)
+                else
+                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp and hrp:FindFirstChild("ESPHitbox") then
+                        hrp.ESPHitbox:Destroy()
+                    end
+                end
+            end
+        end
+    end,
+})
+
+ESP:CreateColorPicker({
+    Name = "Hitbox Color",
+    Color = espSettings.HitboxColor,
+    Callback = function(c)
+        espSettings.HitboxColor = c
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character then updateHitbox(p.Character) end
+        end
+    end,
+})
+
+ESP:CreateSlider({
+    Name = "Hitbox Transparency",
+    Range = {0,1},
+    Increment = 0.1,
+    CurrentValue = espSettings.HitboxTransparency,
+    Callback = function(v)
+        espSettings.HitboxTransparency = v
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character then updateHitbox(p.Character) end
+        end
+    end,
 })
 
 local PacksTab = Window:CreateTab("Packs", "package")
