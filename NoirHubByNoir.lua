@@ -1783,6 +1783,177 @@ ScriptsTab:CreateButton({
 })
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+
+-- Config
+local AimbotEnabled = false
+local TeamCheck = false
+local WallCheck = true
+local FOVRadius = 100
+local FOVColor = Color3.fromRGB(0, 255, 0)
+
+local Smoothness = 0.7
+local AimPart = "Head" -- mặc định aim vào đầu
+
+-- FOV Circle
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+
+local FOVCircle = Instance.new("Frame")
+FOVCircle.Name = "FOV"
+FOVCircle.Parent = ScreenGui
+FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
+FOVCircle.Size = UDim2.new(0, FOVRadius * 2, 0, FOVRadius * 2)
+FOVCircle.BackgroundTransparency = 1
+
+local UIStroke = Instance.new("UIStroke", FOVCircle)
+UIStroke.Thickness = 2
+UIStroke.Color = FOVColor
+
+local UICorner = Instance.new("UICorner", FOVCircle)
+UICorner.CornerRadius = UDim.new(1, 0)
+
+-- Main Tab
+local Tab = Window:CreateTab("Aimbot", "target")
+
+Tab:CreateToggle({
+	Name = "Active Aimbot",
+	CurrentValue = false,
+	Callback = function(value)
+		AimbotEnabled = value
+	end
+})
+
+Tab:CreateToggle({
+	Name = "Show FOV Circle",
+	CurrentValue = false,
+	Callback = function(value)
+		FOVCircle.Visible = value
+	end
+})
+
+Tab:CreateToggle({
+	Name = "Team Check",
+	CurrentValue = true,
+	Callback = function(value)
+		TeamCheck = value
+	end
+})
+
+Tab:CreateToggle({
+	Name = "Wall Check",
+	CurrentValue = true,
+	Callback = function(value)
+		WallCheck = value
+	end
+})
+
+Tab:CreateSlider({
+	Name = "Circle FOV",
+	Range = {50, 300},
+	Increment = 5,
+	CurrentValue = 100,
+	Callback = function(value)
+		FOVRadius = value
+		FOVCircle.Size = UDim2.new(0, value * 2, 0, value * 2)
+	end
+})
+
+Tab:CreateSlider({
+	Name = "Smooth",
+	Range = {0, 1},
+	Increment = 0.05,
+	CurrentValue = 0.4,
+	Callback = function(value)
+		Smoothness = value
+	end
+})
+
+-- 🔹 Dropdown chọn part để aim
+Tab:CreateDropdown({
+	Name = "Aim Part",
+	Options = {"Head", "Torso"},
+	CurrentOption = "Head",
+	MultipleOptions = false,
+	Callback = function(option)
+		AimPart = option
+	end
+})
+
+-- Aimbot logic
+local function GetClosestTarget()
+	local closest = nil
+	local shortestDist = FOVRadius
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			if TeamCheck and player.Team == LocalPlayer.Team then continue end
+
+			local pos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+			if onScreen then
+				local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+				local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+
+				if dist <= shortestDist then
+					if WallCheck then
+						local origin = Camera.CFrame.Position
+						local direction = (player.Character.HumanoidRootPart.Position - origin).Unit * 1000
+						local raycastParams = RaycastParams.new()
+						raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+						raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+						local result = workspace:Raycast(origin, direction, raycastParams)
+						if result and result.Instance:IsDescendantOf(player.Character) then
+							closest = player
+							shortestDist = dist
+						end
+					else
+						closest = player
+						shortestDist = dist
+					end
+				end
+			end
+		end
+	end
+
+	return closest
+end
+
+RunService.RenderStepped:Connect(function()
+	if FOVRainbow then
+		local hue = tick() % 5 / 5
+		local color = Color3.fromHSV(hue, 1, 1)
+		UIStroke.Color = color
+	end
+
+	if AimbotEnabled then
+		local target = GetClosestTarget()
+		if target and target.Character then
+			-- chọn part dựa trên dropdown
+			local part = nil
+			if AimPart == "Head" then
+				part = target.Character:FindFirstChild("Head")
+			else
+				part = target.Character:FindFirstChild("HumanoidRootPart") -- torso
+			end
+
+			if part then
+				local targetPos = part.Position
+				local camPos = Camera.CFrame.Position
+				local newCF = CFrame.new(camPos, targetPos)
+				end
+			end
+		end
+	end
+end)
+
+local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 local le = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/refs/heads/noiryy/Limb_By_Noir"))()
