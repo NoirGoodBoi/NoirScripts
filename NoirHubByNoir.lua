@@ -1053,193 +1053,379 @@ ESP:CreateSlider({
     end,
 })
 
-local PacksTab = Window:CreateTab("Packs", "package")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
 
-PacksTab:CreateSection("Not Fe & just use for R15")
+-- Config
+local AimbotEnabled = false
+local TeamCheck = true
+local WallCheck = true
+local DeathCheck = true -- ✅ mới: bật/tắt dead check
+local FOVRadius = 100
+local FOVColor = Color3.fromRGB(0, 255, 0)
 
-PacksTab:CreateButton({
-    Name = "Korblox",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Korblox.lua"))()
+local Smoothness = 0.4
+local AimPart = "Head" -- mặc định aim vào đầu
+
+-- FOV Circle
+local CoreGui = game:GetService("CoreGui")
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Noir_FOVGui"
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local FOVCircle = Instance.new("Frame")
+FOVCircle.Name = "FOV"
+FOVCircle.Parent = ScreenGui
+FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
+FOVCircle.Size = UDim2.new(0, FOVRadius * 2, 0, FOVRadius * 2)
+FOVCircle.BackgroundTransparency = 1
+FOVCircle.Visible = false
+
+local UIStroke = Instance.new("UIStroke", FOVCircle)
+UIStroke.Thickness = 2
+UIStroke.Color = FOVColor
+
+local UICorner = Instance.new("UICorner", FOVCircle)
+UICorner.CornerRadius = UDim.new(1, 0)
+
+-- Main Tab
+local Taba = Window:CreateTab("Aimbot", "target")
+
+Taba:CreateToggle({
+    Name = "Active Aimbot",
+    CurrentValue = false,
+    Callback = function(value)
+        AimbotEnabled = value
+    end
+})
+
+Taba:CreateToggle({
+    Name = "Show FOV Circle",
+    CurrentValue = false,
+    Callback = function(value)
+        FOVCircle.Visible = value
+    end
+})
+
+Taba:CreateToggle({
+    Name = "Team Check",
+    CurrentValue = true,
+    Callback = function(value)
+        TeamCheck = value
+    end
+})
+
+Taba:CreateToggle({
+    Name = "Wall Check",
+    CurrentValue = true,
+    Callback = function(value)
+        WallCheck = value
+    end
+})
+
+-- ✅ Toggle mới: Death/Dead check
+Taba:CreateToggle({
+    Name = "Death Check",
+    CurrentValue = true,
+    Callback = function(value)
+        DeathCheck = value
+    end
+})
+
+Taba:CreateSlider({
+    Name = "Circle FOV",
+    Range = {50, 300},
+    Increment = 5,
+    CurrentValue = 100,
+    Callback = function(value)
+        FOVRadius = value
+        FOVCircle.Size = UDim2.new(0, value * 2, 0, value * 2)
+    end
+})
+
+Taba:CreateSlider({
+    Name = "Smooth",
+    Range = {0, 1},
+    Increment = 0.05,
+    CurrentValue = 0.4,
+    Callback = function(value)
+        Smoothness = value
+    end
+})
+
+-- Dropdown chọn part để aim
+Taba:CreateDropdown({
+    Name = "Aim Part",
+    Options = {"Head", "Torso"},
+    CurrentOption = "Head",
+    MultipleOptions = false,
+    Callback = function(option)
+        AimPart = option
+    end
+})
+
+-- Aimbot logic
+local function GetClosestTarget()
+    local closest = nil
+    local shortestDist = FOVRadius
+
+    if not Camera then return nil end
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+
+            -- Dead check: nếu bật DeathCheck thì bỏ qua player không có Humanoid hoặc Health <= 0
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if DeathCheck then
+                if not humanoid or humanoid.Health <= 0 then
+                    continue
+                end
+            end
+
+            if not (TeamCheck and player.Team == LocalPlayer.Team) then
+                local targetPart = player.Character:FindFirstChild("HumanoidRootPart")
+                if AimPart == "Head" and player.Character:FindFirstChild("Head") then
+                    targetPart = player.Character.Head
+                end
+
+                local pos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+                if onScreen then
+                    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+                    local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+
+                    if dist <= shortestDist then
+                        if WallCheck then
+                            local origin = Camera.CFrame.Position
+                            local direction = (targetPart.Position - origin).Unit * 1000
+                            local raycastParams = RaycastParams.new()
+                            if LocalPlayer.Character then
+                                raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+                            else
+                                raycastParams.FilterDescendantsInstances = {}
+                            end
+                            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+                            local result = workspace:Raycast(origin, direction, raycastParams)
+                            if result and result.Instance and result.Instance:IsDescendantOf(player.Character) then
+                                closest = player
+                                shortestDist = dist
+                            end
+                        else
+                            closest = player
+                            shortestDist = dist
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return closest
+end
+
+RunService.RenderStepped:Connect(function()
+    if AimbotEnabled and Camera then
+        local target = GetClosestTarget()
+        if target and target.Character then
+            local part = nil
+            if AimPart == "Head" then
+                part = target.Character:FindFirstChild("Head")
+            else
+                part = target.Character:FindFirstChild("HumanoidRootPart") -- torso
+            end
+
+            if part then
+                local targetPos = part.Position
+                local camPos = Camera.CFrame.Position
+                local newCF = CFrame.new(camPos, targetPos)
+                -- Smoothly lerp camera orientation towards target
+                Camera.CFrame = Camera.CFrame:Lerp(newCF, math.clamp(Smoothness, 0, 1))
+            end
+        end
+    end
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local le = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/refs/heads/noiryy/Limb_By_Noir"))()
+le.LISTEN_FOR_INPUT = false
+
+local limbs = {}
+
+local limbExtenderData = getgenv().limbExtenderData
+
+local TabL = Window:CreateTab("Limb", "scale-3d")
+
+-- function tạo option
+local function createOption(params)
+    local methodName = 'Create' .. params.method  
+    local method = params.tab[methodName]
+    
+    if type(method) == 'function' then
+        method(params.tab, {
+            Name = params.name,
+            SectionParent = params.section,
+            CurrentValue = params.value,
+            Flag = params.flag,
+            Options = params.options,
+            CurrentOption = params.currentOption,
+            MultipleOptions = params.multipleOptions,
+            Range = params.range,
+            Color = params.color,
+            Increment = params.increment,
+            Callback = function(Value)
+                if params.multipleOptions == false then
+                    Value = Value[1]
+                end
+                le[params.flag] = Value
+            end,
+        })
+    else
+        warn("Method " .. methodName .. " not found in params.tab")
+    end
+end
+
+-- Toggle chính
+local ModifyLimbs = TabL:CreateToggle({
+    Name = "Modify Limbs",
+    CurrentValue = false,
+    Flag = "ModifyLimbs",
+    Callback = function(Value)
+        le.toggleState(Value)
     end,
 })
 
-PacksTab:CreateButton({
-    Name = "Headless",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Headless.lua"))()
+TabL:CreateDivider()
+
+local UseHighlights = TabL:CreateToggle({
+    Name = "Use Highlights",
+    CurrentValue = le.USE_HIGHLIGHT,
+    Flag = "USE_HIGHLIGHT",
+    Callback = function(Value)
+        le.USE_HIGHLIGHT = Value
     end,
 })
 
-PacksTab:CreateSection("FE & just use for R15")
+TabL:CreateDivider()
 
-PacksTab:CreateButton({
-    Name = "Ninja",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Ninja.lua"))()
-    end,
+-- Gộp Settings + Highlights chung vào TabL
+local toggleSettings = {
+    {
+        method = "Toggle",
+        name = "Team Check",
+        flag = "TEAM_CHECK",
+        tab = TabL,
+        value = le.TEAM_CHECK,
+    },
+    {
+        method = "Toggle",
+        name = "ForceField Check",
+        flag = "FORCEFIELD_CHECK",
+        tab = TabL,
+        value = le.FORCEFIELD_CHECK,
+    },
+    {
+        method = "Toggle",
+        name = "Limb Collisions",
+        flag = "LIMB_CAN_COLLIDE",
+        tab = TabL,
+        value = le.LIMB_CAN_COLLIDE,
+        createDivider = true,
+    },
+    {
+        method = "Slider",
+        name = "Limb Transparency",
+        flag = "LIMB_TRANSPARENCY",
+        tab = TabL,
+        range = {0, 1},
+        increment = 0.1,
+        value = le.LIMB_TRANSPARENCY,
+    },
+    {
+        method = "Slider",
+        name = "Limb Size",
+        flag = "LIMB_SIZE",
+        tab = TabL,
+        range = {5, 50},
+        increment = 0.1,
+        value = le.LIMB_SIZE,
+        createDivider = true,
+    },
+    {
+        method = "Dropdown",
+        name = "Depth Mode",
+        flag = "DEPTH_MODE",
+        options = {"Occluded","AlwaysOnTop"},
+        currentOption = {le.DEPTH_MODE},
+        multipleOptions = false,
+        tab = TabL,
+        createDivider = true,
+    },
+}
+
+for _, setting in pairs(toggleSettings) do
+    createOption(setting)
+    if setting.createDivider then
+        TabL:CreateDivider()
+    end
+end
+
+-- Dropdown chọn Limb
+local TargetLimb = TabL:CreateDropdown({
+   Name = "Target Limb",
+   Options = {},
+   CurrentOption = {le.TARGET_LIMB},
+   MultipleOptions = false,
+   Flag = "TARGET_LIMB",
+   Callback = function(Options)
+		le.TARGET_LIMB = Options[1]
+   end,
 })
 
-PacksTab:CreateButton({
-    Name = "Robot",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Robot.lua"))()
-    end,
+-- Đổi Theme
+TabL:CreateDropdown({
+   Name = "Current Theme",
+   Options = {"Default", "AmberGlow", "Amethyst", "Bloom", "DarkBlue", "Green", "Light", "Ocean", "Serenity"},
+   CurrentOption = {"Default"},
+   MultipleOptions = false,
+   Flag = "CurrentTheme",
+   Callback = function(Options)
+		Window.ModifyTheme(Options[1])
+   end,
 })
 
-PacksTab:CreateButton({
-    Name = "Levitate",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Levitate.lua"))()
-    end,
-})
+Rayfield:LoadConfiguration()
 
-PacksTab:CreateButton({
-    Name = "Mage",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Mage.lua"))()
-    end,
-})
+-- Cập nhật list Limb
+local function characterAdded(Character)
+    local function onChildChanged(child)
+        if not child:IsA("BasePart") then return end
+        if not table.find(limbs, child.Name) then
+            table.insert(limbs, child.Name)
+            table.sort(limbs)
+            TargetLimb:Refresh(limbs)
+        end
+    end
 
-PacksTab:CreateButton({
-    Name = "Stylish",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Stylish.lua"))()
-    end,
-})
+    Character.ChildAdded:Connect(onChildChanged)
 
-PacksTab:CreateButton({
-    Name = "Hero",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Hero.lua"))()
-    end,
-})
+	for _, child in ipairs(Character:GetChildren()) do
+		onChildChanged(child)
+	end
+end
 
-PacksTab:CreateButton({
-    Name = "Astronaut",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Astronaut.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Bubbly",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Bubbly.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Cartoony",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Cartoony.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Elder",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Elder.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Ghost",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Ghost.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Knight",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Knight.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Vampire",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Vampire.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Werewolf",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Werewolf.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Zombie",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Zombie.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Oldschool",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Oldschool.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Bold",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Bold.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Adidas",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Adidas.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Adidas2",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Adidas2.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Catwalk",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Catwalk.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Walmart",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Walmart.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Wicked",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Wicked.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "NFL",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/NFL.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Pirate",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Pirate.lua"))()
-    end,
-})
+LocalPlayer.CharacterAdded:Connect(characterAdded)
+if LocalPlayer.Character then
+    characterAdded(LocalPlayer.Character)
+end
 
 local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 
@@ -1782,379 +1968,193 @@ ScriptsTab:CreateButton({
     end,
 })
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-local HttpService = game:GetService("HttpService")
-local TweenService = game:GetService("TweenService")
+PacksTab = Window:CreateTab("Packs", "package")
 
--- Config
-local AimbotEnabled = false
-local TeamCheck = true
-local WallCheck = true
-local DeathCheck = true -- ✅ mới: bật/tắt dead check
-local FOVRadius = 100
-local FOVColor = Color3.fromRGB(0, 255, 0)
+PacksTab:CreateSection("Not Fe & just use for R15")
 
-local Smoothness = 0.4
-local AimPart = "Head" -- mặc định aim vào đầu
-
--- FOV Circle
-local CoreGui = game:GetService("CoreGui")
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Noir_FOVGui"
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = CoreGui
-
-local FOVCircle = Instance.new("Frame")
-FOVCircle.Name = "FOV"
-FOVCircle.Parent = ScreenGui
-FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
-FOVCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
-FOVCircle.Size = UDim2.new(0, FOVRadius * 2, 0, FOVRadius * 2)
-FOVCircle.BackgroundTransparency = 1
-FOVCircle.Visible = false
-
-local UIStroke = Instance.new("UIStroke", FOVCircle)
-UIStroke.Thickness = 2
-UIStroke.Color = FOVColor
-
-local UICorner = Instance.new("UICorner", FOVCircle)
-UICorner.CornerRadius = UDim.new(1, 0)
-
--- Main Tab
-local Taba = Window:CreateTab("Aimbot", "target")
-
-Taba:CreateToggle({
-    Name = "Active Aimbot",
-    CurrentValue = false,
-    Callback = function(value)
-        AimbotEnabled = value
-    end
-})
-
-Taba:CreateToggle({
-    Name = "Show FOV Circle",
-    CurrentValue = false,
-    Callback = function(value)
-        FOVCircle.Visible = value
-    end
-})
-
-Taba:CreateToggle({
-    Name = "Team Check",
-    CurrentValue = true,
-    Callback = function(value)
-        TeamCheck = value
-    end
-})
-
-Taba:CreateToggle({
-    Name = "Wall Check",
-    CurrentValue = true,
-    Callback = function(value)
-        WallCheck = value
-    end
-})
-
--- ✅ Toggle mới: Death/Dead check
-Taba:CreateToggle({
-    Name = "Death Check",
-    CurrentValue = true,
-    Callback = function(value)
-        DeathCheck = value
-    end
-})
-
-Taba:CreateSlider({
-    Name = "Circle FOV",
-    Range = {50, 300},
-    Increment = 5,
-    CurrentValue = 100,
-    Callback = function(value)
-        FOVRadius = value
-        FOVCircle.Size = UDim2.new(0, value * 2, 0, value * 2)
-    end
-})
-
-Taba:CreateSlider({
-    Name = "Smooth",
-    Range = {0, 1},
-    Increment = 0.05,
-    CurrentValue = 0.4,
-    Callback = function(value)
-        Smoothness = value
-    end
-})
-
--- Dropdown chọn part để aim
-Taba:CreateDropdown({
-    Name = "Aim Part",
-    Options = {"Head", "Torso"},
-    CurrentOption = "Head",
-    MultipleOptions = false,
-    Callback = function(option)
-        AimPart = option
-    end
-})
-
--- Aimbot logic
-local function GetClosestTarget()
-    local closest = nil
-    local shortestDist = FOVRadius
-
-    if not Camera then return nil end
-
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-
-            -- Dead check: nếu bật DeathCheck thì bỏ qua player không có Humanoid hoặc Health <= 0
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            if DeathCheck then
-                if not humanoid or humanoid.Health <= 0 then
-                    continue
-                end
-            end
-
-            if not (TeamCheck and player.Team == LocalPlayer.Team) then
-                local targetPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if AimPart == "Head" and player.Character:FindFirstChild("Head") then
-                    targetPart = player.Character.Head
-                end
-
-                local pos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                if onScreen then
-                    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-                    local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-
-                    if dist <= shortestDist then
-                        if WallCheck then
-                            local origin = Camera.CFrame.Position
-                            local direction = (targetPart.Position - origin).Unit * 1000
-                            local raycastParams = RaycastParams.new()
-                            if LocalPlayer.Character then
-                                raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
-                            else
-                                raycastParams.FilterDescendantsInstances = {}
-                            end
-                            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-
-                            local result = workspace:Raycast(origin, direction, raycastParams)
-                            if result and result.Instance and result.Instance:IsDescendantOf(player.Character) then
-                                closest = player
-                                shortestDist = dist
-                            end
-                        else
-                            closest = player
-                            shortestDist = dist
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    return closest
-end
-
-RunService.RenderStepped:Connect(function()
-    if AimbotEnabled and Camera then
-        local target = GetClosestTarget()
-        if target and target.Character then
-            local part = nil
-            if AimPart == "Head" then
-                part = target.Character:FindFirstChild("Head")
-            else
-                part = target.Character:FindFirstChild("HumanoidRootPart") -- torso
-            end
-
-            if part then
-                local targetPos = part.Position
-                local camPos = Camera.CFrame.Position
-                local newCF = CFrame.new(camPos, targetPos)
-                -- Smoothly lerp camera orientation towards target
-                Camera.CFrame = Camera.CFrame:Lerp(newCF, math.clamp(Smoothness, 0, 1))
-            end
-        end
-    end
-end)
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-local le = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/refs/heads/noiryy/Limb_By_Noir"))()
-le.LISTEN_FOR_INPUT = false
-
-local limbs = {}
-
-local limbExtenderData = getgenv().limbExtenderData
-
-local TabL = Window:CreateTab("Limb", "scale-3d")
-
--- function tạo option
-local function createOption(params)
-    local methodName = 'Create' .. params.method  
-    local method = params.tab[methodName]
-    
-    if type(method) == 'function' then
-        method(params.tab, {
-            Name = params.name,
-            SectionParent = params.section,
-            CurrentValue = params.value,
-            Flag = params.flag,
-            Options = params.options,
-            CurrentOption = params.currentOption,
-            MultipleOptions = params.multipleOptions,
-            Range = params.range,
-            Color = params.color,
-            Increment = params.increment,
-            Callback = function(Value)
-                if params.multipleOptions == false then
-                    Value = Value[1]
-                end
-                le[params.flag] = Value
-            end,
-        })
-    else
-        warn("Method " .. methodName .. " not found in params.tab")
-    end
-end
-
--- Toggle chính
-local ModifyLimbs = TabL:CreateToggle({
-    Name = "Modify Limbs",
-    CurrentValue = false,
-    Flag = "ModifyLimbs",
-    Callback = function(Value)
-        le.toggleState(Value)
+PacksTab:CreateButton({
+    Name = "Korblox",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Korblox.lua"))()
     end,
 })
 
-TabL:CreateDivider()
-
-local UseHighlights = TabL:CreateToggle({
-    Name = "Use Highlights",
-    CurrentValue = le.USE_HIGHLIGHT,
-    Flag = "USE_HIGHLIGHT",
-    Callback = function(Value)
-        le.USE_HIGHLIGHT = Value
+PacksTab:CreateButton({
+    Name = "Headless",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Headless.lua"))()
     end,
 })
 
-TabL:CreateDivider()
+PacksTab:CreateSection("FE & just use for R15")
 
--- Gộp Settings + Highlights chung vào TabL
-local toggleSettings = {
-    {
-        method = "Toggle",
-        name = "Team Check",
-        flag = "TEAM_CHECK",
-        tab = TabL,
-        value = le.TEAM_CHECK,
-    },
-    {
-        method = "Toggle",
-        name = "ForceField Check",
-        flag = "FORCEFIELD_CHECK",
-        tab = TabL,
-        value = le.FORCEFIELD_CHECK,
-    },
-    {
-        method = "Toggle",
-        name = "Limb Collisions",
-        flag = "LIMB_CAN_COLLIDE",
-        tab = TabL,
-        value = le.LIMB_CAN_COLLIDE,
-        createDivider = true,
-    },
-    {
-        method = "Slider",
-        name = "Limb Transparency",
-        flag = "LIMB_TRANSPARENCY",
-        tab = TabL,
-        range = {0, 1},
-        increment = 0.1,
-        value = le.LIMB_TRANSPARENCY,
-    },
-    {
-        method = "Slider",
-        name = "Limb Size",
-        flag = "LIMB_SIZE",
-        tab = TabL,
-        range = {5, 50},
-        increment = 0.1,
-        value = le.LIMB_SIZE,
-        createDivider = true,
-    },
-    {
-        method = "Dropdown",
-        name = "Depth Mode",
-        flag = "DEPTH_MODE",
-        options = {"Occluded","AlwaysOnTop"},
-        currentOption = {le.DEPTH_MODE},
-        multipleOptions = false,
-        tab = TabL,
-        createDivider = true,
-    },
-}
-
-for _, setting in pairs(toggleSettings) do
-    createOption(setting)
-    if setting.createDivider then
-        TabL:CreateDivider()
-    end
-end
-
--- Dropdown chọn Limb
-local TargetLimb = TabL:CreateDropdown({
-   Name = "Target Limb",
-   Options = {},
-   CurrentOption = {le.TARGET_LIMB},
-   MultipleOptions = false,
-   Flag = "TARGET_LIMB",
-   Callback = function(Options)
-		le.TARGET_LIMB = Options[1]
-   end,
+PacksTab:CreateButton({
+    Name = "Ninja",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Ninja.lua"))()
+    end,
 })
 
--- Đổi Theme
-TabL:CreateDropdown({
-   Name = "Current Theme",
-   Options = {"Default", "AmberGlow", "Amethyst", "Bloom", "DarkBlue", "Green", "Light", "Ocean", "Serenity"},
-   CurrentOption = {"Default"},
-   MultipleOptions = false,
-   Flag = "CurrentTheme",
-   Callback = function(Options)
-		Window.ModifyTheme(Options[1])
-   end,
+PacksTab:CreateButton({
+    Name = "Robot",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Robot.lua"))()
+    end,
 })
 
-Rayfield:LoadConfiguration()
+PacksTab:CreateButton({
+    Name = "Levitate",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Levitate.lua"))()
+    end,
+})
 
--- Cập nhật list Limb
-local function characterAdded(Character)
-    local function onChildChanged(child)
-        if not child:IsA("BasePart") then return end
-        if not table.find(limbs, child.Name) then
-            table.insert(limbs, child.Name)
-            table.sort(limbs)
-            TargetLimb:Refresh(limbs)
-        end
-    end
+PacksTab:CreateButton({
+    Name = "Mage",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Mage.lua"))()
+    end,
+})
 
-    Character.ChildAdded:Connect(onChildChanged)
+PacksTab:CreateButton({
+    Name = "Stylish",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Stylish.lua"))()
+    end,
+})
 
-	for _, child in ipairs(Character:GetChildren()) do
-		onChildChanged(child)
-	end
-end
+PacksTab:CreateButton({
+    Name = "Hero",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Hero.lua"))()
+    end,
+})
 
-LocalPlayer.CharacterAdded:Connect(characterAdded)
-if LocalPlayer.Character then
-    characterAdded(LocalPlayer.Character)
-end
+PacksTab:CreateButton({
+    Name = "Astronaut",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Astronaut.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Bubbly",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Bubbly.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Cartoony",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Cartoony.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Elder",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Elder.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Ghost",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Ghost.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Knight",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Knight.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Vampire",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Vampire.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Werewolf",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Werewolf.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Zombie",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Zombie.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Oldschool",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Oldschool.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Bold",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Bold.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Adidas",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Adidas.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Adidas2",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Adidas2.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Catwalk",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Catwalk.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Walmart",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Walmart.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Wicked",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Wicked.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "NFL",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/NFL.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Pirate",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Pirate.lua"))()
+    end,
+})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
