@@ -1260,13 +1260,6 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "PvP by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirPvP.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "Wallhop",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script"))()
@@ -1478,6 +1471,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "c00lkidd GUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelo-Gitland/c00lkidd-Gui-V1-By-Lua-land/refs/heads/main/c00lkidd%20Gui%20V1%20By%20Lua%20Land"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Altair Script Hub",
     Callback = function()
         loadstring(game:HttpGet("https://pastefy.app/MxnvA12M/raw"))()
@@ -1610,9 +1610,7 @@ ScriptsTab:CreateButton({
 
 ScriptsTab:CreateLabel("(E) to active")
 
-ScriptsTab:CreateLabel("freezes any npc near u for 8s")
-
-ScriptsTab:CreateLabel("cooldown 10s")
+ScriptsTab:CreateLabel("time:8s CD:10s")
 
 ScriptsTab:CreateButton({
     Name = "Tap to TP",
@@ -1701,13 +1699,6 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "tsb by EBHUBR (key is: PLSDONATE!)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/r3k33551-bot/Acortador-de-scripts/refs/heads/main/EBHUBR%20V7.txt"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "AK Gaming Ez Hub",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
@@ -1790,6 +1781,180 @@ ScriptsTab:CreateButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Iliankytb/Iliankytb/main/NewBestDoorsScriptIliankytb"))()
     end,
 })
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local le = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/refs/heads/noiryy/Limb_By_Noir"))()
+le.LISTEN_FOR_INPUT = false
+
+local limbs = {}
+local limbExtenderData = getgenv().limbExtenderData
+
+local TabL = Window:CreateTab("Limbs", "scale-3d")
+
+-- function tạo option
+local function createOption(params)
+    local methodName = 'Create' .. params.method  
+    local method = params.tab[methodName]
+    
+    if type(method) == 'function' then
+        method(params.tab, {
+            Name = params.name,
+            SectionParent = params.section,
+            CurrentValue = params.value,
+            Flag = params.flag,
+            Options = params.options,
+            CurrentOption = params.currentOption,
+            MultipleOptions = params.multipleOptions,
+            Range = params.range,
+            Color = params.color,
+            Increment = params.increment,
+            Callback = function(Value)
+                if params.multipleOptions == false then
+                    Value = Value[1]
+                end
+                le[params.flag] = Value
+            end,
+        })
+    else
+        warn("Method " .. methodName .. " not found in params.tab")
+    end
+end
+
+-- Toggle chính
+local ModifyLimbs = TabL:CreateToggle({
+    Name = "Modify Limbs",
+    CurrentValue = false,
+    Flag = "ModifyLimbs",
+    Callback = function(Value)
+        le.toggleState(Value)
+    end,
+})
+
+TabL:CreateDivider()
+
+local UseHighlights = TabL:CreateToggle({
+    Name = "Use Highlights",
+    CurrentValue = le.USE_HIGHLIGHT,
+    Flag = "USE_HIGHLIGHT",
+    Callback = function(Value)
+        le.USE_HIGHLIGHT = Value
+    end,
+})
+
+TabL:CreateDivider()
+
+-- Gộp Settings + Highlights chung vào TabL
+local toggleSettings = {
+    {
+        method = "Toggle",
+        name = "Team Check",
+        flag = "TEAM_CHECK",
+        tab = TabL,
+        value = le.TEAM_CHECK,
+    },
+    {
+        method = "Toggle",
+        name = "ForceField Check",
+        flag = "FORCEFIELD_CHECK",
+        tab = TabL,
+        value = le.FORCEFIELD_CHECK,
+    },
+    {
+        method = "Toggle",
+        name = "Limb Collisions",
+        flag = "LIMB_CAN_COLLIDE",
+        tab = TabL,
+        value = le.LIMB_CAN_COLLIDE,
+        createDivider = true,
+    },
+    {
+        method = "Slider",
+        name = "Limb Transparency",
+        flag = "LIMB_TRANSPARENCY",
+        tab = TabL,
+        range = {0, 1},
+        increment = 0.1,
+        value = le.LIMB_TRANSPARENCY,
+    },
+    {
+        method = "Slider",
+        name = "Limb Size",
+        flag = "LIMB_SIZE",
+        tab = TabL,
+        range = {5, 50},
+        increment = 0.1,
+        value = le.LIMB_SIZE,
+        createDivider = true,
+    },
+    {
+        method = "Dropdown",
+        name = "Depth Mode",
+        flag = "DEPTH_MODE",
+        options = {"Occluded","AlwaysOnTop"},
+        currentOption = {le.DEPTH_MODE},
+        multipleOptions = false,
+        tab = TabL,
+        createDivider = true,
+    },
+}
+
+for _, setting in pairs(toggleSettings) do
+    createOption(setting)
+    if setting.createDivider then
+        TabL:CreateDivider()
+    end
+end
+
+-- Dropdown chọn Limb
+local TargetLimb = TabL:CreateDropdown({
+   Name = "Target Limb",
+   Options = {},
+   CurrentOption = {le.TARGET_LIMB},
+   MultipleOptions = false,
+   Flag = "TARGET_LIMB",
+   Callback = function(Options)
+		le.TARGET_LIMB = Options[1]
+   end,
+})
+
+-- Đổi Theme
+TabL:CreateDropdown({
+   Name = "Current Theme",
+   Options = {"Default", "AmberGlow", "Amethyst", "Bloom", "DarkBlue", "Green", "Light", "Ocean", "Serenity"},
+   CurrentOption = {"Default"},
+   MultipleOptions = false,
+   Flag = "CurrentTheme",
+   Callback = function(Options)
+		Window.ModifyTheme(Options[1])
+   end,
+})
+
+Rayfield:LoadConfiguration()
+
+-- Cập nhật list Limb
+local function characterAdded(Character)
+    local function onChildChanged(child)
+        if not child:IsA("BasePart") then return end
+        if not table.find(limbs, child.Name) then
+            table.insert(limbs, child.Name)
+            table.sort(limbs)
+            TargetLimb:Refresh(limbs)
+        end
+    end
+
+    Character.ChildAdded:Connect(onChildChanged)
+
+	for _, child in ipairs(Character:GetChildren()) do
+		onChildChanged(child)
+	end
+end
+
+LocalPlayer.CharacterAdded:Connect(characterAdded)
+if LocalPlayer.Character then
+    characterAdded(LocalPlayer.Character)
+end
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
