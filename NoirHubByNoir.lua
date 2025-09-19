@@ -1793,6 +1793,7 @@ local TweenService = game:GetService("TweenService")
 local AimbotEnabled = false
 local TeamCheck = true
 local WallCheck = true
+local DeathCheck = true -- ✅ mới: bật/tắt dead check
 local FOVRadius = 100
 local FOVColor = Color3.fromRGB(0, 255, 0)
 
@@ -1858,6 +1859,15 @@ Taba:CreateToggle({
     end
 })
 
+-- ✅ Toggle mới: Death/Dead check
+Taba:CreateToggle({
+    Name = "Death Check",
+    CurrentValue = true,
+    Callback = function(value)
+        DeathCheck = value
+    end
+})
+
 Taba:CreateSlider({
     Name = "Circle FOV",
     Range = {50, 300},
@@ -1899,6 +1909,15 @@ local function GetClosestTarget()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+
+            -- Dead check: nếu bật DeathCheck thì bỏ qua player không có Humanoid hoặc Health <= 0
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if DeathCheck then
+                if not humanoid or humanoid.Health <= 0 then
+                    continue
+                end
+            end
+
             if not (TeamCheck and player.Team == LocalPlayer.Team) then
                 local targetPart = player.Character:FindFirstChild("HumanoidRootPart")
                 if AimPart == "Head" and player.Character:FindFirstChild("Head") then
