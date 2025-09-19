@@ -1820,9 +1820,9 @@ local UICorner = Instance.new("UICorner", FOVCircle)
 UICorner.CornerRadius = UDim.new(1, 0)
 
 -- Main Tab
-local Tab = Window:CreateTab("Aimbot", "target")
+local TabL = Window:CreateTab("Aim & Limb", "target")
 
-Tab:CreateToggle({
+TabL:CreateToggle({
 	Name = "Active Aimbot",
 	CurrentValue = false,
 	Callback = function(value)
@@ -1830,7 +1830,7 @@ Tab:CreateToggle({
 	end
 })
 
-Tab:CreateToggle({
+TabL:CreateToggle({
 	Name = "Show FOV Circle",
 	CurrentValue = false,
 	Callback = function(value)
@@ -1838,7 +1838,7 @@ Tab:CreateToggle({
 	end
 })
 
-Tab:CreateToggle({
+TabL:CreateToggle({
 	Name = "Team Check",
 	CurrentValue = true,
 	Callback = function(value)
@@ -1846,7 +1846,7 @@ Tab:CreateToggle({
 	end
 })
 
-Tab:CreateToggle({
+TabL:CreateToggle({
 	Name = "Wall Check",
 	CurrentValue = true,
 	Callback = function(value)
@@ -1854,7 +1854,7 @@ Tab:CreateToggle({
 	end
 })
 
-Tab:CreateSlider({
+TabL:CreateSlider({
 	Name = "Circle FOV",
 	Range = {50, 300},
 	Increment = 5,
@@ -1865,7 +1865,7 @@ Tab:CreateSlider({
 	end
 })
 
-Tab:CreateSlider({
+TabL:CreateSlider({
 	Name = "Smooth",
 	Range = {0, 1},
 	Increment = 0.05,
@@ -1876,7 +1876,7 @@ Tab:CreateSlider({
 })
 
 -- 🔹 Dropdown chọn part để aim
-Tab:CreateDropdown({
+TabL:CreateDropdown({
 	Name = "Aim Part",
 	Options = {"Head", "Torso"},
 	CurrentOption = "Head",
@@ -1953,6 +1953,8 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+TabL:CreateDivider()
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
@@ -1961,8 +1963,6 @@ le.LISTEN_FOR_INPUT = false
 
 local limbs = {}
 local limbExtenderData = getgenv().limbExtenderData
-
-local TabL = Window:CreateTab("Limbs", "scale-3d")
 
 -- function tạo option
 local function createOption(params)
