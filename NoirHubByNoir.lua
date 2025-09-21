@@ -1509,6 +1509,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "FE Fling GUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_fling"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Reset UI by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetGUI"))()
@@ -1844,6 +1851,13 @@ ScriptsTab:CreateButton({
     Name = "Car Drift [Recommend for R6]",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Cat",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/Y1MkBRn3"))()
     end,
 })
 
@@ -2284,6 +2298,45 @@ RunService.RenderStepped:Connect(function()
             local hrp = getChar(t):FindFirstChild("HumanoidRootPart") or getChar(t):FindFirstChild("Head")
             if hrp then
                 Camera.CFrame = CFrame.new(Camera.CFrame.Position, hrp.Position)
+            end
+        end
+    end
+end)
+
+--fling
+local flingTarget = false
+
+Tab4:CreateToggle({
+    Name = "Fling player",
+    CurrentValue = false,
+    Callback = function(v)
+        flingTarget = v
+        if not v and getChar(LocalPlayer) then
+            local hrp = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.Velocity = Vector3.zero
+                local bv = hrp:FindFirstChild("FlingVelocity")
+                if bv then bv:Destroy() end
+            end
+        end
+    end
+})
+
+RunService.Heartbeat:Connect(function()
+    if flingTarget then
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+            if hrp1 and hrp2 then
+                -- Gắn vào gần target
+                hrp1.CFrame = hrp2.CFrame * CFrame.new(0,2,0)
+                -- Thêm lực để fling
+                local bv = hrp1:FindFirstChild("FlingVelocity") or Instance.new("BodyVelocity")
+                bv.Name = "FlingVelocity"
+                bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                bv.Velocity = Vector3.new(200,200,200) -- chỉnh tốc độ fling ở đây
+                bv.Parent = hrp1
             end
         end
     end
