@@ -267,33 +267,6 @@ PlayerTab:CreateButton({
 
 PlayerTab:CreateSection("Funny Tools")
 
---spin
-PlayerTab:CreateSlider({
-    Name = "Spin Speed",
-    Range = {1,50},
-    Increment = 1,
-    CurrentValue = 5,
-    Callback = function(v)
-        spinSpeed = v
-    end
-})
-RunService.RenderStepped:Connect(function()
-    if spinning and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(spinSpeed), 0)
-    end
-end)
-
---active spin
-local spinning = false
-local spinSpeed = 5
-PlayerTab:CreateToggle({
-    Name = "Spin",
-    CurrentValue = false,
-    Callback = function(v)
-        spinning = v
-    end
-})
-
 PlayerTab:CreateToggle({
     Name = "Sit",
     CurrentValue = false,
@@ -305,36 +278,6 @@ PlayerTab:CreateToggle({
                 LocalPlayer.Character.Humanoid.Sit = false
                 LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
             end
-        end
-    end
-})
-
---gravity
-PlayerTab:CreateSlider({
-    Name = "Gravity",
-    Range = {0, 500},
-    Increment = 1,
-    CurrentValue = math.floor(workspace.Gravity),
-    Callback = function(v)
-        customGravity = v
-        if gravityToggle then
-            workspace.Gravity = v
-        end
-    end
-})
-
---toggle gravity
-local gravityToggle = false
-local customGravity = workspace.Gravity
-PlayerTab:CreateToggle({
-    Name = "Gravity Toggle",
-    CurrentValue = false,
-    Callback = function(v)
-        gravityToggle = v
-        if v then
-            workspace.Gravity = customGravity
-        else
-            workspace.Gravity = 196.2
         end
     end
 })
