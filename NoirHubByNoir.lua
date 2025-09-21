@@ -6,9 +6,8 @@ local Window = Rayfield:CreateWindow({
     LoadingSubtitle = "Script By Noir",
     ConfigurationSaving = {
         Enabled = false,
-    }
-    TabsScrolling = true,
-})
+		}
+	})
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
