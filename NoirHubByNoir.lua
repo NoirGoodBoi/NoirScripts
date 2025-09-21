@@ -1756,13 +1756,6 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Invincible Fly",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "FE Wally West [Mobile]",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/zNHefpgc"))()
@@ -1801,6 +1794,20 @@ ScriptsTab:CreateButton({
     Name = "FE Cat",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/Y1MkBRn3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invisible",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invisible"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invincible Fly",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
     end,
 })
 
