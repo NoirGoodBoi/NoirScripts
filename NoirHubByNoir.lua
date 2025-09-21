@@ -7,6 +7,7 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = {
         Enabled = false,
     }
+    TabsScrolling = true,
 })
 
 local Players = game:GetService("Players")
