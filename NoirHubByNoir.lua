@@ -6,8 +6,8 @@ local Window = Rayfield:CreateWindow({
     LoadingSubtitle = "Script By Noir",
     ConfigurationSaving = {
         Enabled = false,
-		}
-	})
+    }
+})
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -1617,6 +1617,13 @@ ScriptsTab:CreateButton({
     Name = "Altair Script Hub",
     Callback = function()
         loadstring(game:HttpGet("https://pastefy.app/MxnvA12M/raw"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "n0tGUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/Cz3xbk8h"))()
     end,
 })
 
