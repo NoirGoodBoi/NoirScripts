@@ -447,6 +447,49 @@ end
 end
 })
 
+--Auto Jump
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+local autoJumpEnabled = false
+local humanoid
+local jumpConnection
+
+local function getHumanoid()
+    local char = player.Character or player.CharacterAdded:Wait()
+    return char:WaitForChild("Humanoid")
+end
+
+humanoid = getHumanoid()
+player.CharacterAdded:Connect(function(char)
+    humanoid = char:WaitForChild("Humanoid")
+end)
+
+local function setAutoJump(state)
+    autoJumpEnabled = state
+    if autoJumpEnabled then
+        jumpConnection = RunService.RenderStepped:Connect(function()
+            if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+                humanoid.Jump = true
+            end
+        end)
+    else
+        if jumpConnection then
+            jumpConnection:Disconnect()
+            jumpConnection = nil
+        end
+    end
+end
+
+PlayerTab:CreateToggle({
+    Name = "Auto Jump",
+    CurrentValue = false,
+    Callback = function(value)
+        setAutoJump(value)
+    end
+})
+
 -- Vẽ tâm ảo 
 local crosshair = Drawing.new("Circle")
 crosshair.Visible = false
