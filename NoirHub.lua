@@ -490,63 +490,29 @@ PlayerTab:CreateToggle({
     end
 })
 
--- Crosshair
+-- Vẽ tâm ảo
 local crosshair = Drawing.new("Circle")
 crosshair.Visible = false
 crosshair.Color = Color3.fromRGB(255, 255, 255)
 crosshair.Thickness = 1
-crosshair.Radius = 3
+crosshair.Radius = 2
 crosshair.Filled = true
+crosshair.Position = workspace.CurrentCamera.ViewportSize / 2
 
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Camera = workspace.CurrentCamera
-
--- cập nhật vị trí crosshair
-RunService.RenderStepped:Connect(function()
-	if crosshair.Visible then
-		crosshair.Position = Camera.ViewportSize / 2
-	end
+-- Cập nhật vị trí khi đổi độ phân giải
+game:GetService("RunService").RenderStepped:Connect(function()
+crosshair.Position = workspace.CurrentCamera.ViewportSize / 2
 end)
 
--- biến để kiểm tra đang bật shiftlock giả hay không
-local shiftlockEnabled = false
-
--- Toggle trong Rayfield
+-- Toggle Rayfield
 PlayerTab:CreateToggle({
-	Name = "Crosshair (Shiftlock style)",
-	CurrentValue = false,
-	Flag = "CrosshairToggle",
-	Callback = function(Value)
-		shiftlockEnabled = Value
-		crosshair.Visible = Value
-
-		if Value then
-			UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-			UserInputService.MouseIconEnabled = false
-		else
-			UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-			UserInputService.MouseIconEnabled = true
-		end
-	end,
+Name = "Crosshair",
+CurrentValue = false,
+Flag = "CrosshairToggle",
+Callback = function(Value)
+crosshair.Visible = Value
+end,
 })
-
--- Thêm phím SHIFT để bật/tắt nhanh
-UserInputService.InputBegan:Connect(function(input, gpe)
-	if gpe then return end
-	if input.KeyCode == Enum.KeyCode.LeftShift then
-		shiftlockEnabled = not shiftlockEnabled
-		crosshair.Visible = shiftlockEnabled
-
-		if shiftlockEnabled then
-			UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-			UserInputService.MouseIconEnabled = false
-		else
-			UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-			UserInputService.MouseIconEnabled = true
-		end
-	end
-end)
 
 --FOV
 PlayerTab:CreateSlider({
