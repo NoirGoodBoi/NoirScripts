@@ -490,7 +490,7 @@ PlayerTab:CreateToggle({
     end
 })
 
--- Vẽ tâm ảo 
+-- Vẽ tâm ảo
 local crosshair = Drawing.new("Circle")
 crosshair.Visible = false
 crosshair.Color = Color3.fromRGB(255, 255, 255)
@@ -499,9 +499,14 @@ crosshair.Radius = 2
 crosshair.Filled = true
 crosshair.Position = workspace.CurrentCamera.ViewportSize / 2
 
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
 -- Cập nhật vị trí khi đổi độ phân giải
-game:GetService("RunService").RenderStepped:Connect(function()
-    crosshair.Position = workspace.CurrentCamera.ViewportSize / 2
+RunService.RenderStepped:Connect(function()
+    if crosshair.Visible then
+        crosshair.Position = workspace.CurrentCamera.ViewportSize / 2
+    end
 end)
 
 -- Toggle Rayfield
@@ -511,6 +516,16 @@ PlayerTab:CreateToggle({
     Flag = "CrosshairToggle",
     Callback = function(Value)
         crosshair.Visible = Value
+
+        if Value then
+            -- Bật kiểu shiftlock
+            UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+            UserInputService.MouseIconEnabled = false
+        else
+            -- Tắt shiftlock
+            UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+            UserInputService.MouseIconEnabled = true
+        end
     end,
 })
 
