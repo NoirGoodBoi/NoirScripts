@@ -1848,6 +1848,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "FE NPC Controller",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/dacXGb2W"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "FE Invisible",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invisible"))()
