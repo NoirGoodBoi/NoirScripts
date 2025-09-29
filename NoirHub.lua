@@ -1678,6 +1678,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Polara SS Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/ Polara_SS_Script"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "KRware Hub",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/KRWareHub/KRWare/refs/heads/main/KRWare%20Hub%20Loader.lua"))()
