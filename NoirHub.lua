@@ -1685,6 +1685,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Polara SS Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/project_sonic"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "KRware Hub",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/KRWareHub/KRWare/refs/heads/main/KRWare%20Hub%20Loader.lua"))()
@@ -1886,6 +1893,13 @@ ScriptsTab:CreateButton({
     Name = "F3X Panel (building script)",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/SkireScripts/F3X-Panel/main/Main.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Server VIP Free",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithExility/ZenikazeHub/refs/heads/main/ZenikazeV3.1"))()
     end,
 })
 
