@@ -1813,9 +1813,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Invincible Fly",
+    Name = "FE Invincible Fly [R6]",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invincible Fly [R15]",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v2"))()
     end,
 })
 
