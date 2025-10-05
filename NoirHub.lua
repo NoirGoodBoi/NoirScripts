@@ -1671,27 +1671,6 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Solara Hub",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/samuraa1/Solara-Hub/refs/heads/main/SH.lua'))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Polara SS Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/ Polara_SS_Script"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Polara SS Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/project_sonic"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "KRware Hub",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/KRWareHub/KRWare/refs/heads/main/KRWare%20Hub%20Loader.lua"))()
@@ -1736,13 +1715,6 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateSection("Funny FE Scripts :))")
 
 ScriptsTab:CreateButton({
-    Name = "Stalkie (key is: pizza)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Stalkie"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "Inventory Viewer by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
@@ -1759,7 +1731,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "FE Telekinesis V5",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/ FE_Telekinesis"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_Telekinesis"))()
     end,
 })
 
@@ -1776,41 +1748,6 @@ ScriptsTab:CreateButton({
         loadstring(game:HttpGet("https://pastebin.com/raw/p4QY0AsL"))()
     end,
 })
-
-ScriptsTab:CreateButton({
-    Name = "FE Sharingan [for mobile]",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Sharingan [only R6]",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
-    end,
-})
-
-ScriptsTab:CreateLabel("(E)Fireball Jutsu")
-
-ScriptsTab:CreateLabel("(Q)Sharingan (copy movement)")
-
-ScriptsTab:CreateLabel("(R)Kamui")
-
-ScriptsTab:CreateLabel("(F)Amaterasu")
-
-ScriptsTab:CreateLabel("(P)Pose")
-
-ScriptsTab:CreateButton({
-    Name = "Conqueror's Haki",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/eALfcADv"))()
-    end,
-})
-
-ScriptsTab:CreateLabel("(E) to active")
-
-ScriptsTab:CreateLabel("time:8s CD:10s")
 
 ScriptsTab:CreateButton({
     Name = "Tap to TP",
@@ -1881,6 +1818,41 @@ ScriptsTab:CreateButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
     end,
 })
+
+ScriptsTab:CreateButton({
+    Name = "Conqueror's Haki",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/eALfcADv"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("(E) to active")
+
+ScriptsTab:CreateLabel("time:8s CD:10s")
+
+ScriptsTab:CreateButton({
+    Name = "FE Sharingan [for mobile]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Sharingan [only R6]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("(E)Fireball Jutsu")
+
+ScriptsTab:CreateLabel("(Q)Sharingan (copy movement)")
+
+ScriptsTab:CreateLabel("(R)Kamui")
+
+ScriptsTab:CreateLabel("(F)Amaterasu")
+
+ScriptsTab:CreateLabel("(P)Pose")
 
 ScriptsTab:CreateButton({
     Name = "Replication UI",
