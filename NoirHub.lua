@@ -490,6 +490,13 @@ PlayerTab:CreateToggle({
     end
 })
 
+PlayerTab:CreateToggle({
+    Name = "ShiftLock",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/shiftlock"))()
+    end,
+})
+
 -- Vẽ tâm ảo
 local crosshair = Drawing.new("Circle")
 crosshair.Visible = false
@@ -1876,9 +1883,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Server VIP Free",
+    Name = "Server VIP I",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithExility/ZenikazeHub/refs/heads/main/ZenikazeV3.1"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Server VIP II",
+    Callback = function()
+        loadstring(game:HttpGet("https://gist.githubusercontent.com/Tesker-103/ed48b3ae8120b0c040584b661cbda063/raw/210408b3f107dc740a4c9b832bfa647f92aa25d1/FreePrivateServerGUI"))()
     end,
 })
 
