@@ -490,7 +490,7 @@ PlayerTab:CreateToggle({
     end
 })
 
-PlayerTab:CreateToggle({
+PlayerTab:CreateButton({
     Name = "ShiftLock",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/shiftlock"))()
@@ -1650,9 +1650,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Ghost Hub",
+    Name = "Yunas FE Script Hub",
     Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/GhostHub'))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yunus154524/YunusLo1545-HUB/refs/heads/main/YunusLo1545%20HUB"))()
     end,
 })
 
@@ -1664,16 +1664,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Altair Script Hub",
+    Name = "n0tGUI",
     Callback = function()
-        loadstring(game:HttpGet("https://pastefy.app/MxnvA12M/raw"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/Cz3xbk8h"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "n0tGUI",
+    Name = "Rob Visual Script Hub",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/Cz3xbk8h"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/KSvbtcPE"))()
     end,
 })
 
