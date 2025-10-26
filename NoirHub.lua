@@ -1425,9 +1425,16 @@ local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 ScriptsTab:CreateSection("Funny Scripts")
 
 ScriptsTab:CreateButton({
-    Name = "Fly",
+    Name = "Vehicle Fly",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Vehicle%20Fly%20Gui"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Fly GUI V3",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/fly_gui_v3"))()
     end,
 })
 
