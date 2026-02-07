@@ -2058,6 +2058,22 @@ PacksTab:CreateButton({
     end,
 })
 
+                Camera.CameraSubject = hum
+            end
+        end
+    end
+end)
+
+local aimingTarget = false
+
+Tab4:CreateToggle({
+    Name = "Aim to player",
+    CurrentValue = false,
+    Callback = function(v)
+        aimingTarget = v
+    end
+})
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -2068,6 +2084,14 @@ local Tab4 = Window:CreateTab("People", "users")
 local currentTarget = nil
 local loopTeleport = false
 local watching = false
+local aimingTarget = false
+local aimStrength = 0.35
+
+-- orbit variables
+local orbiting = false
+local orbitRadius = 10
+local orbitSpeed = 30
+local orbitAngle = 0
 
 local playerDropdown = Tab4:CreateDropdown({
     Name = "Player List",
@@ -2159,7 +2183,7 @@ Tab4:CreateToggle({
 
 RunService.RenderStepped:Connect(function()
     if watching then
-    local t = getTarget()
+        local t = getTarget()
         if t and getChar(t) then
             local hum = getChar(t):FindFirstChildOfClass("Humanoid")
             if hum then
@@ -2169,8 +2193,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-local aimingTarget = false
-
 Tab4:CreateToggle({
     Name = "Aim to player",
     CurrentValue = false,
@@ -2179,50 +2201,77 @@ Tab4:CreateToggle({
     end
 })
 
+Tab4:CreateSlider({
+    Name = "Aim strength",
+    Range = {0.1, 1},
+    Increment = 0.05,
+    CurrentValue = 0.35,
+    Callback = function(v)
+        aimStrength = v
+    end
+})
+
 RunService.RenderStepped:Connect(function()
     if aimingTarget then
         local t = getTarget()
         if t and getChar(t) then
-            local hrp = getChar(t):FindFirstChild("HumanoidRootPart") or getChar(t):FindFirstChild("Head")
+            local hrp = getChar(t):FindFirstChild("HumanoidRootPart")
             if hrp then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, hrp.Position)
+                local predictedPos = hrp.Position + (hrp.Velocity * 0.1)
+                local targetCF = CFrame.new(Camera.CFrame.Position, predictedPos)
+                Camera.CFrame = Camera.CFrame:Lerp(targetCF, aimStrength)
             end
         end
     end
 end)
 
---fling
-local flingTarget = false
-
+-- ORBIT UI
 Tab4:CreateToggle({
-    Name = "Fling player",
+    Name = "Orbit player",
     CurrentValue = false,
     Callback = function(v)
-        flingTarget = v
-        if not v and getChar(LocalPlayer) then
-            local hrp = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.Velocity = Vector3.zero
-                local bv = hrp:FindFirstChild("FlingVelocity")
-                if bv then bv:Destroy() end
-            end
-        end
+        orbiting = v
     end
 })
 
-RunService.Heartbeat:Connect(function()
-    if flingTarget then
+Tab4:CreateSlider({
+    Name = "Orbit radius",
+    Range = {1, 100},
+    Increment = 1,
+    CurrentValue = 10,
+    Callback = function(v)
+        orbitRadius = v
+    end
+})
+
+Tab4:CreateSlider({
+    Name = "Orbit speed",
+    Range = {16, 100},
+    Increment = 1,
+    CurrentValue = 30,
+    Callback = function(v)
+        orbitSpeed = v
+    end
+})
+
+-- ORBIT LOGIC
+RunService.Heartbeat:Connect(function(dt)
+    if orbiting then
         local t = getTarget()
         if t and getChar(t) and getChar(LocalPlayer) then
             local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
             local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+
             if hrp1 and hrp2 then
-                hrp1.CFrame = hrp2.CFrame * CFrame.new(0,2,0)
-                local bv = hrp1:FindFirstChild("FlingVelocity") or Instance.new("BodyVelocity")
-                bv.Name = "FlingVelocity"
-                bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                bv.Velocity = Vector3.new(200,200,200)
-                bv.Parent = hrp1
+                orbitAngle += orbitSpeed * dt
+
+                local offset = Vector3.new(
+                    math.cos(orbitAngle) * orbitRadius,
+                    0,
+                    math.sin(orbitAngle) * orbitRadius
+                )
+
+                hrp1.CFrame = CFrame.new(hrp2.Position + offset, hrp2.Position)
             end
         end
     end
