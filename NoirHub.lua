@@ -154,8 +154,23 @@ PlayerTab:CreateToggle({
     end
 })
 
---Jumpslider
+--jump
 local jumppower = 50
+local jumpEnabled = false
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+
+local function applyJump()
+    if plr.Character then
+        local hum = plr.Character:FindFirstChild("Humanoid")
+        if hum then
+            hum.UseJumpPower = true
+            hum.JumpPower = jumpEnabled and jumppower or 50
+        end
+    end
+end
+
+-- slider
 PlayerTab:CreateSlider({
     Name = "Power Jump",
     Range = {50, 1000},
@@ -163,37 +178,25 @@ PlayerTab:CreateSlider({
     CurrentValue = 50,
     Callback = function(v)
         jumppower = v
+        applyJump()
     end
 })
 
---InJump
-local jumpLoop = nil
+-- toggle
 PlayerTab:CreateToggle({
     Name = "Increase Power Jump",
     CurrentValue = false,
     Callback = function(state)
-        local plr = game.Players.LocalPlayer
-        if state then
-            jumpLoop = task.spawn(function()
-                while task.wait() do
-                    if not state then break end
-                    if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                        plr.Character.Humanoid.JumpPower = jumppower
-                    end
-                end
-            end)
-        else
-            if jumpLoop then
-                task.cancel(jumpLoop)
-                jumpLoop = nil
-            end
-            if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                plr.Character.Humanoid.JumpPower = 50
-            end
-        end
+        jumpEnabled = state
+        applyJump()
     end
 })
 
+-- giữ sau khi respawn
+plr.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    applyJump()
+end)
 
 --infJump
 local Players = game:GetService("Players")
@@ -2195,7 +2198,7 @@ Tab4:CreateSlider({
 
 Tab4:CreateSlider({
     Name = "Orbit speed",
-    Range = {16, 100},
+    Range = {1, 100},
     Increment = 1,
     CurrentValue = 30,
     Callback = function(v)
