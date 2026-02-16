@@ -1354,225 +1354,6 @@ ScriptsTab:CreateButton({
     end,
 })
 
-ScriptsTab:CreateSection("Funny FE Scripts :))")
-
-ScriptsTab:CreateButton({
-    Name = "Inventory Viewer by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Part Controller GUI by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Part_Controller"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Blackhole",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastefy.app/QH9EnqU3/raw"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Telekinesis V5",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_Telekinesis"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Sandevistan FE (press F)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Sandevistan"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Sandevistan FE v5 (press R)",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/tPh4jS4p"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Emperor Crimson v3.5",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/p4QY0AsL"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Tap to TP",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Tap_to_TP"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Wally West [Mobile]",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/zNHefpgc"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Wally West [For R15]",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/XQZ-official/XQZscripts/refs/heads/main/WallyWest.txt'))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Wally West [for mobile v2]",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Wally-West-Roblox-51462"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Chat Translator GUI",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/dHAK13sf"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "RBG Bubble Chat",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/4M1NrMnc"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Silly Car",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-SILLY-CAR-V1-48227"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Car Drift [Recommend for R6]",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Minecraft Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZynixMoz/SkyeMoz/refs/heads/main/MozCraft/Main"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Cat",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/Y1MkBRn3"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE NPC Controller",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/dacXGb2W"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Invisible",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invisible"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Invincible Fly [R6]",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Invincible Fly [R15]",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v2"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Conqueror's Haki",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/eALfcADv"))()
-    end,
-})
-
-ScriptsTab:CreateLabel("(E) to active")
-
-ScriptsTab:CreateLabel("time:8s CD:10s")
-
-ScriptsTab:CreateButton({
-    Name = "FE Sharingan [for mobile]",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Sharingan [only R6]",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
-    end,
-})
-
-ScriptsTab:CreateLabel("(E)Fireball Jutsu")
-
-ScriptsTab:CreateLabel("(Q)Sharingan (copy movement)")
-
-ScriptsTab:CreateLabel("(R)Kamui")
-
-ScriptsTab:CreateLabel("(F)Amaterasu")
-
-ScriptsTab:CreateLabel("(P)Pose")
-
-ScriptsTab:CreateButton({
-    Name = "Replication UI",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/tMYrf22E"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "F3X Panel (building script)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/SkireScripts/F3X-Panel/main/Main.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Server VIP I",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithExility/ZenikazeHub/refs/heads/main/ZenikazeV3.1"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Server VIP II",
-    Callback = function()
-        loadstring(game:HttpGet("https://gist.githubusercontent.com/Tesker-103/ed48b3ae8120b0c040584b661cbda063/raw/210408b3f107dc740a4c9b832bfa647f92aa25d1/FreePrivateServerGUI"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Server Menu Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/lumpiasallad/Roblox_ServerHop/refs/heads/main/ServerHopScript.lua"))()
-    end,
-})
-
 ScriptsTab:CreateSection("Animation & Emote Scripts")
 
 ScriptsTab:CreateButton({
@@ -1767,6 +1548,190 @@ ScriptsTab:CreateButton({
     Name = "IndexZ Hub",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/IndexZHub/Loader/main/Loader"))()
+    end,
+})
+
+ScriptsTab:CreateSection("Funny FE Scripts :))")
+
+ScriptsTab:CreateButton({
+    Name = "Inventory Viewer by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Part Controller GUI by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Part_Controller"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Telekinesis V5",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_Telekinesis"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Sandevistan FE",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Sandevistan"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Emperor Crimson v3.5",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/p4QY0AsL"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Tap to TP",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Tap_to_TP"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Wally West [Mobile]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zNHefpgc"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Wally West [For R15]",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/XQZ-official/XQZscripts/refs/heads/main/WallyWest.txt'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Wally West [for mobile v2]",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Wally-West-Roblox-51462"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Silly Car",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-SILLY-CAR-V1-48227"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Car Drift [Recommend for R6]",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Cat",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/Y1MkBRn3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE NPC Controller",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/dacXGb2W"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invisible",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invisible"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invincible Fly [R6]",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invincible Fly [R15]",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v2"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Conqueror's Haki",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/eALfcADv"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("(E) to active")
+
+ScriptsTab:CreateLabel("time:8s CD:10s")
+
+ScriptsTab:CreateButton({
+    Name = "FE Sharingan [for mobile]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Sharingan [only R6]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("(E)Fireball Jutsu")
+
+ScriptsTab:CreateLabel("(Q)Sharingan (copy movement)")
+
+ScriptsTab:CreateLabel("(R)Kamui")
+
+ScriptsTab:CreateLabel("(F)Amaterasu")
+
+ScriptsTab:CreateLabel("(P)Pose")
+
+ScriptsTab:CreateButton({
+    Name = "Replication UI",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/tMYrf22E"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "F3X Panel (building script)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SkireScripts/F3X-Panel/main/Main.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Server VIP I",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithExility/ZenikazeHub/refs/heads/main/ZenikazeV3.1"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Server VIP II",
+    Callback = function()
+        loadstring(game:HttpGet("https://gist.githubusercontent.com/Tesker-103/ed48b3ae8120b0c040584b661cbda063/raw/210408b3f107dc740a4c9b832bfa647f92aa25d1/FreePrivateServerGUI"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Server Menu Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/lumpiasallad/Roblox_ServerHop/refs/heads/main/ServerHopScript.lua"))()
     end,
 })
 
@@ -2058,78 +2023,6 @@ PacksTab:CreateButton({
     end,
 })
 
-                Camera.CameraSubject = hum
-            end
-        end
-    end
-end)
-
-local aimingTarget = false
-
-
-local function getChar(p)
-    if not p then return nil end
-    return p.Character
-end
-
-Tab4:CreateButton({
-    Name = "Teleport to player",
-    Callback = function()
-        local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-            if hrp1 and hrp2 then
-                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
-            end
-        end
-    end
-})
-
-Tab4:CreateToggle({
-    Name = "Teleport loop",
-    CurrentValue = false,
-    Callback = function(v)
-        loopTeleport = v
-    end
-})
-
-RunService.Heartbeat:Connect(function()
-    if loopTeleport then
-        local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-            if hrp1 and hrp2 then
-                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
-            end
-        end
-    end
-end)
-
-Tab4:CreateToggle({
-    Name = "Watch player",
-    CurrentValue = false,
-    Callback = function(v)
-        watching = v
-        if not v then
-            Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        end
-    end
-})
-
-RunService.RenderStepped:Connect(function()
-    if watching then
-        local t = getTarget()
-        if t and getChar(t) then
-            local hum = getChar(t):FindFirstChildOfClass("Humanoid")
-            if hum then
-                Camera.CameraSubject = hum
-            end
-        end
-    end
-end)
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -2142,6 +2035,12 @@ local loopTeleport = false
 local watching = false
 local aimingTarget = false
 local aimStrength = 0.35
+
+-- orbit variables
+local orbiting = false
+local orbitRadius = 10
+local orbitSpeed = 30
+local orbitAngle = 0
 
 local playerDropdown = Tab4:CreateDropdown({
     Name = "Player List",
@@ -2267,13 +2166,61 @@ RunService.RenderStepped:Connect(function()
         if t and getChar(t) then
             local hrp = getChar(t):FindFirstChild("HumanoidRootPart")
             if hrp then
-
-                -- predict movement
                 local predictedPos = hrp.Position + (hrp.Velocity * 0.1)
-
                 local targetCF = CFrame.new(Camera.CFrame.Position, predictedPos)
                 Camera.CFrame = Camera.CFrame:Lerp(targetCF, aimStrength)
+            end
+        end
+    end
+end)
 
+-- ORBIT UI
+Tab4:CreateToggle({
+    Name = "Orbit player",
+    CurrentValue = false,
+    Callback = function(v)
+        orbiting = v
+    end
+})
+
+Tab4:CreateSlider({
+    Name = "Orbit radius",
+    Range = {1, 100},
+    Increment = 1,
+    CurrentValue = 10,
+    Callback = function(v)
+        orbitRadius = v
+    end
+})
+
+Tab4:CreateSlider({
+    Name = "Orbit speed",
+    Range = {16, 100},
+    Increment = 1,
+    CurrentValue = 30,
+    Callback = function(v)
+        orbitSpeed = v
+    end
+})
+
+-- ORBIT LOGIC
+RunService.Heartbeat:Connect(function(dt)
+    if orbiting then
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+
+            if hrp1 and hrp2 then
+                orbitAngle += orbitSpeed * dt
+
+                local offset = Vector3.new(
+                    math.cos(orbitAngle) * orbitRadius,
+                    0,
+                    math.sin(orbitAngle) * orbitRadius
+                )
+
+                hrp1.CFrame = CFrame.new(hrp2.Position + offset, hrp2.Position)
             end
         end
     end
