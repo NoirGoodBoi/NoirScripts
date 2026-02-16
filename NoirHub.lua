@@ -2066,13 +2066,69 @@ end)
 
 local aimingTarget = false
 
-Tab4:CreateToggle({
-    Name = "Aim to player",
-    CurrentValue = false,
-    Callback = function(v)
-        aimingTarget = v
+
+local function getChar(p)
+    if not p then return nil end
+    return p.Character
+end
+
+Tab4:CreateButton({
+    Name = "Teleport to player",
+    Callback = function()
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+            if hrp1 and hrp2 then
+                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
+            end
+        end
     end
 })
+
+Tab4:CreateToggle({
+    Name = "Teleport loop",
+    CurrentValue = false,
+    Callback = function(v)
+        loopTeleport = v
+    end
+})
+
+RunService.Heartbeat:Connect(function()
+    if loopTeleport then
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+            if hrp1 and hrp2 then
+                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
+            end
+        end
+    end
+end)
+
+Tab4:CreateToggle({
+    Name = "Watch player",
+    CurrentValue = false,
+    Callback = function(v)
+        watching = v
+        if not v then
+            Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        end
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if watching then
+        local t = getTarget()
+        if t and getChar(t) then
+            local hum = getChar(t):FindFirstChildOfClass("Humanoid")
+            if hum then
+                Camera.CameraSubject = hum
+            end
+        end
+    end
+end)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -2086,12 +2142,6 @@ local loopTeleport = false
 local watching = false
 local aimingTarget = false
 local aimStrength = 0.35
-
--- orbit variables
-local orbiting = false
-local orbitRadius = 10
-local orbitSpeed = 30
-local orbitAngle = 0
 
 local playerDropdown = Tab4:CreateDropdown({
     Name = "Player List",
@@ -2217,61 +2267,13 @@ RunService.RenderStepped:Connect(function()
         if t and getChar(t) then
             local hrp = getChar(t):FindFirstChild("HumanoidRootPart")
             if hrp then
+
+                -- predict movement
                 local predictedPos = hrp.Position + (hrp.Velocity * 0.1)
+
                 local targetCF = CFrame.new(Camera.CFrame.Position, predictedPos)
                 Camera.CFrame = Camera.CFrame:Lerp(targetCF, aimStrength)
-            end
-        end
-    end
-end)
 
--- ORBIT UI
-Tab4:CreateToggle({
-    Name = "Orbit player",
-    CurrentValue = false,
-    Callback = function(v)
-        orbiting = v
-    end
-})
-
-Tab4:CreateSlider({
-    Name = "Orbit radius",
-    Range = {1, 100},
-    Increment = 1,
-    CurrentValue = 10,
-    Callback = function(v)
-        orbitRadius = v
-    end
-})
-
-Tab4:CreateSlider({
-    Name = "Orbit speed",
-    Range = {16, 100},
-    Increment = 1,
-    CurrentValue = 30,
-    Callback = function(v)
-        orbitSpeed = v
-    end
-})
-
--- ORBIT LOGIC
-RunService.Heartbeat:Connect(function(dt)
-    if orbiting then
-        local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-
-            if hrp1 and hrp2 then
-                orbitAngle += orbitSpeed * dt
-
-                local offset = Vector3.new(
-                    math.cos(orbitAngle) * orbitRadius,
-                    0,
-                    math.sin(orbitAngle) * orbitRadius
-                )
-
-                hrp1.CFrame = CFrame.new(hrp2.Position + offset, hrp2.Position)
             end
         end
     end
