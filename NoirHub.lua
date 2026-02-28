@@ -1741,6 +1741,13 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateSection("For Some Game")
 
 ScriptsTab:CreateButton({
+    Name = "Uma Racing",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/UPDATE-1.0-Uma-Racing-Simple-And-Open-Source-63947"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "M1 reset",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/M1Reset.lua"))()
