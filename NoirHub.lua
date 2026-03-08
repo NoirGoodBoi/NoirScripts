@@ -1367,6 +1367,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Black flash Chain (JJS)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ggab2351-stack/Jjs/refs/heads/main/Betterblackflashchain"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Uma Racing",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/UPDATE-1.0-Uma-Racing-Simple-And-Open-Source-63947"))()
