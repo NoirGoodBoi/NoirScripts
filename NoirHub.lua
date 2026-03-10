@@ -1503,9 +1503,17 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FREE UGC EMOTES",
+    Name = "FE Emote GUI",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Free-UGC-Emotes-Script-48649"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sypcerr/scripts/refs/heads/main/c15.lua",true))()
+    end,
+})
+
+
+ScriptsTab:CreateButton({
+    Name = "FE Animation Script Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://kbauu.neocities.org/animation-hub"))()
     end,
 })
 
@@ -1628,6 +1636,14 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Welding Abuse Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/rangell8/Rexys-Welding-Hub/refs/heads/main/script"))()
+    end,
+})
+
+
+ScriptsTab:CreateButton({
     Name = "Rob Visual Script Hub",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/KSvbtcPE"))()
@@ -1686,9 +1702,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Part Controller GUI by Noir",
+    Name = "Wikipedia Tool",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Part_Controller"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/4UMAeFvE"))()
     end,
 })
 
@@ -1728,16 +1744,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Wally West [For R15]",
+    Name = "FE Wally West [For Mobile V2]",
     Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/XQZ-official/XQZscripts/refs/heads/main/WallyWest.txt'))()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Wally-West-Roblox-51462"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Wally West [for mobile v2]",
+    Name = "FE The Flash",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Wally-West-Roblox-51462"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/The_Flash"))()
     end,
 })
 
@@ -1791,17 +1807,6 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Conqueror's Haki",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/eALfcADv"))()
-    end,
-})
-
-ScriptsTab:CreateLabel("(E) to active")
-
-ScriptsTab:CreateLabel("time:8s CD:10s")
-
-ScriptsTab:CreateButton({
     Name = "FE Sharingan [for mobile]",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
@@ -1829,13 +1834,6 @@ ScriptsTab:CreateButton({
     Name = "Replication UI",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/tMYrf22E"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "F3X Panel (building script)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/SkireScripts/F3X-Panel/main/Main.lua"))()
     end,
 })
 
