@@ -1337,9 +1337,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Fling GUI",
+    Name = "Fake Items Script",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_fling"))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/bUEfYpZn"))()
     end,
 })
 
