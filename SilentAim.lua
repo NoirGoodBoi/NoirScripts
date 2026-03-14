@@ -1,158 +1,290 @@
 local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
-local UIS=game:GetService("UserInputService")
+
 local LP=Players.LocalPlayer
 local Camera=workspace.CurrentCamera
 
 local gui=Instance.new("ScreenGui")
-gui.Name="NoirSilentAimUI"
-gui.IgnoreGuiInset=true
 gui.ResetOnSpawn=false
 pcall(function() gui.Parent=gethui() end)
-if not gui.Parent then gui.Parent=LP:WaitForChild("PlayerGui") end
+if not gui.Parent then gui.Parent=LP.PlayerGui end
 
 local frame=Instance.new("Frame")
-frame.Size=UDim2.new(0,220,0,68)
+frame.Size=UDim2.new(0,165,0,75)
 frame.Position=UDim2.new(0,40,0,180)
 frame.BackgroundColor3=Color3.fromRGB(25,25,28)
 frame.BorderSizePixel=0
 frame.Active=true
+frame.Draggable=true
 frame.Parent=gui
 
-local corner=Instance.new("UICorner")
-corner.CornerRadius=UDim.new(0,16)
-corner.Parent=frame
+Instance.new("UICorner",frame).CornerRadius=UDim.new(0,10)
 
 local title=Instance.new("TextLabel")
-title.Size=UDim2.new(1,-20,0,28)
-title.Position=UDim2.new(0,12,0,6)
+title.Size=UDim2.new(1,-25,0,16)
+title.Position=UDim2.new(0,6,0,0)
 title.BackgroundTransparency=1
-title.Text="Silent Aim by Noir"
+title.Text="Silent Aim"
 title.TextColor3=Color3.fromRGB(230,230,235)
-title.TextSize=18
-title.Font=Enum.Font.GothamMedium
+title.Font=Enum.Font.GothamBold
+title.TextSize=12
+title.TextXAlignment=Enum.TextXAlignment.Left
 title.Parent=frame
 
+local minimize=Instance.new("TextButton")
+minimize.Size=UDim2.new(0,18,0,16)
+minimize.Position=UDim2.new(1,-20,0,0)
+minimize.Text="-"
+minimize.BackgroundTransparency=1
+minimize.Font=Enum.Font.GothamBold
+minimize.TextSize=14
+minimize.TextColor3=Color3.fromRGB(240,240,240)
+minimize.Parent=frame
+
+local dropdown=Instance.new("TextButton")
+dropdown.Size=UDim2.new(1,-12,0,18)
+dropdown.Position=UDim2.new(0,6,0,18)
+dropdown.BackgroundColor3=Color3.fromRGB(40,40,45)
+dropdown.Text="Mode : Character"
+dropdown.TextColor3=Color3.fromRGB(240,240,240)
+dropdown.Font=Enum.Font.Gotham
+dropdown.TextSize=11
+dropdown.Parent=frame
+Instance.new("UICorner",dropdown)
+
+local list=Instance.new("Frame")
+list.Size=UDim2.new(1,-12,0,54)
+list.Position=UDim2.new(0,6,0,-54)
+list.BackgroundColor3=Color3.fromRGB(35,35,40)
+list.Visible=false
+list.ZIndex=5
+list.Parent=frame
+Instance.new("UICorner",list)
+
+local function option(text,y)
+
+	local b=Instance.new("TextButton")
+	b.Size=UDim2.new(1,0,0,18)
+	b.Position=UDim2.new(0,0,0,y)
+	b.BackgroundTransparency=1
+	b.Text=text
+	b.TextColor3=Color3.fromRGB(240,240,240)
+	b.Font=Enum.Font.Gotham
+	b.TextSize=11
+	b.ZIndex=6
+	b.Parent=list
+
+	return b
+
+end
+
+local charBtn=option("Character",0)
+local camBtn=option("Camera",18)
+local bothBtn=option("Character + Camera",36)
+
 local toggle=Instance.new("TextButton")
-toggle.Size=UDim2.new(0,120,0,28) 
-toggle.Position=UDim2.new(1,-132,1,-36)
-toggle.BackgroundColor3=Color3.fromRGB(80,80,85)
-toggle.BorderSizePixel=0
+toggle.Size=UDim2.new(1,-9,0,30)
+toggle.Position=UDim2.new(0,4,1,-35)
 toggle.Text="Off"
-toggle.TextColor3=Color3.fromRGB(240,240,240)
-toggle.TextSize=16
 toggle.Font=Enum.Font.GothamBold
+toggle.TextSize=12
+toggle.BackgroundColor3=Color3.fromRGB(80,80,85)
+toggle.TextColor3=Color3.fromRGB(240,240,240)
 toggle.Parent=frame
-
-local toggleCorner=Instance.new("UICorner")
-toggleCorner.CornerRadius=UDim.new(0,10)
-toggleCorner.Parent=toggle
-
-local dragging=false
-local dragStart
-local startPos
-frame.InputBegan:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-		dragging=true
-		dragStart=i.Position
-		startPos=frame.Position
-	end
-end)
-UIS.InputEnded:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-		dragging=false
-	end
-end)
-UIS.InputChanged:Connect(function(i)
-	if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
-		local d=i.Position-dragStart
-		frame.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+d.X,startPos.Y.Scale,startPos.Y.Offset+d.Y)
-	end
-end)
+Instance.new("UICorner",toggle)
 
 local highlight=Instance.new("Highlight")
 highlight.FillTransparency=1
 highlight.OutlineColor=Color3.fromRGB(60,255,120)
-highlight.OutlineTransparency=0
-pcall(function() highlight.Parent=gethui() end)
-if not highlight.Parent then highlight.Parent=gui end
+highlight.Parent=gui
 
 local enabled=false
 local target=nil
-local diedConn=nil
+local aimMode="Character"
+local minimized=false
 
 local function aliveChar(plr)
+
 	local c=plr.Character
 	if not c then return end
-	local hum=c:FindFirstChildWhichIsA("Humanoid")
+
+	local hum=c:FindFirstChildOfClass("Humanoid")
 	local hrp=c:FindFirstChild("HumanoidRootPart")
-	if hum and hrp and hum.Health>0 then return c,hum,hrp end
+
+	if hum and hrp and hum.Health>0 then
+		return c,hum,hrp
+	end
+
 end
 
-local function getNearest()
-	local myChar,myHum,myHRP=aliveChar(LP)
-	if not myChar then return end
-	local best,bd= nil,1e9
-	for _,p in ipairs(Players:GetPlayers()) do
+local function getTarget()
+
+	local center=Vector2.new(
+		Camera.ViewportSize.X/2,
+		Camera.ViewportSize.Y/2
+	)
+
+	local closest=nil
+	local shortest=120
+
+	for _,p in pairs(Players:GetPlayers()) do
+
 		if p~=LP then
+
 			local c,hum,hrp=aliveChar(p)
+
 			if c then
-				local d=(hrp.Position-myHRP.Position).Magnitude
-				if d<bd then
-					bd=d
-					best=p
+
+				local pos,visible=Camera:WorldToViewportPoint(hrp.Position)
+
+				if visible then
+
+					local dist=(Vector2.new(pos.X,pos.Y)-center).Magnitude
+
+					if dist<shortest then
+						shortest=dist
+						closest=p
+					end
+
 				end
+
 			end
+
 		end
+
 	end
-	return best
+
+	return closest
+
 end
 
-local function trackTarget(plr)
-	if diedConn then diedConn:Disconnect() diedConn=nil end
-	target=plr
-	if not target then highlight.Adornee=nil return end
-	local c,hum=aliveChar(target)
-	if not c then target=nil highlight.Adornee=nil return end
-	highlight.Adornee=c
-	diedConn=hum.Died:Connect(function()
-		target=nil
-		highlight.Adornee=nil
-	end)
-end
-
-local function setToggle(state)
-	enabled=state
-	if enabled then
-		toggle.BackgroundColor3=Color3.fromRGB(60,170,90)
-		toggle.Text="On"
-	else
-		toggle.BackgroundColor3=Color3.fromRGB(80,80,85)
-		toggle.Text="Off"
-		trackTarget(nil)
-	end
-end
-
-toggle.MouseButton1Click:Connect(function()
-	setToggle(not enabled)
+dropdown.MouseButton1Click:Connect(function()
+	list.Visible=not list.Visible
 end)
 
-RunService.Heartbeat:Connect(function()
-	if not enabled then return end
-	if not target then
-		local p=getNearest()
-		if p then trackTarget(p) end
+charBtn.MouseButton1Click:Connect(function()
+	aimMode="Character"
+	dropdown.Text="Mode : Character"
+	list.Visible=false
+end)
+
+camBtn.MouseButton1Click:Connect(function()
+	aimMode="Camera"
+	dropdown.Text="Mode : Camera"
+	list.Visible=false
+end)
+
+bothBtn.MouseButton1Click:Connect(function()
+	aimMode="Both"
+	dropdown.Text="Mode : Character + Camera"
+	list.Visible=false
+end)
+
+minimize.MouseButton1Click:Connect(function()
+
+	minimized=not minimized
+
+	if minimized then
+		frame.Size=UDim2.new(0,165,0,16)
+		dropdown.Visible=false
+		list.Visible=false
+		toggle.Visible=false
+	else
+		frame.Size=UDim2.new(0,165,0,75)
+		dropdown.Visible=true
+		toggle.Visible=true
 	end
+
+end)
+
+toggle.MouseButton1Click:Connect(function()
+
+	enabled=not enabled
+
+	if enabled then
+
+		target=getTarget()
+
+		if target then
+			toggle.Text="On"
+			toggle.BackgroundColor3=Color3.fromRGB(60,170,90)
+		else
+			enabled=false
+		end
+
+	else
+
+		toggle.Text="Off"
+		toggle.BackgroundColor3=Color3.fromRGB(80,80,85)
+
+		target=nil
+		highlight.Adornee=nil
+
+	end
+
 end)
 
 RunService.RenderStepped:Connect(function()
+
 	if not enabled then return end
 	if not target then return end
+
 	local tc,th,thrp=aliveChar(target)
 	local myc,myh,myhrp=aliveChar(LP)
-	if not tc or not myc then trackTarget(nil) return end
-	local camPos=Camera.CFrame.Position
-	local aimPos=thrp.Position
-	local look=CFrame.new(camPos,aimPos)
-	Camera.CFrame=look
+
+	if not tc then
+		target=nil
+		enabled=false
+		toggle.Text="Off"
+		highlight.Adornee=nil
+		return
+	end
+
+	highlight.Adornee=target.Character
+
+	local myPos=myhrp.Position
+	local targetPos=thrp.Position
+
+	if aimMode=="Character" then
+
+		myh.AutoRotate=false
+
+		myhrp.CFrame=CFrame.new(
+			myPos,
+			Vector3.new(targetPos.X,myPos.Y,targetPos.Z)
+		)
+
+	elseif aimMode=="Camera" then
+
+		Camera.CFrame=CFrame.new(
+			Camera.CFrame.Position,
+			targetPos
+		)
+
+	elseif aimMode=="Both" then
+
+		myh.AutoRotate=false
+
+		myhrp.CFrame=CFrame.new(
+			myPos,
+			Vector3.new(targetPos.X,myPos.Y,targetPos.Z)
+		)
+
+		local right=3
+		local up=3
+		local back=8
+
+		local camPos=
+			myhrp.Position
+			+ myhrp.CFrame.RightVector*right
+			- myhrp.CFrame.LookVector*back
+			+ Vector3.new(0,up,0)
+
+		Camera.CFrame=CFrame.new(
+			camPos,
+			targetPos
+		)
+
+	end
+
 end)
