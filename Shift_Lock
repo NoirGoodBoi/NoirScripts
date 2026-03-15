@@ -186,7 +186,7 @@ local function faceCam(h, hrp, v)
 		oldAR = h.AutoRotate
 		h.AutoRotate = false
 		-- Roblox shiftlock camera offset
-		h.CameraOffset = Vector3.new(1.75,0,0)
+		h.CameraOffset = Vector3.new(1.75,0.25,0)
 		rotCon = RS.RenderStepped:Connect(function()
 			local cam = Wk.CurrentCamera
 			if not (hrp and cam) then return end
