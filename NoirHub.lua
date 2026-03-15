@@ -76,34 +76,21 @@ Players.PlayerRemoving:Connect(function()
     PlayerCountLabel:Set("Players: " .. #Players:GetPlayers())
 end)
 
--- Lấy danh sách player dạng DisplayName (@Username)
-local function GetPlayerNames()
-    local names = {}
-    for _, plr in ipairs(Players:GetPlayers()) do
-        table.insert(names, plr.DisplayName .. " (@" .. plr.Name .. ")")
+local Players = game:GetService("Players")
+
+MainTab:CreateLabel("Players:")
+
+local function AddPlayerLabels()
+    for _, player in pairs(Players:GetPlayers()) do
+        MainTab:CreateLabel(player.DisplayName .. " [@" .. player.Name .. "]")
     end
-    return names
 end
 
--- Dropdown danh sách người chơi
-local PlayerDropdown = MainTab:CreateDropdown({
-    Name = "Danh Sách Người Chơi",
-    Options = GetPlayerNames(),
-    CurrentOption = {},
-    MultipleOptions = false,
-    Flag = "PlayerDropdown",
-    Callback = function(Option)
-        print("Chọn: " .. Option)
-    end,
-})
+AddPlayerLabels()
 
--- Tự động refresh khi có người join/leave
-local function RefreshDropdown()
-    PlayerDropdown:Refresh(GetPlayerNames(), true)
-end
-
-Players.PlayerAdded:Connect(RefreshDropdown)
-Players.PlayerRemoving:Connect(RefreshDropdown)
+Players.PlayerAdded:Connect(function(player)
+    MainTab:CreateLabel(player.DisplayName .. " [@" .. player.Name .. "]")
+end)
 
 MainTab:CreateButton({
    Name = "Reset GUI Rayfield",
