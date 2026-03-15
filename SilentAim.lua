@@ -263,6 +263,29 @@ RunService.RenderStepped:Connect(function()
 
 	elseif aimMode=="Both" then
 
+	myh.AutoRotate=false
+
+	myhrp.CFrame=CFrame.new(
+		myPos,
+		Vector3.new(targetPos.X,myPos.Y,targetPos.Z)
+	)
+
+	-- offset vai phải nhưng vẫn giữ camera player
+	local right=3
+	local up=2
+
+	local offset=
+		myhrp.CFrame.RightVector*right
+		+ Vector3.new(0,up,0)
+
+	Camera.CFrame=
+		CFrame.new(
+			Camera.CFrame.Position + offset,
+			targetPos
+		)
+
+end
+
 		myh.AutoRotate=false
 
 		myhrp.CFrame=CFrame.new(
