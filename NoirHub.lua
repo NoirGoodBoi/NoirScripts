@@ -92,6 +92,8 @@ Players.PlayerAdded:Connect(function(player)
     MainTab:CreateLabel(player.DisplayName .. " [@" .. player.Name .. "]")
 end)
 
+
+
 MainTab:CreateButton({
    Name = "Reset GUI Rayfield",
    Callback = function() Rayfield:Destroy() end,
