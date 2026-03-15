@@ -179,27 +179,32 @@ end;
 local rotCon, camCon, oldAR, oldOffset;
 local function faceCam(h, hrp, v)
 	if rotCon then
-		rotCon:Disconnect();
-		rotCon = nil;
-	end;
+		rotCon:Disconnect()
+		rotCon = nil
+	end
 	if v then
-		oldAR = h.AutoRotate;
-		h.AutoRotate = false;
+		oldAR = h.AutoRotate
+		h.AutoRotate = false
+		-- Roblox shiftlock camera offset
+		h.CameraOffset = Vector3.new(1.75,0,0)
 		rotCon = RS.RenderStepped:Connect(function()
-			local cam = Wk.CurrentCamera;
-			if not (hrp and cam) then
-				return;
-			end;
-			local lv = cam.CFrame.LookVector;
-			local flat = Vector3.new(lv.X, 0, lv.Z);
+			local cam = Wk.CurrentCamera
+			if not (hrp and cam) then return end
+			local lv = cam.CFrame.LookVector
+			local flat = Vector3.new(lv.X,0,lv.Z)
 			if flat.Magnitude > 0.0001 then
-				hrp.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + flat.Unit, Vector3.yAxis);
-			end;
-		end);
+				hrp.CFrame = CFrame.lookAt(
+					hrp.Position,
+					hrp.Position + flat.Unit,
+					Vector3.yAxis
+				)
+			end
+		end)
 	elseif oldAR ~= nil then
-		h.AutoRotate = oldAR;
-	end;
-end;
+		h.AutoRotate = oldAR
+		h.CameraOffset = Vector3.zero
+	end
+end
 local function reapply(v)
 	task.defer(function()
 		local _, h, r = getParts();
