@@ -507,6 +507,8 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
+local crosshairEnabled = false
+
 -- Circle crosshair
 local crosshair = Drawing.new("Circle")
 crosshair.Visible = false
@@ -518,101 +520,107 @@ crosshair.Filled = true
 -- + crosshair
 local lines = {}
 for i = 1,4 do
-    local line = Drawing.new("Line")
-    line.Visible = false
-    line.Color = Color3.fromRGB(255,0,0)
-    line.Thickness = 2
-    table.insert(lines,line)
+	local line = Drawing.new("Line")
+	line.Visible = false
+	line.Color = Color3.fromRGB(255,0,0)
+	line.Thickness = 2
+	table.insert(lines,line)
 end
 
 local function drawPlus(pos)
 
-    local size = 6
-    local gap = 2
+	local size = 6
+	local gap = 2
 
-    lines[1].From = Vector2.new(pos.X - size, pos.Y)
-    lines[1].To   = Vector2.new(pos.X - gap, pos.Y)
+	lines[1].From = Vector2.new(pos.X - size, pos.Y)
+	lines[1].To   = Vector2.new(pos.X - gap, pos.Y)
 
-    lines[2].From = Vector2.new(pos.X + gap, pos.Y)
-    lines[2].To   = Vector2.new(pos.X + size, pos.Y)
+	lines[2].From = Vector2.new(pos.X + gap, pos.Y)
+	lines[2].To   = Vector2.new(pos.X + size, pos.Y)
 
-    lines[3].From = Vector2.new(pos.X, pos.Y - size)
-    lines[3].To   = Vector2.new(pos.X, pos.Y - gap)
+	lines[3].From = Vector2.new(pos.X, pos.Y - size)
+	lines[3].To   = Vector2.new(pos.X, pos.Y - gap)
 
-    lines[4].From = Vector2.new(pos.X, pos.Y + gap)
-    lines[4].To   = Vector2.new(pos.X, pos.Y + size)
+	lines[4].From = Vector2.new(pos.X, pos.Y + gap)
+	lines[4].To   = Vector2.new(pos.X, pos.Y + size)
 
 end
 
 RunService.RenderStepped:Connect(function()
 
-    local viewport = camera.ViewportSize
-    local center = viewport/2
+	if not crosshairEnabled then
+		crosshair.Visible = false
+		for _,l in pairs(lines) do
+			l.Visible = false
+		end
+		return
+	end
 
-    local character = player.Character
-    if not character or not character:FindFirstChild("Head") then return end
+	local viewport = camera.ViewportSize
+	local center = viewport / 2
 
-    local head = character.Head
-    local distance = (camera.CFrame.Position - head.Position).Magnitude
+	local character = player.Character
+	if not character or not character:FindFirstChild("Head") then return end
 
-    local pos = center
+	local head = character.Head
+	local distance = (camera.CFrame.Position - head.Position).Magnitude
 
-    -- THIRD PERSON OFFSET
-    if distance > 1 then
-        local offset = camera.CFrame.RightVector * 4
-        local worldPoint = camera.CFrame.Position + camera.CFrame.LookVector * 1000 + offset
-        local screenPoint = camera:WorldToViewportPoint(worldPoint)
-        pos = Vector2.new(screenPoint.X,screenPoint.Y)
-    end
+	local pos = center
 
-    -- Raycast check enemy
-    local rayParams = RaycastParams.new()
-    rayParams.FilterDescendantsInstances = {character}
-    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+	-- Third person offset
+	if distance > 1 then
+		local offset = camera.CFrame.RightVector * 3.5 + camera.CFrame.UpVector * 0.5
+		local worldPoint = camera.CFrame.Position + camera.CFrame.LookVector * 1000 + offset
+		local screenPoint = camera:WorldToViewportPoint(worldPoint)
+		pos = Vector2.new(screenPoint.X,screenPoint.Y)
+	end
 
-    local ray = workspace:Raycast(
-        camera.CFrame.Position,
-        camera.CFrame.LookVector * 1000,
-        rayParams
-    )
+	-- Raycast detect enemy
+	local rayParams = RaycastParams.new()
+	rayParams.FilterDescendantsInstances = {character}
+	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
-    local enemyFound = false
+	local ray = workspace:Raycast(
+		camera.CFrame.Position,
+		camera.CFrame.LookVector * 1000,
+		rayParams
+	)
 
-    if ray and ray.Instance then
-        local model = ray.Instance:FindFirstAncestorOfClass("Model")
-        if model and Players:GetPlayerFromCharacter(model) then
-            enemyFound = true
-        end
-    end
+	local enemyFound = false
 
-    if enemyFound then
-        crosshair.Visible = false
+	if ray and ray.Instance then
+		local model = ray.Instance:FindFirstAncestorOfClass("Model")
+		if model and Players:GetPlayerFromCharacter(model) then
+			enemyFound = true
+		end
+	end
 
-        drawPlus(pos)
-        for _,l in pairs(lines) do
-            l.Visible = true
-        end
-    else
-        crosshair.Visible = true
-        crosshair.Position = pos
+	if enemyFound then
+		crosshair.Visible = false
+		drawPlus(pos)
 
-        for _,l in pairs(lines) do
-            l.Visible = false
-        end
-    end
+		for _,l in pairs(lines) do
+			l.Visible = true
+		end
+	else
+		crosshair.Visible = true
+		crosshair.Position = pos
+
+		for _,l in pairs(lines) do
+			l.Visible = false
+		end
+	end
 
 end)
 
+-- Rayfield toggle
 PlayerTab:CreateToggle({
-    Name = "Crosshair",
-    CurrentValue = false,
-    Flag = "CrosshairToggle",
-    Callback = function(Value)
-        crosshair.Visible = Value
-        for _,l in pairs(lines) do
-            l.Visible = false
-        end
-    end,
+	Name = "Crosshair",
+	CurrentValue = false,
+	Flag = "CrosshairToggle",
+	Callback = function(Value)
+		crosshairEnabled = Value
+	end,
 })
 
 --FOV
