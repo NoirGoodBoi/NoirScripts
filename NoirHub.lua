@@ -1483,6 +1483,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "The Strongest Battleground",
+    Callback = function()
+        loadstring(game:HttpGet("https://api.getpolsec.com/scripts/hosted/6c153e601475b17b12d0c5f1f295f2bdb2efd2c13aa92d93e0588ba7b4a34d7e.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "AK Gaming Ez Hub",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
