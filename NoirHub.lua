@@ -1383,6 +1383,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "SilentAim by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAim.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "Aim Bot",
     Callback = function()
         loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Aimbot-Universal-For-Mobile-and-PC-29153"))()
@@ -1397,16 +1404,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Aimbot by Noir",
+    Name = "Aimbot Hub (player + NPC)",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/Aimbot"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "SilentAim by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAim.lua"))()
+        loadstring(game:HttpGet("https://api.junkie-development.de/api/v1/luascripts/public/71d988cded3d4e480f4ac8f009dbf117c82320704ce873bff04c64ddd7e6d550/download"))()
     end,
 })
 
@@ -1418,9 +1418,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "AimNPC by Noir",
+    Name = "Aura (Like Gojo's Infinite)",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/AimNPC"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hellohellohell012321/KAWAII-AURA/main/kawaii_aura.lua", true))()
     end,
 })
 
@@ -1520,14 +1520,14 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Ink Game",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/wefwef127382/inkgames.github.io/refs/heads/main/ringta.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/wefwef34/inkgames.github.io/refs/heads/main/ringta.lua"))()
     end,
 })
 
 ScriptsTab:CreateButton({
     Name = "Deadrail",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/wefwef127382/DEADRAILS.github.io/refs/heads/main/mainringta.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/erewe23/deadrailsring.github.io/refs/heads/main/ringta.lua"))()
     end,
 })
 
@@ -1797,23 +1797,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "FE Telekinesis V5",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_Telekinesis"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "Sandevistan FE",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Sandevistan"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Emperor Crimson v3.5",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/p4QY0AsL"))()
     end,
 })
 
@@ -2399,7 +2385,7 @@ local toggleSettings = {
     { method = "Toggle", name = "ForceField Check", flag = "FORCEFIELD_CHECK", tab = Settings, value = le:Get("FORCEFIELD_CHECK") },
     { method = "Toggle", name = "Limb Collisions", flag = "LIMB_CAN_COLLIDE", tab = Settings, value = le:Get("LIMB_CAN_COLLIDE"), createDivider = true },
     { method = "Slider", name = "Limb Transparency", flag = "LIMB_TRANSPARENCY", tab = Settings, range = {0,1}, increment = 0.1, value = le:Get("LIMB_TRANSPARENCY") },
-    { method = "Slider", name = "Limb Size", flag = "LIMB_SIZE", tab = Settings, range = {5,100}, increment = 0.5, value = le:Get("LIMB_SIZE"), createDivider = true },
+    { method = "Slider", name = "Limb Size", flag = "LIMB_SIZE", tab = Settings, range = {5,1000}, increment = 0.5, value = le:Get("LIMB_SIZE"), createDivider = true },
 }
 
 for _, setting in pairs(toggleSettings) do
@@ -2535,7 +2521,7 @@ local ui = {
 
     { type = "section", name = "Off Screen Arrow" },
     toggle("Enabled", "OSA", "offScreenArrow", false),
-    slider("Size", "OSASize", {15,100}, 15, 1, "offScreenArrowSize"),
+    slider("Size", "OSASize", {15,1000}, 15, 1, "offScreenArrowSize"),
     slider("Radius", "OSARadius", {150,360}, 150, 1, "offScreenArrowRadius"),
     toggle("Outline", "OSAOutlined", "offScreenArrowOutline", true),
 
