@@ -1949,7 +1949,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Murder Mystery 2",
     Callback = function()
-        loadstring(game:HttpGet("https://pastefy.app/gmwvIgw6/raw", true))()
+        loadstring(game:HttpGet("https://pastefy.app/wwfom1bX/raw", true))()
     end,
 })
 
