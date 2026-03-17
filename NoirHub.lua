@@ -1730,7 +1730,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "Survive 100days in Nuclear Bunker",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/egor2078f/egor2078f/main/Script.lua", true))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/S100d"))()
     end,
 })
 
