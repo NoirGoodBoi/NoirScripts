@@ -1067,66 +1067,94 @@ FPSTab:CreateToggle({
     end,
 })
 
-local Terrain = workspace:FindFirstChildOfClass("Terrain")
-
-FPSTab:CreateToggle({
+FPSTab:CreateButton({
     Name = "Potato Mode",
-    CurrentValue = false,
-    Callback = function(v)
+    Callback = function()
 
-        if v then
+        local Lighting = game:GetService("Lighting")
+        local Terrain = workspace:FindFirstChildOfClass("Terrain")
 
-            pcall(function()
-                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-            end)
-
-            Lighting.GlobalShadows = false
-
-            if Terrain then
-                pcall(function() Terrain.Decoration = false end)
+        -- 1 Disable Lighting Effects
+        for _,v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("BloomEffect")
+            or v:IsA("SunRaysEffect")
+            or v:IsA("DepthOfFieldEffect")
+            or v:IsA("ColorCorrectionEffect")
+            or v:IsA("BlurEffect")
+            or v:IsA("Atmosphere") then
+                pcall(function()
+                    v.Enabled = false
+                end)
             end
+        end
 
-            for _,obj in ipairs(workspace:GetDescendants()) do
+        -- 2 Disable Particles
+        for _,v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter")
+            or v:IsA("Trail")
+            or v:IsA("Smoke")
+            or v:IsA("Fire")
+            or v:IsA("Sparkles") then
+                pcall(function()
+                    v.Enabled = false
+                end)
+            end
+        end
 
-                if not obj:IsDescendantOf(game.Players) then
+        -- 3 Disable Shadows
+        Lighting.GlobalShadows = false
 
-                    if obj:IsA("BasePart") then
-                        pcall(function() obj.Material = Enum.Material.Plastic end)
-                        pcall(function() obj.CastShadow = false end)
-                        pcall(function() obj.Reflectance = 0 end)
-                    end
+        -- 4 Disable Water Effects
+        if Terrain then
+            Terrain.WaterWaveSize = 0
+            Terrain.WaterWaveSpeed = 0
+            Terrain.WaterReflectance = 0
+            Terrain.WaterTransparency = 1
+        end
 
-                    if obj:IsA("MeshPart") then
-                        pcall(function()
-                            obj.RenderFidelity = Enum.RenderFidelity.Performance
-                        end)
-                    end
+        -- 5 Disable Grass
+        if Terrain then
+            pcall(function()
+                Terrain.Decoration = false
+            end)
+        end
 
-                    if obj:IsA("Texture") or obj:IsA("Decal") then
-                        pcall(function()
-                            obj.Transparency = 1
-                        end)
-                    end
+        -- 6 Lower Graphics Level
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        end)
 
+        -- 7 Simplify Materials & Mesh
+        for _,v in ipairs(workspace:GetDescendants()) do
+
+            if not v:IsDescendantOf(game.Players) then
+
+                if v:IsA("BasePart") then
+                    pcall(function()
+                        v.Material = Enum.Material.Plastic
+                        v.CastShadow = false
+                        v.Reflectance = 0
+                    end)
+                end
+
+                if v:IsA("MeshPart") then
+                    pcall(function()
+                        v.RenderFidelity = Enum.RenderFidelity.Performance
+                    end)
+                end
+
+                -- 8 Remove Textures
+                if v:IsA("Texture") or v:IsA("Decal") then
+                    pcall(function()
+                        v:Destroy()
+                    end)
                 end
 
             end
 
-        else
-
-            pcall(function()
-                settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
-            end)
-
-            Lighting.GlobalShadows = true
-
-            if Terrain then
-                pcall(function() Terrain.Decoration = true end)
-            end
-
         end
 
-    end,
+    end
 })
 
 local Players = game:GetService("Players")
