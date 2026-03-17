@@ -413,166 +413,6 @@ PlayerTab:CreateToggle({
     end
 })
 
-local Lighting = game:GetService("Lighting")
-
---fullbright
-local oldBrightness = Lighting.Brightness
-local oldClockTime = Lighting.ClockTime
-local oldFogEnd = Lighting.FogEnd
-local oldGlobalShadows = Lighting.GlobalShadows
-
-PlayerTab:CreateToggle({
-    Name = "Fullbright",
-    CurrentValue = false,
-    Callback = function(v)
-        if v then
-            Lighting.Brightness = 5
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
-            Lighting.GlobalShadows = false
-        else
-            Lighting.Brightness = oldBrightness
-            Lighting.ClockTime = oldClockTime
-            Lighting.FogEnd = oldFogEnd
-            Lighting.GlobalShadows = oldGlobalShadows
-        end
-    end,
-})
-
---remove fog
-local oldFogStart = Lighting.FogStart
-local removedEffects = {}
-
-PlayerTab:CreateToggle({
-    Name = "Remove Fog",
-    CurrentValue = false,
-    Callback = function(v)
-
-        if v then
-            Lighting.FogEnd = 100000
-            Lighting.FogStart = 0
-
-            for _,obj in pairs(Lighting:GetChildren()) do
-                if obj:IsA("Atmosphere") or obj:IsA("BlurEffect") then
-                    table.insert(removedEffects,obj)
-                    obj.Parent = nil
-                end
-            end
-
-        else
-            Lighting.FogEnd = oldFogEnd
-            Lighting.FogStart = oldFogStart
-
-            for _,obj in pairs(removedEffects) do
-                obj.Parent = Lighting
-            end
-
-            removedEffects = {}
-        end
-
-    end,
-})
-
-local Lighting = game:GetService("Lighting")
-
-local removedEffects = {}
-local removedUltra = {}
-
---BOOST FPS
-PlayerTab:CreateToggle({
-    Name = "Boost FPS",
-    CurrentValue = false,
-    Callback = function(v)
-
-        if v then
-            Lighting.GlobalShadows = false
-
-            for _,obj in pairs(game:GetDescendants()) do
-                if obj:IsA("BloomEffect")
-                or obj:IsA("SunRaysEffect")
-                or obj:IsA("DepthOfFieldEffect")
-                or obj:IsA("ColorCorrectionEffect")
-                or obj:IsA("BlurEffect")
-                or obj:IsA("Atmosphere")
-                or obj:IsA("ParticleEmitter")
-                or obj:IsA("Trail")
-                or obj:IsA("Smoke")
-                or obj:IsA("Fire")
-                or obj:IsA("Sparkles") then
-
-                    table.insert(removedEffects,obj)
-                    obj.Parent = nil
-                end
-            end
-
-        else
-
-            Lighting.GlobalShadows = true
-
-            for _,obj in pairs(removedEffects) do
-                if obj then
-                    obj.Parent = Lighting
-                end
-            end
-
-            removedEffects = {}
-
-        end
-    end,
-})
-
---ULTRA BOOST FPS
-PlayerTab:CreateToggle({
-    Name = "Ultra Boost FPS",
-    CurrentValue = false,
-    Callback = function(v)
-
-        if v then
-
-            settings().Rendering.QualityLevel = "Level01"
-            Lighting.GlobalShadows = false
-
-            workspace.Terrain.WaterWaveSize = 0
-            workspace.Terrain.WaterWaveSpeed = 0
-            workspace.Terrain.WaterReflectance = 0
-            workspace.Terrain.WaterTransparency = 1
-
-            for _,obj in pairs(game:GetDescendants()) do
-                if obj:IsA("BloomEffect")
-                or obj:IsA("SunRaysEffect")
-                or obj:IsA("DepthOfFieldEffect")
-                or obj:IsA("ColorCorrectionEffect")
-                or obj:IsA("BlurEffect")
-                or obj:IsA("Atmosphere")
-                or obj:IsA("ParticleEmitter")
-                or obj:IsA("Trail")
-                or obj:IsA("Smoke")
-                or obj:IsA("Fire")
-                or obj:IsA("Sparkles")
-                or obj:IsA("Texture")
-                or obj:IsA("Decal") then
-
-                    table.insert(removedUltra,obj)
-                    obj.Parent = nil
-                end
-            end
-
-        else
-
-            Lighting.GlobalShadows = true
-
-            for _,obj in pairs(removedUltra) do
-                if obj then
-                    obj.Parent = Lighting
-                end
-            end
-
-            removedUltra = {}
-
-        end
-    end,
-})
-
 --minimap
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -911,24 +751,342 @@ PlayerTab:CreateButton({
     end
 })
 
---thirdp
-PlayerTab:CreateButton({
-    Name = "Unlock Third Person",
-    Callback = function()
-        LocalPlayer.CameraMode = Enum.CameraMode.Classic
-        LocalPlayer.CameraMinZoomDistance = 0
-        LocalPlayer.CameraMaxZoomDistance = 1000
+-- Third Person Force Toggle
+local thirdPersonEnabled = false
+local thirdPersonLoop = nil
+
+PlayerTab:CreateToggle({
+    Name = "Force Third Person",
+    CurrentValue = false,
+    Callback = function(state)
+        thirdPersonEnabled = state
+
+        if state then
+            thirdPersonLoop = game:GetService("RunService").RenderStepped:Connect(function()
+                if LocalPlayer and LocalPlayer.Character then
+                    LocalPlayer.CameraMode = Enum.CameraMode.Classic
+                    LocalPlayer.CameraMinZoomDistance = 0
+                    LocalPlayer.CameraMaxZoomDistance = math.huge
+                end
+            end)
+        else
+            if thirdPersonLoop then
+                thirdPersonLoop:Disconnect()
+                thirdPersonLoop = nil
+            end
+        end
     end
 })
 
---resetchar
-PlayerTab:CreateButton({
-    Name = "Reset Character",
-    Callback = function()
-        if LocalPlayer.Character then
-            LocalPlayer.Character:BreakJoints()
+--No Camera Shake
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local noShakeEnabled = false
+local connection
+
+PlayerTab:CreateToggle({
+    Name = "No Camera Shake",
+    CurrentValue = false,
+    Callback = function(state)
+        noShakeEnabled = state
+
+        if state then
+            local lastCFrame = Camera.CFrame
+
+            connection = RunService.RenderStepped:Connect(function()
+                if not noShakeEnabled then return end
+                
+                if Camera then
+                    Camera.CFrame = lastCFrame
+                    lastCFrame = Camera.CFrame
+                end
+
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum.CameraOffset = Vector3.new(0,0,0)
+                    end
+                end
+            end)
+        else
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
         end
     end
+})
+
+local Lighting = game:GetService("Lighting")
+
+local FPSTab = Window:CreateTab("FPS", "gauge")
+
+FPSTab:CreateSection("Visual Boost")
+
+local oldBrightness = Lighting.Brightness
+local oldClockTime = Lighting.ClockTime
+local oldFogEnd = Lighting.FogEnd
+local oldGlobalShadows = Lighting.GlobalShadows
+
+local fullbrightValue = 5
+
+FPSTab:CreateToggle({
+    Name = "Fullbright",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+            Lighting.Brightness = fullbrightValue
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 100000
+            Lighting.GlobalShadows = false
+        else
+            Lighting.Brightness = oldBrightness
+            Lighting.ClockTime = oldClockTime
+            Lighting.FogEnd = oldFogEnd
+            Lighting.GlobalShadows = oldGlobalShadows
+        end
+
+    end,
+})
+
+FPSTab:CreateSlider({
+    Name = "Fullbright Brightness",
+    Range = {1, 15},
+    Increment = 0.5,
+    CurrentValue = 5,
+    Callback = function(v)
+
+        fullbrightValue = v
+
+        if Lighting.ClockTime == 14 then
+            Lighting.Brightness = v
+        end
+
+    end,
+})
+
+local oldFogStart = Lighting.FogStart
+local removedFogEffects = {}
+
+FPSTab:CreateToggle({
+    Name = "Remove Fog",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+
+            Lighting.FogEnd = 100000
+            Lighting.FogStart = 0
+
+            for _,obj in pairs(Lighting:GetChildren()) do
+                if obj:IsA("Atmosphere") or obj:IsA("BlurEffect") then
+                    removedFogEffects[obj] = obj.Parent
+                    obj.Parent = nil
+                end
+            end
+
+        else
+
+            Lighting.FogEnd = oldFogEnd
+            Lighting.FogStart = oldFogStart
+
+            for obj,parent in pairs(removedFogEffects) do
+                if obj then
+                    obj.Parent = parent
+                end
+            end
+
+            removedFogEffects = {}
+
+        end
+
+    end,
+})
+
+FPSTab:CreateSection("Performance")
+
+FPSTab:CreateToggle({
+    Name = "Unlock FPS",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+            setfpscap(0)
+        else
+            setfpscap(60)
+        end
+
+    end,
+})
+
+local removedEffects = {}
+
+FPSTab:CreateToggle({
+    Name = "Boost FPS",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+
+            Lighting.GlobalShadows = false
+
+            for _,obj in pairs(game:GetDescendants()) do
+                if obj:IsA("BloomEffect")
+                or obj:IsA("SunRaysEffect")
+                or obj:IsA("DepthOfFieldEffect")
+                or obj:IsA("ColorCorrectionEffect")
+                or obj:IsA("BlurEffect")
+                or obj:IsA("Atmosphere")
+                or obj:IsA("ParticleEmitter")
+                or obj:IsA("Trail")
+                or obj:IsA("Smoke")
+                or obj:IsA("Fire")
+                or obj:IsA("Sparkles") then
+
+                    removedEffects[obj] = obj.Parent
+                    obj.Parent = nil
+
+                end
+            end
+
+        else
+
+            Lighting.GlobalShadows = true
+
+            for obj,parent in pairs(removedEffects) do
+                if obj then
+                    obj.Parent = parent
+                end
+            end
+
+            removedEffects = {}
+
+        end
+
+    end,
+})
+
+local removedUltra = {}
+
+FPSTab:CreateToggle({
+    Name = "Ultra Boost FPS",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            Lighting.GlobalShadows = false
+
+            workspace.Terrain.WaterWaveSize = 0
+            workspace.Terrain.WaterWaveSpeed = 0
+            workspace.Terrain.WaterReflectance = 0
+            workspace.Terrain.WaterTransparency = 1
+
+            for _,obj in pairs(game:GetDescendants()) do
+
+                if obj:IsA("BloomEffect")
+                or obj:IsA("SunRaysEffect")
+                or obj:IsA("DepthOfFieldEffect")
+                or obj:IsA("ColorCorrectionEffect")
+                or obj:IsA("BlurEffect")
+                or obj:IsA("Atmosphere")
+                or obj:IsA("ParticleEmitter")
+                or obj:IsA("Trail")
+                or obj:IsA("Smoke")
+                or obj:IsA("Fire")
+                or obj:IsA("Sparkles")
+                or obj:IsA("Texture")
+                or obj:IsA("Decal") then
+
+                    removedUltra[obj] = obj.Parent
+                    obj.Parent = nil
+
+                end
+            end
+
+        else
+
+            Lighting.GlobalShadows = true
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+
+            for obj,parent in pairs(removedUltra) do
+                if obj then
+                    obj.Parent = parent
+                end
+            end
+
+            removedUltra = {}
+
+        end
+
+    end,
+})
+
+local savedTextures = {}
+local savedMesh = {}
+local oldDecoration = workspace.Terrain.Decoration
+
+FPSTab:CreateToggle({
+    Name = "Potato Mode",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            Lighting.GlobalShadows = false
+
+            workspace.Terrain.Decoration = false
+            workspace.Terrain.WaterWaveSize = 0
+            workspace.Terrain.WaterWaveSpeed = 0
+            workspace.Terrain.WaterReflectance = 0
+            workspace.Terrain.WaterTransparency = 1
+
+            for _,obj in pairs(workspace:GetDescendants()) do
+
+                if obj:IsA("MeshPart") then
+                    savedMesh[obj] = obj.RenderFidelity
+                    obj.RenderFidelity = Enum.RenderFidelity.Performance
+                end
+
+                if obj:IsA("Texture") or obj:IsA("Decal") then
+                    savedTextures[obj] = obj.Parent
+                    obj.Parent = nil
+                end
+
+            end
+
+        else
+
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+            Lighting.GlobalShadows = true
+
+            workspace.Terrain.Decoration = oldDecoration
+
+            for mesh,val in pairs(savedMesh) do
+                if mesh then
+                    mesh.RenderFidelity = val
+                end
+            end
+            savedMesh = {}
+
+            for tex,parent in pairs(savedTextures) do
+                if tex then
+                    tex.Parent = parent
+                end
+            end
+            savedTextures = {}
+
+        end
+
+    end,
 })
 
 local Players = game:GetService("Players")
