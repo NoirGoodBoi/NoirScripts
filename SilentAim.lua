@@ -171,19 +171,27 @@ end)
 
 toggle.MouseButton1Click:Connect(function()
 	enabled = not enabled
+
 	if enabled then
 		target = getTarget()
+
 		if target then
 			toggle.Text = "On"
 			toggle.BackgroundColor3 = Color3.fromRGB(60,170,90)
 		else
 			enabled = false
 		end
+
 	else
 		toggle.Text = "Off"
 		toggle.BackgroundColor3 = Color3.fromRGB(80,80,85)
 		target = nil
 		highlight.Adornee = nil
+
+		local c,h = aliveChar(LP)
+		if h then
+			h.AutoRotate = true
+		end
 	end
 end)
 
@@ -200,6 +208,11 @@ RunService.RenderStepped:Connect(function()
 		enabled = false
 		toggle.Text = "Off"
 		highlight.Adornee = nil
+
+		if myh then
+			myh.AutoRotate = true
+		end
+
 		return
 	end
 
