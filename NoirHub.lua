@@ -1067,30 +1067,42 @@ FPSTab:CreateToggle({
     end,
 })
 
---================ POTATO MODE =================--
-local savedTextures = {}
-local savedMesh = {}
+--================ SUPER POTATO MODE =================--
+
+local Terrain = workspace:FindFirstChildOfClass("Terrain")
+
 local savedParts = {}
-local oldDecoration = workspace.Terrain.Decoration
+local savedMesh = {}
+local savedTextures = {}
+local savedLights = {}
+local savedParticles = {}
+local savedSurface = {}
+local savedHighlight = {}
+
+local oldDecoration = Terrain and Terrain.Decoration
 
 FPSTab:CreateToggle({
-    Name = "Potato Mode",
+    Name = "Super Potato Mode",
     CurrentValue = false,
     Callback = function(v)
 
         if v then
 
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            pcall(function()
+                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            end)
+
             Lighting.GlobalShadows = false
 
-            workspace.Terrain.Decoration = false
+            if Terrain then
+                pcall(function() Terrain.Decoration = false end)
+                pcall(function() Terrain.WaterWaveSize = 0 end)
+                pcall(function() Terrain.WaterWaveSpeed = 0 end)
+                pcall(function() Terrain.WaterReflectance = 0 end)
+                pcall(function() Terrain.WaterTransparency = 1 end)
+            end
 
-            workspace.Terrain.WaterWaveSize = 0
-            workspace.Terrain.WaterWaveSpeed = 0
-            workspace.Terrain.WaterReflectance = 0
-            workspace.Terrain.WaterTransparency = 1
-
-            for _,obj in pairs(workspace:GetDescendants()) do
+            for _,obj in ipairs(workspace:GetDescendants()) do
 
                 if obj:IsA("BasePart") then
 
@@ -1100,52 +1112,110 @@ FPSTab:CreateToggle({
                         CastShadow = obj.CastShadow
                     }
 
-                    obj.Material = Enum.Material.Plastic
-                    obj.Reflectance = 0
-                    obj.CastShadow = false
+                    pcall(function() obj.Material = Enum.Material.Plastic end)
+                    pcall(function() obj.Reflectance = 0 end)
+                    pcall(function() obj.CastShadow = false end)
+
                 end
 
                 if obj:IsA("MeshPart") then
                     savedMesh[obj] = obj.RenderFidelity
-                    obj.RenderFidelity = Enum.RenderFidelity.Performance
+                    pcall(function()
+                        obj.RenderFidelity = Enum.RenderFidelity.Performance
+                    end)
                 end
 
                 if obj:IsA("Texture") or obj:IsA("Decal") then
-                    savedTextures[obj] = obj.Parent
-                    obj.Parent = nil
+                    savedTextures[obj] = obj.Transparency
+                    pcall(function() obj.Transparency = 1 end)
+                end
+
+                if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+                    savedLights[obj] = obj.Enabled
+                    pcall(function() obj.Enabled = false end)
+                end
+
+                if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+                    savedParticles[obj] = obj.Enabled
+                    pcall(function() obj.Enabled = false end)
+                end
+
+                if obj:IsA("SurfaceAppearance") then
+                    savedSurface[obj] = obj.Parent
+                    pcall(function() obj.Parent = nil end)
+                end
+
+                if obj:IsA("Highlight") then
+                    savedHighlight[obj] = obj.Enabled
+                    pcall(function() obj.Enabled = false end)
                 end
 
             end
 
         else
 
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+            pcall(function()
+                settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+            end)
+
             Lighting.GlobalShadows = true
 
-            workspace.Terrain.Decoration = oldDecoration
+            if Terrain and oldDecoration ~= nil then
+                pcall(function() Terrain.Decoration = oldDecoration end)
+            end
 
             for part,data in pairs(savedParts) do
                 if part then
-                    part.Material = data.Material
-                    part.Reflectance = data.Reflectance
-                    part.CastShadow = data.CastShadow
+                    pcall(function()
+                        part.Material = data.Material
+                        part.Reflectance = data.Reflectance
+                        part.CastShadow = data.CastShadow
+                    end)
                 end
             end
             savedParts = {}
 
             for mesh,val in pairs(savedMesh) do
                 if mesh then
-                    mesh.RenderFidelity = val
+                    pcall(function() mesh.RenderFidelity = val end)
                 end
             end
             savedMesh = {}
 
-            for tex,parent in pairs(savedTextures) do
+            for tex,val in pairs(savedTextures) do
                 if tex then
-                    tex.Parent = parent
+                    pcall(function() tex.Transparency = val end)
                 end
             end
             savedTextures = {}
+
+            for light,val in pairs(savedLights) do
+                if light then
+                    pcall(function() light.Enabled = val end)
+                end
+            end
+            savedLights = {}
+
+            for p,val in pairs(savedParticles) do
+                if p then
+                    pcall(function() p.Enabled = val end)
+                end
+            end
+            savedParticles = {}
+
+            for s,parent in pairs(savedSurface) do
+                if s then
+                    pcall(function() s.Parent = parent end)
+                end
+            end
+            savedSurface = {}
+
+            for h,val in pairs(savedHighlight) do
+                if h then
+                    pcall(function() h.Enabled = val end)
+                end
+            end
+            savedHighlight = {}
 
         end
 
