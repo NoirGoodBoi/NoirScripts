@@ -15,8 +15,110 @@ local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Stats = game:GetService("Stats")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 
 local MainTab = Window:CreateTab("Main", "home")
+
+MainTab:CreateButton({
+   Name = "Reset GUI Rayfield",
+   Callback = function() Rayfield:Destroy() end,
+})
+
+local AllIDs = {}
+local foundAnything = ""
+
+-- Rejoin
+MainTab:CreateButton({
+   Name = "Rejoin Server",
+   Callback = function()
+      TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+   end,
+})
+
+-- Server Hop
+MainTab:CreateButton({
+   Name = "Server Hop",
+   Callback = function()
+
+      local Site
+      if foundAnything == "" then
+         Site = HttpService:JSONDecode(game:HttpGet(
+            "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+      else
+         Site = HttpService:JSONDecode(game:HttpGet(
+            "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100&cursor="..foundAnything))
+      end
+
+      if Site.nextPageCursor then
+         foundAnything = Site.nextPageCursor
+      end
+
+      for i,v in pairs(Site.data) do
+         local ID = tostring(v.id)
+         if tonumber(v.playing) < tonumber(v.maxPlayers) and ID ~= game.JobId then
+
+            local Possible = true
+            for _,Existing in pairs(AllIDs) do
+               if ID == Existing then
+                  Possible = false
+               end
+            end
+
+            if Possible then
+               table.insert(AllIDs, ID)
+               TeleportService:TeleportToPlaceInstance(game.PlaceId, ID)
+               break
+            end
+
+         end
+      end
+
+   end,
+})
+
+-- Join Server Small
+MainTab:CreateButton({
+   Name = "Join Server Small",
+   Callback = function()
+
+      local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
+      local servers = HttpService:JSONDecode(game:HttpGet(url))
+
+      local lowest = nil
+      local players = math.huge
+
+      for _,v in pairs(servers.data) do
+         if v.playing < players and v.id ~= game.JobId then
+            players = v.playing
+            lowest = v.id
+         end
+      end
+
+      if lowest then
+         TeleportService:TeleportToPlaceInstance(game.PlaceId, lowest)
+      end
+
+   end,
+})
+
+-- Join Server Fast
+MainTab:CreateButton({
+   Name = "Join Server Fast",
+   Callback = function()
+
+      local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"
+      local servers = HttpService:JSONDecode(game:HttpGet(url))
+
+      for _,v in pairs(servers.data) do
+         if v.playing < v.maxPlayers and v.id ~= game.JobId then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, v.id)
+            break
+         end
+      end
+
+   end,
+})
 
 MainTab:CreateSection("Thông Tin Bản Thân")
 MainTab:CreateLabel("Username: " .. LocalPlayer.Name)
@@ -92,19 +194,14 @@ Players.PlayerAdded:Connect(function(player)
     MainTab:CreateLabel(player.DisplayName .. " [@" .. player.Name .. "]")
 end)
 
-
-
-MainTab:CreateButton({
-   Name = "Reset GUI Rayfield",
-   Callback = function() Rayfield:Destroy() end,
-})
-
 local PlayerTab = Window:CreateTab("Player", "user")
 
 PlayerTab:CreateSection("Tools")
 
 --Speed
 local walkspeed = 16
+local defaultSpeed = nil
+
 PlayerTab:CreateSlider({
     Name = "Speed",
     Range = {16, 1000},
@@ -122,6 +219,13 @@ PlayerTab:CreateToggle({
     CurrentValue = false,
     Callback = function(state)
         local plr = game.Players.LocalPlayer
+
+        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            if not defaultSpeed then
+                defaultSpeed = plr.Character.Humanoid.WalkSpeed
+            end
+        end
+
         if state then
             speedLoop = task.spawn(function()
                 while task.wait() do
@@ -136,8 +240,9 @@ PlayerTab:CreateToggle({
                 task.cancel(speedLoop)
                 speedLoop = nil
             end
+
             if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                plr.Character.Humanoid.WalkSpeed = 16
+                plr.Character.Humanoid.WalkSpeed = defaultSpeed or 16
             end
         end
     end
@@ -259,21 +364,6 @@ PlayerTab:CreateButton({
 
 PlayerTab:CreateSection("Funny Tools")
 
-PlayerTab:CreateToggle({
-    Name = "Sit",
-    CurrentValue = false,
-    Callback = function(state)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            if state then
-                LocalPlayer.Character.Humanoid.Sit = true
-            else
-                LocalPlayer.Character.Humanoid.Sit = false
-                LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-            end
-        end
-    end
-})
-
 --ping&fps
 local statsGui
 local showStats = false
@@ -321,6 +411,166 @@ PlayerTab:CreateToggle({
             end
         end
     end
+})
+
+local Lighting = game:GetService("Lighting")
+
+--fullbright
+local oldBrightness = Lighting.Brightness
+local oldClockTime = Lighting.ClockTime
+local oldFogEnd = Lighting.FogEnd
+local oldGlobalShadows = Lighting.GlobalShadows
+
+PlayerTab:CreateToggle({
+    Name = "Fullbright",
+    CurrentValue = false,
+    Callback = function(v)
+        if v then
+            Lighting.Brightness = 5
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 100000
+            Lighting.GlobalShadows = false
+        else
+            Lighting.Brightness = oldBrightness
+            Lighting.ClockTime = oldClockTime
+            Lighting.FogEnd = oldFogEnd
+            Lighting.GlobalShadows = oldGlobalShadows
+        end
+    end,
+})
+
+--remove fog
+local oldFogStart = Lighting.FogStart
+local removedEffects = {}
+
+PlayerTab:CreateToggle({
+    Name = "Remove Fog",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+            Lighting.FogEnd = 100000
+            Lighting.FogStart = 0
+
+            for _,obj in pairs(Lighting:GetChildren()) do
+                if obj:IsA("Atmosphere") or obj:IsA("BlurEffect") then
+                    table.insert(removedEffects,obj)
+                    obj.Parent = nil
+                end
+            end
+
+        else
+            Lighting.FogEnd = oldFogEnd
+            Lighting.FogStart = oldFogStart
+
+            for _,obj in pairs(removedEffects) do
+                obj.Parent = Lighting
+            end
+
+            removedEffects = {}
+        end
+
+    end,
+})
+
+local Lighting = game:GetService("Lighting")
+
+local removedEffects = {}
+local removedUltra = {}
+
+--BOOST FPS
+PlayerTab:CreateToggle({
+    Name = "Boost FPS",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+            Lighting.GlobalShadows = false
+
+            for _,obj in pairs(game:GetDescendants()) do
+                if obj:IsA("BloomEffect")
+                or obj:IsA("SunRaysEffect")
+                or obj:IsA("DepthOfFieldEffect")
+                or obj:IsA("ColorCorrectionEffect")
+                or obj:IsA("BlurEffect")
+                or obj:IsA("Atmosphere")
+                or obj:IsA("ParticleEmitter")
+                or obj:IsA("Trail")
+                or obj:IsA("Smoke")
+                or obj:IsA("Fire")
+                or obj:IsA("Sparkles") then
+
+                    table.insert(removedEffects,obj)
+                    obj.Parent = nil
+                end
+            end
+
+        else
+
+            Lighting.GlobalShadows = true
+
+            for _,obj in pairs(removedEffects) do
+                if obj then
+                    obj.Parent = Lighting
+                end
+            end
+
+            removedEffects = {}
+
+        end
+    end,
+})
+
+--ULTRA BOOST FPS
+PlayerTab:CreateToggle({
+    Name = "Ultra Boost FPS",
+    CurrentValue = false,
+    Callback = function(v)
+
+        if v then
+
+            settings().Rendering.QualityLevel = "Level01"
+            Lighting.GlobalShadows = false
+
+            workspace.Terrain.WaterWaveSize = 0
+            workspace.Terrain.WaterWaveSpeed = 0
+            workspace.Terrain.WaterReflectance = 0
+            workspace.Terrain.WaterTransparency = 1
+
+            for _,obj in pairs(game:GetDescendants()) do
+                if obj:IsA("BloomEffect")
+                or obj:IsA("SunRaysEffect")
+                or obj:IsA("DepthOfFieldEffect")
+                or obj:IsA("ColorCorrectionEffect")
+                or obj:IsA("BlurEffect")
+                or obj:IsA("Atmosphere")
+                or obj:IsA("ParticleEmitter")
+                or obj:IsA("Trail")
+                or obj:IsA("Smoke")
+                or obj:IsA("Fire")
+                or obj:IsA("Sparkles")
+                or obj:IsA("Texture")
+                or obj:IsA("Decal") then
+
+                    table.insert(removedUltra,obj)
+                    obj.Parent = nil
+                end
+            end
+
+        else
+
+            Lighting.GlobalShadows = true
+
+            for _,obj in pairs(removedUltra) do
+                if obj then
+                    obj.Parent = Lighting
+                end
+            end
+
+            removedUltra = {}
+
+        end
+    end,
 })
 
 --minimap
@@ -682,481 +932,385 @@ PlayerTab:CreateButton({
 })
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
 local LocalPlayer = Players.LocalPlayer
 
--- ESP Tab
-local ESP = Window:CreateTab("Visual", "eye")
+local ESP = Window:CreateTab("Visual","eye")
 
 ESP:CreateSection("ESP")
 
---esp1
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
+local nameMode = 3
 
-local function removeAllESP()
-    for _, gui in pairs(espInstances) do
-        if gui and gui.Parent then
-            gui:Destroy()
-        end
-    end
-    for _, conn in pairs(espConnections) do
-        conn:Disconnect()
-    end
-    espInstances = {}
-    espConnections = {}
-end
-
-local function createESP(plr)
-    if plr == game.Players.LocalPlayer then return end
-    if not plr.Character then return end
-    local head = plr.Character:FindFirstChild("Head")
-    if not head then return end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "NoirESP"
-    billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.LightInfluence = 0
-    billboard.MaxDistance = math.huge
-    billboard.Parent = head
-
-    local txt = Instance.new("TextLabel")
-    txt.Size = UDim2.new(1, 0, 1, 0)
-    txt.BackgroundTransparency = 1
-    txt.TextScaled = false
-    txt.Font = Enum.Font.SourceSansBold
-    txt.TextSize = 14
-    txt.TextColor3 = Color3.new(1, 1, 1)
-    txt.TextStrokeTransparency = 0.5
-    txt.Text = plr.Name
-    txt.Parent = billboard
-
-    local conn = game:GetService("RunService").RenderStepped:Connect(function()
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
-            txt.Text = plr.Name .. " | " .. math.floor(dist) .. "m"
-        end
-    end)
-
-    table.insert(espInstances, billboard)
-    table.insert(espConnections, conn)
-end
-
-ESP:CreateToggle({
-    Name = "ESP (@name)",
-    CurrentValue = false,
-    Callback = function(state)
-        espEnabled = state
-        removeAllESP()
-        if not state then return end
-
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= game.Players.LocalPlayer then
-                if plr.Character then
-                    createESP(plr)
-                end
-                
-                table.insert(espConnections, plr.CharacterAdded:Connect(function()
-                    if espEnabled then
-                        task.wait(0.5)
-                        createESP(plr)
-                    end
-                end))
-            end
-        end
-
-        table.insert(espConnections, game.Players.PlayerAdded:Connect(function(plr)
-            if espEnabled then
-                plr.CharacterAdded:Connect(function()
-                    task.wait(0.5)
-                    createESP(plr)
-                end)
-            end
-        end))
-    end
-})
-
---esp2
-local espEnabled = false
-local espConnections = {}
-local espInstances = {}
-
-local function removeAllESP()
-    for _, gui in pairs(espInstances) do
-        if gui and gui.Parent then
-            gui:Destroy()
-        end
-    end
-    for _, conn in pairs(espConnections) do
-        conn:Disconnect()
-    end
-    espInstances = {}
-    espConnections = {}
-end
-
-local function createESP(plr)
-    if plr == game.Players.LocalPlayer then return end
-    if not plr.Character then return end
-    local head = plr.Character:FindFirstChild("Head")
-    if not head then return end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "NoirESP"
-    billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.LightInfluence = 0
-    billboard.MaxDistance = math.huge
-    billboard.Parent = head
-
-    local txt = Instance.new("TextLabel")
-    txt.Size = UDim2.new(1, 0, 1, 0)
-    txt.BackgroundTransparency = 1
-    txt.TextScaled = false
-    txt.Font = Enum.Font.SourceSansBold
-    txt.TextSize = 14
-    txt.TextColor3 = Color3.new(1, 1, 1)
-    txt.TextStrokeTransparency = 0.5
-    txt.Text = plr.Name
-    txt.Parent = billboard
-
-    local conn = game:GetService("RunService").RenderStepped:Connect(function()
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
-            txt.Text = plr.DisplayName .. " | " .. math.floor(dist) .. "m"
-        end
-    end)
-
-    table.insert(espInstances, billboard)
-    table.insert(espConnections, conn)
-end
-
-ESP:CreateToggle({
-    Name = "ESP (display name)",
-    CurrentValue = false,
-    Callback = function(state)
-        espEnabled = state
-        removeAllESP()
-        if not state then return end
-
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= game.Players.LocalPlayer then
-                if plr.Character then
-                    createESP(plr)
-                end
-                
-                table.insert(espConnections, plr.CharacterAdded:Connect(function()
-                    if espEnabled then
-                        task.wait(0.5)
-                        createESP(plr)
-                    end
-                end))
-            end
-        end
-
-        table.insert(espConnections, game.Players.PlayerAdded:Connect(function(plr)
-            if espEnabled then
-                plr.CharacterAdded:Connect(function()
-                    task.wait(0.5)
-                    createESP(plr)
-                end)
-            end
-        end))
-    end
-})
-
---esp3
-local espEnabled = false
-local espConnections = {}
-local espInstances = {}
-
-local function removeAllESP()
-    for _, gui in pairs(espInstances) do
-        if gui and gui.Parent then
-            gui:Destroy()
-        end
-    end
-    for _, conn in pairs(espConnections) do
-        conn:Disconnect()
-    end
-    espInstances = {}
-    espConnections = {}
-end
-
-local function createESP(plr)
-    if plr == game.Players.LocalPlayer then return end
-    if not plr.Character then return end
-    local head = plr.Character:FindFirstChild("Head")
-    if not head then return end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "NoirESP"
-    billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.LightInfluence = 0
-    billboard.MaxDistance = math.huge
-    billboard.Parent = head
-
-    local txt = Instance.new("TextLabel")
-    txt.Size = UDim2.new(1, 0, 1, 0)
-    txt.BackgroundTransparency = 1
-    txt.TextScaled = false
-    txt.Font = Enum.Font.SourceSansBold
-    txt.TextSize = 14
-    txt.TextColor3 = Color3.new(1, 1, 1)
-    txt.TextStrokeTransparency = 0.5
-    txt.Text = plr.Name
-    txt.Parent = billboard
-
-    local conn = game:GetService("RunService").RenderStepped:Connect(function()
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
-            txt.Text = plr.DisplayName .. " (@" .. plr.Name .. ") | " .. math.floor(dist) .. "m"
-        end
-    end)
-
-    table.insert(espInstances, billboard)
-    table.insert(espConnections, conn)
-end
-
-ESP:CreateToggle({
-    Name = "ESP (@name+display name)",
-    CurrentValue = false,
-    Callback = function(state)
-        espEnabled = state
-        removeAllESP()
-        if not state then return end
-
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= game.Players.LocalPlayer then
-                if plr.Character then
-                    createESP(plr)
-                end
-                
-                table.insert(espConnections, plr.CharacterAdded:Connect(function()
-                    if espEnabled then
-                        task.wait(0.5)
-                        createESP(plr)
-                    end
-                end))
-            end
-        end
-
-        table.insert(espConnections, game.Players.PlayerAdded:Connect(function(plr)
-            if espEnabled then
-                plr.CharacterAdded:Connect(function()
-                    task.wait(0.5)
-                    createESP(plr)
-                end)
-            end
-        end))
-    end
-})
-
-ESP:CreateSection("highlight")
-
--- GLOBAL SETTINGS
 local espSettings = {
-    UseOutline = false,
-    UseFill = false,
-    Color = Color3.fromRGB(0,255,0),
-    ShowHitbox = false,
-    HitboxTransparency = 0.5,
-    HitboxColor = Color3.fromRGB(255,0,0),
+UseOutline = false,
+UseFill = false,
+Color = Color3.fromRGB(0,255,0),
+ShowHitbox = false,
+HitboxTransparency = 0.5,
+HitboxColor = Color3.fromRGB(255,0,0),
 }
 
--- Tạo highlight cho 1 player
-local function createHighlight(char)
-    if char and not char:FindFirstChild("ESPHighlight") then
-        local h = Instance.new("Highlight")
-        h.Name = "ESPHighlight"
-        h.Adornee = char
-        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-        h.Parent = char
-        h.Enabled = true
-        h.FillTransparency = espSettings.UseFill and 0.5 or 1
-        h.OutlineTransparency = espSettings.UseOutline and 0 or 1
-        h.FillColor = espSettings.Color
-        h.OutlineColor = espSettings.Color
-    end
+-- NAME MODE
+
+local function getName(plr)
+
+if nameMode == 1 then
+return "@"..plr.Name
+elseif nameMode == 2 then
+return plr.DisplayName
+else
+return plr.DisplayName.." (@"..plr.Name..")"
 end
 
--- Update highlight settings
-local function updateHighlight(char)
-    local h = char and char:FindFirstChild("ESPHighlight")
-    if h then
-        h.FillTransparency = espSettings.UseFill and 0.5 or 1
-        h.OutlineTransparency = espSettings.UseOutline and 0 or 1
-        h.FillColor = espSettings.Color
-        h.OutlineColor = espSettings.Color
-    end
 end
 
--- Tạo hitbox (BoxHandleAdornment vào HumanoidRootPart)
-local function createHitbox(char)
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if hrp and not hrp:FindFirstChild("ESPHitbox") then
-        local box = Instance.new("BoxHandleAdornment")
-        box.Name = "ESPHitbox"
-        box.Adornee = hrp
-        box.Size = hrp.Size * 2
-        box.AlwaysOnTop = true
-        box.ZIndex = 0
-        box.Color3 = espSettings.HitboxColor
-        box.Transparency = espSettings.HitboxTransparency
-        box.Parent = hrp
-    end
+local function removeAllESP()
+
+for _,gui in pairs(espInstances) do
+if gui and gui.Parent then
+gui:Destroy()
+end
 end
 
--- Update hitbox settings
-local function updateHitbox(char)
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local box = hrp and hrp:FindFirstChild("ESPHitbox")
-    if box then
-        box.Color3 = espSettings.HitboxColor
-        box.Transparency = espSettings.HitboxTransparency
-    end
+for _,conn in pairs(espConnections) do
+conn:Disconnect()
 end
 
--- Apply ESP cho tất cả players
-local function applyESP(player)
-    if player.Character then
-        createHighlight(player.Character)
-        updateHighlight(player.Character)
-        if espSettings.ShowHitbox then
-            createHitbox(player.Character)
-            updateHitbox(player.Character)
-        end
-    end
-    player.CharacterAdded:Connect(function(char)
-        task.wait(1)
-        createHighlight(char)
-        updateHighlight(char)
-        if espSettings.ShowHitbox then
-            createHitbox(char)
-            updateHitbox(char)
-        end
-    end)
+espInstances = {}
+espConnections = {}
+
 end
 
--- Gán ESP cho tất cả player hiện tại + player mới
-for _, p in ipairs(Players:GetPlayers()) do
-    if p ~= LocalPlayer then
-        applyESP(p)
-    end
+local function createESP(plr)
+
+if plr == LocalPlayer then return end
+if not plr.Character then return end
+
+local head = plr.Character:FindFirstChild("Head")
+local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+
+if not head or not hrp then return end
+
+local billboard = Instance.new("BillboardGui")
+billboard.Name = "NoirESP"
+billboard.AlwaysOnTop = true
+billboard.Size = UDim2.new(0,200,0,50)
+billboard.StudsOffset = Vector3.new(0,2,0)
+billboard.Parent = head
+
+local txt = Instance.new("TextLabel")
+txt.Size = UDim2.new(1,0,1,0)
+txt.BackgroundTransparency = 1
+txt.Font = Enum.Font.SourceSansBold
+txt.TextSize = 14
+txt.TextColor3 = Color3.new(1,1,1)
+txt.TextStrokeTransparency = 0.5
+txt.Parent = billboard
+
+local conn = RunService.RenderStepped:Connect(function()
+
+if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+local dist = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+
+txt.Text = getName(plr).." | "..math.floor(dist).."m"
+
 end
-Players.PlayerAdded:Connect(function(p)
-    if p ~= LocalPlayer then
-        applyESP(p)
-    end
+
 end)
 
--------------------------------------------------
--- GUI Controls
--------------------------------------------------
+table.insert(espInstances,billboard)
+table.insert(espConnections,conn)
+
+end
 
 ESP:CreateToggle({
-    Name = "Highlight Outline",
-    CurrentValue = false,
-    Callback = function(v)
-        espSettings.UseOutline = v
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character then updateHighlight(p.Character) end
-        end
-    end,
+Name = "Player ESP",
+CurrentValue = false,
+Callback = function(state)
+
+espEnabled = state
+removeAllESP()
+
+if not state then return end
+
+for _,plr in pairs(Players:GetPlayers()) do
+
+if plr ~= LocalPlayer then
+
+if plr.Character then
+createESP(plr)
+end
+
+table.insert(espConnections,
+plr.CharacterAdded:Connect(function()
+
+if espEnabled then
+task.wait(0.5)
+createESP(plr)
+end
+
+end))
+
+end
+
+end
+
+end
+})
+
+ESP:CreateDropdown({
+Name = "ESP Name Mode",
+Options = {"@Username","DisplayName","Display + @Username"},
+CurrentOption = {"Display + @Username"},
+MultipleOptions = false,
+Callback = function(opt)
+
+local o = opt[1]
+
+if o == "@Username" then
+nameMode = 1
+elseif o == "DisplayName" then
+nameMode = 2
+else
+nameMode = 3
+end
+
+end
+})
+
+ESP:CreateSection("Highlight")
+
+local function createHighlight(char)
+
+if char and not char:FindFirstChild("ESPHighlight") then
+
+local h = Instance.new("Highlight")
+h.Name = "ESPHighlight"
+h.Adornee = char
+h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+h.Parent = char
+
+end
+
+end
+
+local function updateHighlight(char)
+
+local h = char and char:FindFirstChild("ESPHighlight")
+if h then
+
+h.FillTransparency = espSettings.UseFill and 0.5 or 1
+h.OutlineTransparency = espSettings.UseOutline and 0 or 1
+h.FillColor = espSettings.Color
+h.OutlineColor = espSettings.Color
+
+end
+
+end
+
+local function createHitbox(char)
+
+local hrp = char:FindFirstChild("HumanoidRootPart")
+
+if hrp and not hrp:FindFirstChild("ESPHitbox") then
+
+local box = Instance.new("BoxHandleAdornment")
+box.Name = "ESPHitbox"
+box.Adornee = hrp
+box.Size = hrp.Size * 2
+box.AlwaysOnTop = true
+box.Color3 = espSettings.HitboxColor
+box.Transparency = espSettings.HitboxTransparency
+box.Parent = hrp
+
+end
+
+end
+
+local function updateHitbox(char)
+
+local hrp = char:FindFirstChild("HumanoidRootPart")
+local box = hrp and hrp:FindFirstChild("ESPHitbox")
+
+if box then
+
+box.Color3 = espSettings.HitboxColor
+box.Transparency = espSettings.HitboxTransparency
+
+end
+
+end
+
+local function applyESP(player)
+
+if player.Character then
+
+createHighlight(player.Character)
+updateHighlight(player.Character)
+
+if espSettings.ShowHitbox then
+createHitbox(player.Character)
+updateHitbox(player.Character)
+end
+
+end
+
+player.CharacterAdded:Connect(function(char)
+
+task.wait(1)
+
+createHighlight(char)
+updateHighlight(char)
+
+if espSettings.ShowHitbox then
+createHitbox(char)
+updateHitbox(char)
+end
+
+end)
+
+end
+
+for _,p in ipairs(Players:GetPlayers()) do
+if p ~= LocalPlayer then
+applyESP(p)
+end
+end
+
+Players.PlayerAdded:Connect(function(p)
+if p ~= LocalPlayer then
+applyESP(p)
+end
+end)
+
+ESP:CreateToggle({
+Name = "Highlight Outline",
+CurrentValue = false,
+Callback = function(v)
+
+espSettings.UseOutline = v
+
+for _,p in ipairs(Players:GetPlayers()) do
+if p.Character then updateHighlight(p.Character) end
+end
+
+end
 })
 
 ESP:CreateToggle({
-    Name = "Highlight Fill",
-    CurrentValue = false,
-    Callback = function(v)
-        espSettings.UseFill = v
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character then updateHighlight(p.Character) end
-        end
-    end,
+Name = "Highlight Fill",
+CurrentValue = false,
+Callback = function(v)
+
+espSettings.UseFill = v
+
+for _,p in ipairs(Players:GetPlayers()) do
+if p.Character then updateHighlight(p.Character) end
+end
+
+end
 })
 
 ESP:CreateColorPicker({
-    Name = "Highlight Color",
-    Color = espSettings.Color,
-    Callback = function(c)
-        espSettings.Color = c
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character then updateHighlight(p.Character) end
-        end
-    end,
+Name = "Highlight Color",
+Color = espSettings.Color,
+Callback = function(c)
+
+espSettings.Color = c
+
+for _,p in ipairs(Players:GetPlayers()) do
+if p.Character then updateHighlight(p.Character) end
+end
+
+end
 })
 
-ESP:CreateSection("hitbox")
+ESP:CreateSection("Hitbox")
 
 ESP:CreateToggle({
-    Name = "Show Hitbox",
-    CurrentValue = false,
-    Callback = function(v)
-        espSettings.ShowHitbox = v
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character then
-                if v then
-                    createHitbox(p.Character)
-                else
-                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp and hrp:FindFirstChild("ESPHitbox") then
-                        hrp.ESPHitbox:Destroy()
-                    end
-                end
-            end
-        end
-    end,
+Name = "Show Hitbox",
+CurrentValue = false,
+Callback = function(v)
+
+espSettings.ShowHitbox = v
+
+for _,p in ipairs(Players:GetPlayers()) do
+
+if p.Character then
+
+if v then
+createHitbox(p.Character)
+else
+
+local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+
+if hrp and hrp:FindFirstChild("ESPHitbox") then
+hrp.ESPHitbox:Destroy()
+end
+
+end
+
+end
+
+end
+
+end
 })
 
 ESP:CreateColorPicker({
-    Name = "Hitbox Color",
-    Color = espSettings.HitboxColor,
-    Callback = function(c)
-        espSettings.HitboxColor = c
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character then updateHitbox(p.Character) end
-        end
-    end,
+Name = "Hitbox Color",
+Color = espSettings.HitboxColor,
+Callback = function(c)
+
+espSettings.HitboxColor = c
+
+for _,p in ipairs(Players:GetPlayers()) do
+if p.Character then updateHitbox(p.Character) end
+end
+
+end
 })
 
 ESP:CreateSlider({
-    Name = "Hitbox Transparency",
-    Range = {0,1},
-    Increment = 0.1,
-    CurrentValue = espSettings.HitboxTransparency,
-    Callback = function(v)
-        espSettings.HitboxTransparency = v
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p.Character then updateHitbox(p.Character) end
-        end
-    end,
+Name = "Hitbox Transparency",
+Range = {0,1},
+Increment = 0.1,
+CurrentValue = espSettings.HitboxTransparency,
+Callback = function(v)
+
+espSettings.HitboxTransparency = v
+
+for _,p in ipairs(Players:GetPlayers()) do
+if p.Character then updateHitbox(p.Character) end
+end
+
+end
 })
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local HttpService = game:GetService("HttpService")
-local TweenService = game:GetService("TweenService")
 
 -- Config
 local AimbotEnabled = false
+local NPCAimbotEnabled = false
 local TeamCheck = true
 local WallCheck = true
-local DeathCheck = true -- ✅ mới: bật/tắt dead check
+local DeathCheck = true
 local FOVRadius = 100
-local FOVColor = Color3.fromRGB(0, 255, 0)
-
 local Smoothness = 0.4
-local AimPart = "Head" -- mặc định aim vào đầu
+local AimPart = "Head"
+local Prediction = 0.12
 
--- FOV Circle
+-- FOV
 local CoreGui = game:GetService("CoreGui")
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "Noir_FOVGui"
 ScreenGui.IgnoreGuiInset = true
@@ -1164,176 +1318,246 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
 local FOVCircle = Instance.new("Frame")
-FOVCircle.Name = "FOV"
-FOVCircle.Parent = ScreenGui
-FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
-FOVCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
-FOVCircle.Size = UDim2.new(0, FOVRadius * 2, 0, FOVRadius * 2)
+FOVCircle.AnchorPoint = Vector2.new(0.5,0.5)
+FOVCircle.Position = UDim2.new(0.5,0,0.5,0)
+FOVCircle.Size = UDim2.new(0,FOVRadius*2,0,FOVRadius*2)
 FOVCircle.BackgroundTransparency = 1
 FOVCircle.Visible = false
+FOVCircle.Parent = ScreenGui
 
-local UIStroke = Instance.new("UIStroke", FOVCircle)
-UIStroke.Thickness = 2
-UIStroke.Color = FOVColor
+local stroke = Instance.new("UIStroke",FOVCircle)
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(0,255,0)
 
-local UICorner = Instance.new("UICorner", FOVCircle)
-UICorner.CornerRadius = UDim.new(1, 0)
+local corner = Instance.new("UICorner",FOVCircle)
+corner.CornerRadius = UDim.new(1,0)
 
--- Main Tab
-local Taba = Window:CreateTab("Aimbot", "target")
+-- TAB
+local Taba = Window:CreateTab("Aimbot","target")
 
 Taba:CreateToggle({
-    Name = "Active Aimbot",
-    CurrentValue = false,
-    Callback = function(value)
-        AimbotEnabled = value
-    end
+Name="Active Aimbot",
+CurrentValue=false,
+Callback=function(v)
+AimbotEnabled=v
+end
 })
 
 Taba:CreateToggle({
-    Name = "Show FOV Circle",
-    CurrentValue = false,
-    Callback = function(value)
-        FOVCircle.Visible = value
-    end
+Name="Aimbot NPC",
+CurrentValue=false,
+Callback=function(v)
+NPCAimbotEnabled=v
+end
 })
 
 Taba:CreateToggle({
-    Name = "Team Check",
-    CurrentValue = true,
-    Callback = function(value)
-        TeamCheck = value
-    end
+Name="Show FOV Circle",
+CurrentValue=false,
+Callback=function(v)
+FOVCircle.Visible=v
+end
 })
 
 Taba:CreateToggle({
-    Name = "Wall Check",
-    CurrentValue = true,
-    Callback = function(value)
-        WallCheck = value
-    end
+Name="Team Check",
+CurrentValue=true,
+Callback=function(v)
+TeamCheck=v
+end
 })
 
--- ✅ Toggle mới: Death/Dead check
 Taba:CreateToggle({
-    Name = "Death Check",
-    CurrentValue = true,
-    Callback = function(value)
-        DeathCheck = value
-    end
+Name="Wall Check",
+CurrentValue=true,
+Callback=function(v)
+WallCheck=v
+end
+})
+
+Taba:CreateToggle({
+Name="Death Check",
+CurrentValue=true,
+Callback=function(v)
+DeathCheck=v
+end
 })
 
 Taba:CreateSlider({
-    Name = "Circle FOV",
-    Range = {50, 300},
-    Increment = 5,
-    CurrentValue = 100,
-    Callback = function(value)
-        FOVRadius = value
-        FOVCircle.Size = UDim2.new(0, value * 2, 0, value * 2)
-    end
+Name="Circle FOV",
+Range={50,300},
+Increment=5,
+CurrentValue=100,
+Callback=function(v)
+FOVRadius=v
+FOVCircle.Size=UDim2.new(0,v*2,0,v*2)
+end
 })
 
 Taba:CreateSlider({
-    Name = "Smooth",
-    Range = {0, 1},
-    Increment = 0.05,
-    CurrentValue = 0.4,
-    Callback = function(value)
-        Smoothness = value
-    end
+Name="Smooth",
+Range={0,1},
+Increment=0.05,
+CurrentValue=0.4,
+Callback=function(v)
+Smoothness=v
+end
 })
 
--- Dropdown chọn part để aim
+Taba:CreateSlider({
+Name="Prediction",
+Range={0,0.5},
+Increment=0.01,
+CurrentValue=0.12,
+Callback=function(v)
+Prediction=v
+end
+})
+
 Taba:CreateDropdown({
-    Name = "Aim Part",
-    Options = {"Head", "Torso"},
-    CurrentOption = "Head",
-    MultipleOptions = false,
-    Callback = function(option)
-        AimPart = option
-    end
+Name="Aim Part",
+Options={"Head","Torso"},
+CurrentOption="Head",
+MultipleOptions=false,
+Callback=function(v)
+AimPart=v
+end
 })
 
--- Aimbot logic
-local function GetClosestTarget()
-    local closest = nil
-    local shortestDist = FOVRadius
+-- NPC Cache (FPS Boost)
+local NPCList={}
 
-    if not Camera then return nil end
+local function RefreshNPCs()
 
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+NPCList={}
 
-            -- Dead check: nếu bật DeathCheck thì bỏ qua player không có Humanoid hoặc Health <= 0
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            if DeathCheck then
-                if not humanoid or humanoid.Health <= 0 then
-                    continue
-                end
-            end
-
-            if not (TeamCheck and player.Team == LocalPlayer.Team) then
-                local targetPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if AimPart == "Head" and player.Character:FindFirstChild("Head") then
-                    targetPart = player.Character.Head
-                end
-
-                local pos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                if onScreen then
-                    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-                    local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-
-                    if dist <= shortestDist then
-                        if WallCheck then
-                            local origin = Camera.CFrame.Position
-                            local direction = (targetPart.Position - origin).Unit * 1000
-                            local raycastParams = RaycastParams.new()
-                            if LocalPlayer.Character then
-                                raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
-                            else
-                                raycastParams.FilterDescendantsInstances = {}
-                            end
-                            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-
-                            local result = workspace:Raycast(origin, direction, raycastParams)
-                            if result and result.Instance and result.Instance:IsDescendantOf(player.Character) then
-                                closest = player
-                                shortestDist = dist
-                            end
-                        else
-                            closest = player
-                            shortestDist = dist
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    return closest
+for _,obj in pairs(workspace:GetDescendants()) do
+if obj:IsA("Model") then
+if obj:FindFirstChildOfClass("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
+if not Players:GetPlayerFromCharacter(obj) then
+table.insert(NPCList,obj)
+end
+end
+end
 end
 
-RunService.RenderStepped:Connect(function()
-    if AimbotEnabled and Camera then
-        local target = GetClosestTarget()
-        if target and target.Character then
-            local part = nil
-            if AimPart == "Head" then
-                part = target.Character:FindFirstChild("Head")
-            else
-                part = target.Character:FindFirstChild("HumanoidRootPart") -- torso
-            end
+end
 
-            if part then
-                local targetPos = part.Position
-                local camPos = Camera.CFrame.Position
-                local newCF = CFrame.new(camPos, targetPos)
-                -- Smoothly lerp camera orientation towards target
-                Camera.CFrame = Camera.CFrame:Lerp(newCF, math.clamp(Smoothness, 0, 1))
-            end
-        end
-    end
+RefreshNPCs()
+
+task.spawn(function()
+while true do
+task.wait(5)
+RefreshNPCs()
+end
+end)
+
+-- Target Finder
+local function GetClosestTarget()
+
+local closest=nil
+local shortest=FOVRadius
+
+local function checkCharacter(char,player)
+
+local hrp=char:FindFirstChild("HumanoidRootPart")
+if not hrp then return end
+
+local humanoid=char:FindFirstChildOfClass("Humanoid")
+
+if DeathCheck then
+if not humanoid or humanoid.Health<=0 then
+return
+end
+end
+
+if player and TeamCheck and player.Team==LocalPlayer.Team then
+return
+end
+
+local part=hrp
+
+if AimPart=="Head" and char:FindFirstChild("Head") then
+part=char.Head
+end
+
+local pos,onScreen=Camera:WorldToViewportPoint(part.Position)
+if not onScreen then return end
+
+local center=Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)
+local dist=(Vector2.new(pos.X,pos.Y)-center).Magnitude
+
+if dist<=shortest then
+
+if WallCheck then
+
+local origin=Camera.CFrame.Position
+local direction=(part.Position-origin).Unit*1000
+
+local params=RaycastParams.new()
+params.FilterDescendantsInstances={LocalPlayer.Character}
+params.FilterType=Enum.RaycastFilterType.Blacklist
+
+local result=workspace:Raycast(origin,direction,params)
+
+if result and result.Instance and result.Instance:IsDescendantOf(char) then
+closest=part
+shortest=dist
+end
+
+else
+
+closest=part
+shortest=dist
+
+end
+
+end
+
+end
+
+-- PLAYER
+if AimbotEnabled then
+for _,p in pairs(Players:GetPlayers()) do
+if p~=LocalPlayer and p.Character then
+checkCharacter(p.Character,p)
+end
+end
+end
+
+-- NPC
+if NPCAimbotEnabled then
+for _,npc in pairs(NPCList) do
+checkCharacter(npc,nil)
+end
+end
+
+return closest
+
+end
+
+-- AIM LOOP
+RunService.RenderStepped:Connect(function()
+
+if not (AimbotEnabled or NPCAimbotEnabled) then return end
+if not Camera then return end
+
+local part=GetClosestTarget()
+
+if part then
+
+local targetPos=part.Position
+local velocity=part.AssemblyLinearVelocity or Vector3.new()
+
+targetPos=targetPos+(velocity*Prediction)
+
+local camPos=Camera.CFrame.Position
+local newCF=CFrame.new(camPos,targetPos)
+
+Camera.CFrame=Camera.CFrame:Lerp(newCF,math.clamp(Smoothness,0,1))
+
+end
+
 end)
 
 local ScriptsTab = Window:CreateTab("Scripts", "file-text")
@@ -1476,16 +1700,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "TSB (by YQANTG v3.3)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/yqantg-pixel/Find/refs/heads/main/Protected_3334988263341522.lua.txt"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "The Strongest Battleground",
     Callback = function()
-        loadstring(game:HttpGet("https://api.getpolsec.com/scripts/hosted/6c153e601475b17b12d0c5f1f295f2bdb2efd2c13aa92d93e0588ba7b4a34d7e.lua"))()
+        loadstring(game:HttpGet("https://api.getpolsec.com/scripts/hosted/7bad5e3679f40a89db9300800355a40cd92b70f3ca4c354ffe0e52444c6341fb.lua"))()
     end,
 })
 
@@ -1511,9 +1728,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "MeMe Sea",
+    Name = "Survive 100days in Nuclear Bunker",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZaqueHub/ShinyHub-MMSea/main/MEME%20SEA%20PROTECT.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/egor2078f/egor2078f/main/Script.lua", true))()
     end,
 })
 
@@ -2330,10 +2547,11 @@ RunService.Heartbeat:Connect(function(dt)
     end
 end)
 
+--Tab Limbs
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-getgenv().le = getgenv().le or loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/LimbExtender.lua'))()
+getgenv().le = getgenv().le or loadstring(game:HttpGet("https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/LimbExtender.lua"))()
 local LimbExtender = getgenv().le
 
 local le = LimbExtender({
@@ -2341,212 +2559,73 @@ local le = LimbExtender({
     USE_HIGHLIGHT = false,
 })
 
-local Settings = Window:CreateTab("Limbs", "scale-3d")
+local LimbTab = Window:CreateTab("Limbs", "scale-3d")
 
-local function safeCreate(tab, methodName, opts)
-    local method = tab[methodName]
-    if type(method) == "function" then
-        return method(tab, opts)
-    else
-        warn("Method " .. tostring(methodName) .. " not found on tab")
-    end
-end
-
-local function createOption(params)
-    local methodName = "Create" .. params.method
-    local opts = {
-        Name = params.name,
-        SectionParent = params.section,
-        CurrentValue = params.value,
-        Flag = params.flag,
-        Options = params.options,
-        CurrentOption = params.currentOption,
-        MultipleOptions = params.multipleOptions,
-        Range = params.range,
-        Color = params.color,
-        Increment = params.increment,
-        Callback = function(Value)
-            
-            if params.multipleOptions == false and type(Value) == "table" then
-                Value = Value[1]
-            end
-            le:Set(params.flag, Value)
-        end,
-    }
-    return safeCreate(params.tab, methodName, opts)
-end
-
-local ModifyLimbs = Settings:CreateToggle({
+local ModifyLimbs = LimbTab:CreateToggle({
     Name = "Modify Limbs",
-    SectionParent = nil,
     CurrentValue = false,
-    Flag = "ModifyLimbs",
-    Callback = function(Value)
-        le:Toggle(Value)
-    end,
-})
-Settings:CreateDivider()
-
-local toggleSettings = {
-    { method = "Toggle", name = "Team Check", flag = "TEAM_CHECK", tab = Settings, value = le:Get("TEAM_CHECK") },
-    { method = "Toggle", name = "ForceField Check", flag = "FORCEFIELD_CHECK", tab = Settings, value = le:Get("FORCEFIELD_CHECK") },
-    { method = "Toggle", name = "Limb Collisions", flag = "LIMB_CAN_COLLIDE", tab = Settings, value = le:Get("LIMB_CAN_COLLIDE"), createDivider = true },
-    { method = "Slider", name = "Limb Transparency", flag = "LIMB_TRANSPARENCY", tab = Settings, range = {0,1}, increment = 0.1, value = le:Get("LIMB_TRANSPARENCY") },
-    { method = "Slider", name = "Limb Size", flag = "LIMB_SIZE", tab = Settings, range = {5,1000}, increment = 0.5, value = le:Get("LIMB_SIZE"), createDivider = true },
-}
-
-for _, setting in pairs(toggleSettings) do
-    createOption(setting)
-    if setting.createDivider then
-        setting.tab:CreateDivider()
-    end
-end
-
-Settings:CreateKeybind({
-    Name = "Toggle Keybind",
-    CurrentKeybind = le:Get("TOGGLE"),
-    HoldToInteract = false,
-    SectionParent = nil,
-    Flag = "ToggleKeybind",
-    Callback = function()
-        ModifyLimbs:Set(not le._running)
+    Callback = function(v)
+        le:Toggle(v)
     end,
 })
 
+LimbTab:CreateToggle({
+    Name = "Team Check",
+    CurrentValue = le:Get("TEAM_CHECK"),
+    Callback = function(v)
+        le:Set("TEAM_CHECK", v)
+    end,
+})
 
-local Sense = loadstring(game:HttpGet('https://sirius.menu/sense'))()
-Sense.teamSettings.enemy.enabled = true
-Sense.teamSettings.friendly.enabled = true
+LimbTab:CreateToggle({
+    Name = "ForceField Check",
+    CurrentValue = le:Get("FORCEFIELD_CHECK"),
+    Callback = function(v)
+        le:Set("FORCEFIELD_CHECK", v)
+    end,
+})
 
-local function setBoth(settingName, value)
-    if Sense and Sense.teamSettings then
-        Sense.teamSettings.enemy[settingName] = value
-        Sense.teamSettings.friendly[settingName] = value
-    end
-end
+LimbTab:CreateToggle({
+    Name = "Limb Collisions",
+    CurrentValue = le:Get("LIMB_CAN_COLLIDE"),
+    Callback = function(v)
+        le:Set("LIMB_CAN_COLLIDE", v)
+    end,
+})
 
-local function createControl(def)
-    if not def or not def.type then return end
+LimbTab:CreateSlider({
+    Name = "Limb Size",
+    Range = {5,100},
+    Increment = 0.5,
+    CurrentValue = le:Get("LIMB_SIZE"),
+    Callback = function(v)
+        le:Set("LIMB_SIZE", v)
+    end,
+})
 
-    local function applyPropsToTeams(value)
-        if not def.props then return end
-        local function wrapColor(c)
-            if def.alpha ~= nil then
-                return {c, def.alpha}
-            end
-            return c
-        end
+LimbTab:CreateSlider({
+    Name = "Limb Transparency",
+    Range = {0,1},
+    Increment = 0.1,
+    CurrentValue = le:Get("LIMB_TRANSPARENCY"),
+    Callback = function(v)
+        le:Set("LIMB_TRANSPARENCY", v)
+    end,
+})
 
-        if def.props.friendly then
-            local target = Sense.teamSettings.friendly
-            for _, propName in ipairs(def.props.friendly) do
-                target[propName] = (def.type == "color") and wrapColor(value) or value
-            end
-        end
-        if def.props.enemy then
-            local target = Sense.teamSettings.enemy
-            for _, propName in ipairs(def.props.enemy) do
-                target[propName] = (def.type == "color") and wrapColor(value) or value
-            end
-        end
-    end
-
-    local function controlCallback(v)
-        if def.setting then
-            setBoth(def.setting, v)
-        end
-        applyPropsToTeams(v)
-        if def.onChange then def.onChange(v) end
-    end
-
-    if def.type == "section" then
-        Tab:CreateSection(def.name or "")
-        return
-    elseif def.type == "label" then
-        Tab:CreateLabel(def.name or "")
-        return
-    elseif def.type == "toggle" then
-        return Tab:CreateToggle({ Name = def.name, CurrentValue = def.default or false, Flag = def.flag or "", Callback = controlCallback })
-    elseif def.type == "color" then
-        return Tab:CreateColorPicker({ Name = def.name, Color = def.color or Color3.fromRGB(255,255,255), Flag = def.flag or "", Callback = controlCallback })
-    elseif def.type == "dropdown" then
-        return Tab:CreateDropdown({ Name = def.name, Options = def.options or {}, CurrentOption = def.current, Flag = def.flag or "", Callback = controlCallback })
-    elseif def.type == "slider" then
-        return Tab:CreateSlider({ Name = def.name, Range = def.range or {0,100}, CurrentValue = (def.default ~= nil and def.default) or ((def.range and def.range[1]) or 0), Increment = def.increment or 1, Suffix = def.suffix or "", Flag = def.flag or "", Callback = controlCallback })
-    end
-end
-
-local function colorBoth(name, flag, propertiesList, defaultColor, alpha)
-    return { type = "color", name = name, flag = flag, color = defaultColor, alpha = alpha or 1, props = { friendly = propertiesList, enemy = propertiesList } }
-end
-local function colorFriendly(name, flag, friendlyProps, defaultColor, alpha)
-    return { type = "color", name = name, flag = flag, color = defaultColor, alpha = alpha or 1, props = { friendly = friendlyProps } }
-end
-local function colorEnemy(name, flag, enemyProps, defaultColor, alpha)
-    return { type = "color", name = name, flag = flag, color = defaultColor, alpha = alpha or 1, props = { enemy = enemyProps } }
-end
-local function toggle(name, flag, setting, default)
-    return { type = "toggle", name = name, flag = flag, setting = setting, default = default }
-end
-local function slider(name, flag, range, default, inc, setting)
-    return { type = "slider", name = name, flag = flag, range = range, default = default, increment = inc, setting = setting }
-end
-
-local ui = {
-    { type = "section", name = "Team Settings" },
-    { type = "toggle", name = "Hide Team", flag = "HideTeam", default = false, onChange = function(v) Sense.teamSettings.friendly.enabled = not v end },
-
-    colorBoth("Team Color",  "TeamColor", {"boxColor","box3dColor","offScreenArrowColor","tracerColor"}, Color3.fromRGB(0,255,0), 1),
-    colorBoth("Enemy Color", "EnemyColor", {"boxColor","box3dColor","offScreenArrowColor","tracerColor"}, Color3.fromRGB(255,0,0), 1),
-
-    { type = "section", name = "Box" },
-    toggle("Enabled", "Boxes", "box", false),
-    toggle("Outline", "BoxesOutlined", "boxOutline", true),
-    toggle("Fill", "BoxesFilled", "boxFill", false),
-    colorFriendly("Team Fill Color", "TeamFillColor", {"boxFillColor"}, Color3.fromRGB(0,255,0), 0.5),
-    colorEnemy("Enemy Fill Color", "EnemyFillColor", {"boxFillColor"}, Color3.fromRGB(255,0,0), 0.5),
-    toggle("3D Boxes", "3DBoxes", "box3d", false),
-
-    { type = "section", name = "Health" },
-    toggle("Enabled", "HealthBar", "healthBar", false),
-    { type = "color", name = "Health Color", flag = "HealthColor", color = Color3.fromRGB(0,255,0), onChange = function(c) setBoth("healthyColor", c) end },
-    { type = "color", name = "Dying Color", flag = "DyingColor", color = Color3.fromRGB(255,0,0), onChange = function(c) setBoth("dyingColor", c) end },
-    toggle("Outline", "HBsOutlined", "healthBarOutline", true),
-
-    { type = "section", name = "Tracer" },
-    toggle("Enabled", "Tracers", "tracer", false),
-    toggle("Outline", "TracersOutlined", "tracerOutline", true),
-    { type = "dropdown", name = "Origin", flag = "TracerOrigin", options = {"Bottom","Top","Mouse"}, current = "Bottom", onChange = function(v) setBoth("tracerOrigin", v) end },
-
-    { type = "section", name = "Chams" },
-    toggle("Enabled", "Chams", "chams", false),
-    toggle("Visible Only", "ChamsVisOnly", "chamsVisibleOnly", false),
-    colorFriendly("Team Fill Color", "TeamFillColorChams", {"chamsFillColor"}, Color3.new(0.2,0.2,0.2), 0.5),
-    colorFriendly("Team Outline Color", "TeamOutlineColorChams", {"chamsOutlineColor"}, Color3.new(0,1,0), 0),
-    colorEnemy("Enemy Fill Color", "EnemyFillColorChams", {"chamsFillColor"}, Color3.new(0.2,0.2,0.2), 0.5),
-    colorEnemy("Enemy Outline Color", "EnemyOutlineColorChams", {"chamsOutlineColor"}, Color3.new(1,0,0), 0),
-
-    { type = "section", name = "Off Screen Arrow" },
-    toggle("Enabled", "OSA", "offScreenArrow", false),
-    slider("Size", "OSASize", {15,1000}, 15, 1, "offScreenArrowSize"),
-    slider("Radius", "OSARadius", {150,360}, 150, 1, "offScreenArrowRadius"),
-    toggle("Outline", "OSAOutlined", "offScreenArrowOutline", true),
-
-    { type = "section", name = "Weapon" },
-    toggle("Enabled", "Weapons", "weapon", false),
-    toggle("Outline", "WeaponOutlined", "weaponOutline", true),
-}
-
-for _, entry in ipairs(ui) do
-    createControl(entry)
-end
-
-Sense.Load()
-Rayfield:LoadConfiguration()
+local TargetLimb = LimbTab:CreateDropdown({
+    Name = "Target Limb",
+    Options = {},
+    CurrentOption = { le:Get("TARGET_LIMB") },
+    MultipleOptions = false,
+    Callback = function(opt)
+        le:Set("TARGET_LIMB", opt[1])
+    end,
+})
 
 local limbs = {}
+
 local function addLimbIfNew(name)
-    if not name then return end
     if not table.find(limbs, name) then
         table.insert(limbs, name)
         table.sort(limbs)
@@ -2555,20 +2634,21 @@ local function addLimbIfNew(name)
 end
 
 local function characterAdded(Character)
-    if not Character then return end
-    local function onChildChanged(child)
-        if not child or not child:IsA("BasePart") then return end
-        addLimbIfNew(child.Name)
+    for _, part in ipairs(Character:GetChildren()) do
+        if part:IsA("BasePart") then
+            addLimbIfNew(part.Name)
+        end
     end
 
-    Character.ChildAdded:Connect(onChildChanged)
-
-    for _, child in ipairs(Character:GetChildren()) do
-        onChildChanged(child)
-    end
+    Character.ChildAdded:Connect(function(child)
+        if child:IsA("BasePart") then
+            addLimbIfNew(child.Name)
+        end
+    end)
 end
 
 LocalPlayer.CharacterAdded:Connect(characterAdded)
+
 if LocalPlayer.Character then
     characterAdded(LocalPlayer.Character)
 end
