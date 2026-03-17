@@ -1067,22 +1067,10 @@ FPSTab:CreateToggle({
     end,
 })
 
---================ SUPER POTATO MODE =================--
-
 local Terrain = workspace:FindFirstChildOfClass("Terrain")
 
-local savedParts = {}
-local savedMesh = {}
-local savedTextures = {}
-local savedLights = {}
-local savedParticles = {}
-local savedSurface = {}
-local savedHighlight = {}
-
-local oldDecoration = Terrain and Terrain.Decoration
-
 FPSTab:CreateToggle({
-    Name = "Super Potato Mode",
+    Name = "Potato Mode",
     CurrentValue = false,
     Callback = function(v)
 
@@ -1096,58 +1084,30 @@ FPSTab:CreateToggle({
 
             if Terrain then
                 pcall(function() Terrain.Decoration = false end)
-                pcall(function() Terrain.WaterWaveSize = 0 end)
-                pcall(function() Terrain.WaterWaveSpeed = 0 end)
-                pcall(function() Terrain.WaterReflectance = 0 end)
-                pcall(function() Terrain.WaterTransparency = 1 end)
             end
 
             for _,obj in ipairs(workspace:GetDescendants()) do
 
-                if obj:IsA("BasePart") then
+                if not obj:IsDescendantOf(game.Players) then
 
-                    savedParts[obj] = {
-                        Material = obj.Material,
-                        Reflectance = obj.Reflectance,
-                        CastShadow = obj.CastShadow
-                    }
+                    if obj:IsA("BasePart") then
+                        pcall(function() obj.Material = Enum.Material.Plastic end)
+                        pcall(function() obj.CastShadow = false end)
+                        pcall(function() obj.Reflectance = 0 end)
+                    end
 
-                    pcall(function() obj.Material = Enum.Material.Plastic end)
-                    pcall(function() obj.Reflectance = 0 end)
-                    pcall(function() obj.CastShadow = false end)
+                    if obj:IsA("MeshPart") then
+                        pcall(function()
+                            obj.RenderFidelity = Enum.RenderFidelity.Performance
+                        end)
+                    end
 
-                end
+                    if obj:IsA("Texture") or obj:IsA("Decal") then
+                        pcall(function()
+                            obj.Transparency = 1
+                        end)
+                    end
 
-                if obj:IsA("MeshPart") then
-                    savedMesh[obj] = obj.RenderFidelity
-                    pcall(function()
-                        obj.RenderFidelity = Enum.RenderFidelity.Performance
-                    end)
-                end
-
-                if obj:IsA("Texture") or obj:IsA("Decal") then
-                    savedTextures[obj] = obj.Transparency
-                    pcall(function() obj.Transparency = 1 end)
-                end
-
-                if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
-                    savedLights[obj] = obj.Enabled
-                    pcall(function() obj.Enabled = false end)
-                end
-
-                if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
-                    savedParticles[obj] = obj.Enabled
-                    pcall(function() obj.Enabled = false end)
-                end
-
-                if obj:IsA("SurfaceAppearance") then
-                    savedSurface[obj] = obj.Parent
-                    pcall(function() obj.Parent = nil end)
-                end
-
-                if obj:IsA("Highlight") then
-                    savedHighlight[obj] = obj.Enabled
-                    pcall(function() obj.Enabled = false end)
                 end
 
             end
@@ -1160,62 +1120,9 @@ FPSTab:CreateToggle({
 
             Lighting.GlobalShadows = true
 
-            if Terrain and oldDecoration ~= nil then
-                pcall(function() Terrain.Decoration = oldDecoration end)
+            if Terrain then
+                pcall(function() Terrain.Decoration = true end)
             end
-
-            for part,data in pairs(savedParts) do
-                if part then
-                    pcall(function()
-                        part.Material = data.Material
-                        part.Reflectance = data.Reflectance
-                        part.CastShadow = data.CastShadow
-                    end)
-                end
-            end
-            savedParts = {}
-
-            for mesh,val in pairs(savedMesh) do
-                if mesh then
-                    pcall(function() mesh.RenderFidelity = val end)
-                end
-            end
-            savedMesh = {}
-
-            for tex,val in pairs(savedTextures) do
-                if tex then
-                    pcall(function() tex.Transparency = val end)
-                end
-            end
-            savedTextures = {}
-
-            for light,val in pairs(savedLights) do
-                if light then
-                    pcall(function() light.Enabled = val end)
-                end
-            end
-            savedLights = {}
-
-            for p,val in pairs(savedParticles) do
-                if p then
-                    pcall(function() p.Enabled = val end)
-                end
-            end
-            savedParticles = {}
-
-            for s,parent in pairs(savedSurface) do
-                if s then
-                    pcall(function() s.Parent = parent end)
-                end
-            end
-            savedSurface = {}
-
-            for h,val in pairs(savedHighlight) do
-                if h then
-                    pcall(function() h.Enabled = val end)
-                end
-            end
-            savedHighlight = {}
 
         end
 
