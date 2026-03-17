@@ -861,13 +861,13 @@ local Lighting = game:GetService("Lighting")
 
 local FPSTab = Window:CreateTab("FPS", "gauge")
 
+--================ VISUAL BOOST =================--
 FPSTab:CreateSection("Visual Boost")
 
 local oldBrightness = Lighting.Brightness
 local oldClockTime = Lighting.ClockTime
 local oldFogEnd = Lighting.FogEnd
 local oldGlobalShadows = Lighting.GlobalShadows
-
 local fullbrightValue = 5
 
 FPSTab:CreateToggle({
@@ -892,7 +892,7 @@ FPSTab:CreateToggle({
 
 FPSTab:CreateSlider({
     Name = "Fullbright Brightness",
-    Range = {1, 15},
+    Range = {1,15},
     Increment = 0.5,
     CurrentValue = 5,
     Callback = function(v)
@@ -944,6 +944,7 @@ FPSTab:CreateToggle({
     end,
 })
 
+--================ PERFORMANCE =================--
 FPSTab:CreateSection("Performance")
 
 FPSTab:CreateToggle({
@@ -960,6 +961,7 @@ FPSTab:CreateToggle({
     end,
 })
 
+-- Boost FPS
 local removedEffects = {}
 
 FPSTab:CreateToggle({
@@ -1007,6 +1009,7 @@ FPSTab:CreateToggle({
     end,
 })
 
+-- Ultra Boost
 local removedUltra = {}
 
 FPSTab:CreateToggle({
@@ -1064,8 +1067,10 @@ FPSTab:CreateToggle({
     end,
 })
 
+--================ POTATO MODE =================--
 local savedTextures = {}
 local savedMesh = {}
+local savedParts = {}
 local oldDecoration = workspace.Terrain.Decoration
 
 FPSTab:CreateToggle({
@@ -1079,12 +1084,26 @@ FPSTab:CreateToggle({
             Lighting.GlobalShadows = false
 
             workspace.Terrain.Decoration = false
+
             workspace.Terrain.WaterWaveSize = 0
             workspace.Terrain.WaterWaveSpeed = 0
             workspace.Terrain.WaterReflectance = 0
             workspace.Terrain.WaterTransparency = 1
 
             for _,obj in pairs(workspace:GetDescendants()) do
+
+                if obj:IsA("BasePart") then
+
+                    savedParts[obj] = {
+                        Material = obj.Material,
+                        Reflectance = obj.Reflectance,
+                        CastShadow = obj.CastShadow
+                    }
+
+                    obj.Material = Enum.Material.Plastic
+                    obj.Reflectance = 0
+                    obj.CastShadow = false
+                end
 
                 if obj:IsA("MeshPart") then
                     savedMesh[obj] = obj.RenderFidelity
@@ -1104,6 +1123,15 @@ FPSTab:CreateToggle({
             Lighting.GlobalShadows = true
 
             workspace.Terrain.Decoration = oldDecoration
+
+            for part,data in pairs(savedParts) do
+                if part then
+                    part.Material = data.Material
+                    part.Reflectance = data.Reflectance
+                    part.CastShadow = data.CastShadow
+                end
+            end
+            savedParts = {}
 
             for mesh,val in pairs(savedMesh) do
                 if mesh then
