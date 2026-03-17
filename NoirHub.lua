@@ -529,14 +529,14 @@ end
 end
 })
 
---Auto Jump
+-- Auto Jump System
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
-local autoJumpEnabled = false
 local humanoid
 local jumpConnection
+local mode = "Normal"
 
 local function getHumanoid()
     local char = player.Character or player.CharacterAdded:Wait()
@@ -544,31 +544,68 @@ local function getHumanoid()
 end
 
 humanoid = getHumanoid()
+
 player.CharacterAdded:Connect(function(char)
     humanoid = char:WaitForChild("Humanoid")
 end)
 
-local function setAutoJump(state)
-    autoJumpEnabled = state
-    if autoJumpEnabled then
-        jumpConnection = RunService.RenderStepped:Connect(function()
-            if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
-                humanoid.Jump = true
-            end
-        end)
-    else
-        if jumpConnection then
-            jumpConnection:Disconnect()
-            jumpConnection = nil
-        end
+local function stopJump()
+    if jumpConnection then
+        jumpConnection:Disconnect()
+        jumpConnection = nil
     end
 end
+
+local function startJump()
+
+    stopJump()
+
+    jumpConnection = RunService.RenderStepped:Connect(function()
+
+        if not humanoid then return end
+        if humanoid.FloorMaterial == Enum.Material.Air then return end
+
+        if mode == "Normal" then
+            humanoid.Jump = true
+
+        elseif mode == "Bhop" then
+            humanoid.Jump = true
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+
+        elseif mode == "Smart" then
+            if humanoid.MoveDirection.Magnitude > 0 then
+                humanoid.Jump = true
+            end
+
+        elseif mode == "Force" then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+
+        end
+
+    end)
+
+end
+
+
+PlayerTab:CreateDropdown({
+    Name = "Auto Jump Mode",
+    Options = {"Normal","Bhop","Smart","Force"},
+    CurrentOption = {"Normal"},
+    Callback = function(option)
+        mode = option[1]
+    end
+})
+
 
 PlayerTab:CreateToggle({
     Name = "Auto Jump",
     CurrentValue = false,
-    Callback = function(value)
-        setAutoJump(value)
+    Callback = function(state)
+        if state then
+            startJump()
+        else
+            stopJump()
+        end
     end
 })
 
@@ -646,7 +683,6 @@ RunService.RenderStepped:Connect(function()
 
 	local pos = center
 
-	-- Third person offset
 	if distance > 1 then
 		local offset = camera.CFrame.RightVector * 3.5 + camera.CFrame.UpVector * 0.5
 		local worldPoint = camera.CFrame.Position + camera.CFrame.LookVector * 1000 + offset
@@ -654,7 +690,6 @@ RunService.RenderStepped:Connect(function()
 		pos = Vector2.new(screenPoint.X,screenPoint.Y)
 	end
 
-	-- Raycast detect enemy
 	local rayParams = RaycastParams.new()
 	rayParams.FilterDescendantsInstances = {character}
 	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
