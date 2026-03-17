@@ -1,13 +1,26 @@
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
+
 local LP = Players.LocalPlayer
+
+-- remove old UI
+local old = game.CoreGui:FindFirstChild("ResetUI")
+if old then
+	old:Destroy()
+end
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "ResetUI"
 gui.IgnoreGuiInset = true
 gui.ResetOnSpawn = false
-pcall(function() gui.Parent = gethui() end)
-if not gui.Parent then gui.Parent = LP:WaitForChild("PlayerGui") end
+
+pcall(function()
+	gui.Parent = gethui()
+end)
+
+if not gui.Parent then
+	gui.Parent = LP:WaitForChild("PlayerGui")
+end
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0,200,0,100)
@@ -21,57 +34,91 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0,16)
 corner.Parent = frame
 
+-- drag system
 local dragging = false
-local dragStart, startPos
-frame.InputBegan:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-		dragging=true
-		dragStart=i.Position
-		startPos=frame.Position
-	end
-end)
-UIS.InputEnded:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-		dragging=false
-	end
-end)
-UIS.InputChanged:Connect(function(i)
-	if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
-		local delta=i.Position-dragStart
-		frame.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
+local dragStart
+local startPos
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
 	end
 end)
 
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- button creator
 local function createButton(text,color,pos,callback)
+
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(0,160,0,36)
 	btn.Position = pos
 	btn.BackgroundColor3 = color
 	btn.Text = text
-	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.TextColor3 = Color3.new(1,1,1)
 	btn.Font = Enum.Font.GothamBold
 	btn.TextSize = 16
 	btn.Parent = frame
+
 	local bc = Instance.new("UICorner")
 	bc.CornerRadius = UDim.new(0,8)
 	bc.Parent = btn
+
 	btn.MouseButton1Click:Connect(callback)
-	return btn
+
 end
 
+-- RESPawn (spawn tại chỗ)
 createButton("Respawn",Color3.fromRGB(60,170,90),UDim2.new(0,20,0,15),function()
+
 	local char = LP.Character
-	if char then
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local pos = hrp and hrp.Position
-		char:BreakJoints()
-		LP.CharacterAdded:Wait():WaitForChild("HumanoidRootPart").CFrame = CFrame.new(pos)
-	end
+	if not char then return end
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local pos = hrp.CFrame
+
+	char:BreakJoints()
+
+	local newChar = LP.CharacterAdded:Wait()
+	local newHRP = newChar:WaitForChild("HumanoidRootPart")
+
+	task.spawn(function()
+		for i = 1,40 do
+			if newHRP then
+				newHRP.CFrame = pos
+			end
+			task.wait()
+		end
+	end)
+
 end)
 
+-- RESET bình thường
 createButton("Reset",Color3.fromRGB(200,60,60),UDim2.new(0,20,0,55),function()
+
 	local char = LP.Character
 	if char then
 		char:BreakJoints()
 	end
+
 end)
