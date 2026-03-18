@@ -813,33 +813,25 @@ PlayerTab:CreateToggle({
     end
 })
 
---No Camera Shake
+-- No Camera Shake (Fixed)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-
-local noShakeEnabled = false
 local connection
 
 PlayerTab:CreateToggle({
     Name = "No Camera Shake",
     CurrentValue = false,
     Callback = function(state)
-        noShakeEnabled = state
 
         if state then
-            local lastCFrame = Camera.CFrame
-
             connection = RunService.RenderStepped:Connect(function()
-                if not noShakeEnabled then return end
-                
                 if Camera then
-                    Camera.CFrame = lastCFrame
-                    lastCFrame = Camera.CFrame
+                    local pos = Camera.CFrame.Position
+                    local _, y, _ = Camera.CFrame:ToEulerAnglesYXZ()
+                    Camera.CFrame = CFrame.new(pos) * CFrame.Angles(0, y, 0)
                 end
-
                 local char = LocalPlayer.Character
                 if char then
                     local hum = char:FindFirstChildOfClass("Humanoid")
@@ -1954,9 +1946,23 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Survive 100days in Nuclear Bunker",
+    Name = "Tower Of Zombies",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/S100d"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/gumanba/Scripts/main/TowerofZombies"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Survive Zombie Arena",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/qcHi3xbp/raw"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Survive The Apocalypse",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ntjustin/2-Player-Battle-Tycoon/refs/heads/main/The%20Apocalypse",true))()
     end,
 })
 
