@@ -1936,9 +1936,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Survive The Apocalypse",
+    Name = "Raft 101 Survival",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ntjustin/2-Player-Battle-Tycoon/refs/heads/main/The%20Apocalypse",true))()
+        loadstring(game:HttpGet("https://pastebin.com/raw/NUunqb1w"))()
     end,
 })
 
