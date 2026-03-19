@@ -1037,10 +1037,8 @@ FPSTab:CreateToggle({
 
                     removedUltra[obj] = obj.Parent
                     obj.Parent = nil
-
                 end
             end
-
         else
 
             Lighting.GlobalShadows = true
@@ -1053,98 +1051,62 @@ FPSTab:CreateToggle({
             end
 
             removedUltra = {}
-
         end
-
     end,
 })
 
 FPSTab:CreateButton({
-    Name = "Potato Mode",
+    Name = "FINAL POTATO MODE",
     Callback = function()
 
         local Lighting = game:GetService("Lighting")
         local Terrain = workspace:FindFirstChildOfClass("Terrain")
 
-        -- 1 Disable Lighting Effects
-        for _,v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("BloomEffect")
-            or v:IsA("SunRaysEffect")
-            or v:IsA("DepthOfFieldEffect")
-            or v:IsA("ColorCorrectionEffect")
-            or v:IsA("BlurEffect")
-            or v:IsA("Atmosphere") then
-                pcall(function()
-                    v.Enabled = false
-                end)
-            end
-        end
-
-        -- 2 Disable Particles
-        for _,v in ipairs(workspace:GetDescendants()) do
-            if v:IsA("ParticleEmitter")
-            or v:IsA("Trail")
-            or v:IsA("Smoke")
-            or v:IsA("Fire")
-            or v:IsA("Sparkles") then
-                pcall(function()
-                    v.Enabled = false
-                end)
-            end
-        end
-
-        -- 3 Disable Shadows
+        -- 1 Shadows OFF
         Lighting.GlobalShadows = false
 
-        -- 4 Disable Water Effects
+        -- 2 Water + Grass
         if Terrain then
+            Terrain.Decoration = false
             Terrain.WaterWaveSize = 0
             Terrain.WaterWaveSpeed = 0
             Terrain.WaterReflectance = 0
             Terrain.WaterTransparency = 1
         end
 
-        -- 5 Disable Grass
-        if Terrain then
-            pcall(function()
-                Terrain.Decoration = false
-            end)
-        end
-
-        -- 6 Lower Graphics Level
+        -- 3 Graphics Level
         pcall(function()
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
         end)
 
-        -- 7 Simplify Materials & Mesh
-        for _,v in ipairs(workspace:GetDescendants()) do
+        -- 4 Simplify nearby objects ONLY
+        local function process(obj)
 
-            if not v:IsDescendantOf(game.Players) then
+            if obj:IsA("BasePart") then
+                obj.Material = Enum.Material.Plastic
+                obj.CastShadow = false
+                obj.Reflectance = 0
+            end
 
-                if v:IsA("BasePart") then
-                    pcall(function()
-                        v.Material = Enum.Material.Plastic
-                        v.CastShadow = false
-                        v.Reflectance = 0
-                    end)
-                end
-
-                if v:IsA("MeshPart") then
-                    pcall(function()
-                        v.RenderFidelity = Enum.RenderFidelity.Performance
-                    end)
-                end
-
-                -- 8 Remove Textures
-                if v:IsA("Texture") or v:IsA("Decal") then
-                    pcall(function()
-                        v:Destroy()
-                    end)
-                end
-
+            if obj:IsA("MeshPart") then
+                obj.RenderFidelity = Enum.RenderFidelity.Performance
             end
 
         end
+
+        -- Không scan toàn map
+        for _,v in ipairs(workspace:GetChildren()) do
+            for _,obj in ipairs(v:GetDescendants()) do
+                process(obj)
+            end
+        end
+
+        -- xử lý object spawn sau
+        workspace.DescendantAdded:Connect(function(obj)
+            task.spawn(function()
+                process(obj)
+            end)
+        end)
 
     end
 })
@@ -1277,6 +1239,20 @@ end))
 end
 
 end
+
+table.insert(espConnections,
+Players.PlayerAdded:Connect(function(plr)
+
+plr.CharacterAdded:Connect(function()
+
+if espEnabled then
+task.wait(0.5)
+createESP(plr)
+end
+
+end)
+
+end))
 
 end
 })
