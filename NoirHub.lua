@@ -953,7 +953,6 @@ local function startJump()
 
 end
 
-
 PlayerTab:CreateDropdown({
     Name = "Auto Jump Mode",
     Options = {"Normal","Bhop","Smart","Force"},
@@ -962,7 +961,6 @@ PlayerTab:CreateDropdown({
         mode = option[1]
     end
 })
-
 
 PlayerTab:CreateToggle({
     Name = "Auto Jump",
@@ -1099,89 +1097,6 @@ PlayerTab:CreateToggle({
 })
 
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-
-local LocalPlayer = Players.LocalPlayer
-
--- lưu lịch sử vị trí
-local positionHistory = {}
-
--- cập nhật liên tục
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            table.insert(positionHistory, {
-                time = tick(),
-                cf = char.HumanoidRootPart.CFrame
-            })
-
-            -- giữ lịch sử ngắn (tránh full memory)
-            for i = #positionHistory, 1, -1 do
-                if tick() - positionHistory[i].time > 5 then
-                    table.remove(positionHistory, i)
-                end
-            end
-        end
-    end
-end)
-
-local flashButton
-
-PlayerTab:CreateToggle({
-    Name = "Flash Back (5s)",
-    CurrentValue = false,
-    Callback = function(state)
-
-        if state then
-            flashButton = Instance.new("TextButton")
-            flashButton.Size = UDim2.new(0, 120, 0, 40)
-            flashButton.Position = UDim2.new(0.8, 0, 0.5, 0)
-            flashButton.Text = "Flash Back"
-            flashButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
-            flashButton.TextColor3 = Color3.fromRGB(255,255,255)
-            flashButton.Parent = game.CoreGui
-
-            flashButton.MouseButton1Click:Connect(function()
-                local char = LocalPlayer.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-
-                -- tìm vị trí gần nhất nhưng trong 5s
-                local target = nil
-                for i = #positionHistory, 1, -1 do
-                    local data = positionHistory[i]
-                    if tick() - data.time <= 5 then
-                        target = data.cf
-                        break
-                    end
-                end
-
-                if target then
-                    local distance = (hrp.Position - target.Position).Magnitude
-                    local speed = 60
-                    local time = distance / speed
-
-                    TweenService:Create(
-                        hrp,
-                        TweenInfo.new(time, Enum.EasingStyle.Linear),
-                        {CFrame = target}
-                    ):Play()
-                end
-            end)
-
-        else
-            if flashButton then
-                flashButton:Destroy()
-                flashButton = nil
-            end
-        end
-    end
-})
-
-local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 -- SETTINGS
@@ -1284,9 +1199,9 @@ PlayerTab:CreateToggle({
 -- SLIDER LENGTH
 PlayerTab:CreateSlider({
     Name = "Dash Length",
-    Range = {50, 500},
+    Range = {10, 500},
     Increment = 10,
-    CurrentValue = 100,
+    CurrentValue = 30,
     Callback = function(v)
         dashLength = v
     end
@@ -2347,7 +2262,7 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateButton({
     Name = "The Strongest Battleground",
     Callback = function()
-        loadstring(game:HttpGet("https://api.getpolsec.com/scripts/hosted/7bad5e3679f40a89db9300800355a40cd92b70f3ca4c354ffe0e52444c6341fb.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kaimm2/TSB/refs/heads/main/Tthanh%20Tong%20Hop%20Tech.txt"))()
     end,
 })
 
@@ -2455,15 +2370,6 @@ ScriptsTab:CreateButton({
     Name = "Doors",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Iliankytb/Iliankytb/main/NewBestDoorsScriptIliankytb"))()
-    end,
-})
-
-ScriptsTab:CreateSection("Shaders")
-
-ScriptsTab:CreateButton({
-    Name = "Shaders Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/pshade-ultimate/refs/heads/main/src/cd.lua"))()
     end,
 })
 
@@ -2766,7 +2672,7 @@ ScriptsTab:CreateButton({
 
 PacksTab = Window:CreateTab("Packs", "package")
 
-PacksTab:CreateSection("Not Fe & just use for R15")
+PacksTab:CreateSection("Not Fe")
 
 PacksTab:CreateButton({
     Name = "Korblox",
@@ -2782,7 +2688,6 @@ PacksTab:CreateButton({
     end,
 })
 
-
 PacksTab:CreateSection("Animation Pack & Emote FE")
 
 PacksTab:CreateButton({
@@ -2791,8 +2696,6 @@ PacksTab:CreateButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/gwnrdt/gwnrdt/refs/heads/main/Animation.lua"))()
     end,
 })
-
-PacksTab:CreateButton("Animation & Emote Scripts")
 
 PacksTab:CreateButton({
     Name = "Animation v2.5",
@@ -2850,6 +2753,15 @@ PacksTab:CreateButton({
     end,
 })
 
+PacksTab:CreateSection("Shaders")
+
+PacksTab:CreateButton({
+    Name = "Shaders Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/pshade-ultimate/refs/heads/main/src/cd.lua"))()
+    end,
+})
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -2859,8 +2771,7 @@ local Tab4 = Window:CreateTab("People", "users")
 
 local currentTarget = nil
 local loopTeleport = false
-local spectateIndex = 1
-local spectateList = {}
+local watching = false
 local aimingTarget = false
 local aimStrength = 0.35
 
@@ -2878,9 +2789,7 @@ local playerDropdown = Tab4:CreateDropdown({
     Flag = "obj_playerlist",
     Callback = function(option)
         if type(option) == "table" and #option > 0 then
-            local full = option[1]
-            local username = string.match(full, "@(.+)")
-            currentTarget = username
+            currentTarget = option[1]
         else
             currentTarget = nil
         end
@@ -2891,21 +2800,11 @@ local function refreshPlayers()
     local opts = {}
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer then
-            table.insert(opts, p.DisplayName .. " @" .. p.Name)
+            table.insert(opts, p.Name)
         end
     end
     playerDropdown:Refresh(opts, true)
-
-    -- reset target if not exist
-    local exists = false
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p.Name == currentTarget then
-            exists = true
-            break
-        end
-    end
-
-    if not exists then
+    if not table.find(opts, currentTarget) then
         currentTarget = nil
     end
 end
@@ -2924,64 +2823,6 @@ local function getChar(p)
     return p.Character
 end
 
--- helper
-local function getRoot(p)
-    local char = getChar(p)
-    if not char then return nil end
-    return char:FindFirstChild("HumanoidRootPart")
-end
-
-local function teleportToPlayer(p)
-    if not p then return end
-    local root = getRoot(p)
-    local myRoot = getRoot(LocalPlayer)
-    if root and myRoot then
-        myRoot.CFrame = root.CFrame * CFrame.new(2,0,2)
-    end
-end
-
-local function getClosestPlayer()
-    local myRoot = getRoot(LocalPlayer)
-    if not myRoot then return nil end
-
-    local closest = nil
-    local shortest = math.huge
-
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            local root = getRoot(p)
-            if root then
-                local dist = (root.Position - myRoot.Position).Magnitude
-                if dist < shortest then
-                    shortest = dist
-                    closest = p
-                end
-            end
-        end
-    end
-
-    return closest
-end
-
-local function getFriendPlayers()
-    local friends = {}
-
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            local success, result = pcall(function()
-                return LocalPlayer:IsFriendsWith(p.UserId)
-            end)
-
-            if success and result then
-                table.insert(friends, p)
-            end
-        end
-    end
-
-    return friends
-end
-
--- Teleport to selected
 Tab4:CreateButton({
     Name = "Teleport to player",
     Callback = function()
@@ -2996,46 +2837,6 @@ Tab4:CreateButton({
     end
 })
 
--- Random
-Tab4:CreateButton({
-    Name = "Teleport Random Player",
-    Callback = function()
-        local list = {}
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer then
-                table.insert(list, p)
-            end
-        end
-
-        if #list > 0 then
-            teleportToPlayer(list[math.random(1, #list)])
-        end
-    end
-})
-
--- Nearest
-Tab4:CreateButton({
-    Name = "Teleport Nearest Player",
-    Callback = function()
-        local target = getClosestPlayer()
-        if target then
-            teleportToPlayer(target)
-        end
-    end
-})
-
--- Friend
-Tab4:CreateButton({
-    Name = "Teleport to Friend",
-    Callback = function()
-        local friends = getFriendPlayers()
-        if #friends > 0 then
-            teleportToPlayer(friends[math.random(1, #friends)])
-        end
-    end
-})
-
--- Loop teleport
 Tab4:CreateToggle({
     Name = "Teleport loop",
     CurrentValue = false,
@@ -3057,137 +2858,29 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- UI container
-local spectateUI = Instance.new("Frame")
-spectateUI.Size = UDim2.new(0, 200, 0, 120)
-spectateUI.Position = UDim2.new(0, 10, 0, 150)
-spectateUI.BackgroundTransparency = 1
-spectateUI.Visible = false
-spectateUI.Parent = game.CoreGui
-
--- Buttons
-local nextBtn = Instance.new("TextButton")
-nextBtn.Size = UDim2.new(0, 90, 0, 35)
-nextBtn.Position = UDim2.new(0, 5, 0, 70)
-nextBtn.Text = "Next"
-nextBtn.Parent = spectateUI
-
-local prevBtn = Instance.new("TextButton")
-prevBtn.Size = UDim2.new(0, 90, 0, 35)
-prevBtn.Position = UDim2.new(0, 105, 0, 70)
-prevBtn.Text = "Prev"
-prevBtn.Parent = spectateUI
-
--- Info overlay (gọn, góc màn)
-local infoLabel = Instance.new("TextLabel")
-infoLabel.Size = UDim2.new(0, 220, 0, 80)
-infoLabel.Position = UDim2.new(0, 10, 0, 10)
-infoLabel.BackgroundTransparency = 0.7
-infoLabel.TextScaled = true
-infoLabel.TextWrapped = true
-infoLabel.TextXAlignment = Enum.TextXAlignment.Left
-infoLabel.TextYAlignment = Enum.TextYAlignment.Top
-infoLabel.Parent = game.CoreGui
-
--- Get root
-local function getRoot(p)
-    if not p or not p.Character then return nil end
-    return p.Character:FindFirstChild("HumanoidRootPart")
-end
-
--- Update list
-local function updateSpectateList()
-    spectateList = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(spectateList, p)
-        end
-    end
-end
-
--- Spectate
-local function spectatePlayer(p)
-    if p and p.Character then
-        local hum = p.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            workspace.CurrentCamera.CameraSubject = hum
-        end
-    end
-end
-
--- Toggle spectate
 Tab4:CreateToggle({
-    Name = "Spectate Player",
+    Name = "Watch player",
     CurrentValue = false,
     Callback = function(v)
-        if v then
-            spectateUI.Visible = true
-            updateSpectateList()
-
-            if #spectateList > 0 then
-                spectateIndex = 1
-                spectatePlayer(spectateList[spectateIndex])
-            end
-        else
-            spectateUI.Visible = false
-            infoLabel.Text = ""
-            workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        watching = v
+        if not v then
+            Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         end
     end
 })
 
--- Next
-nextBtn.MouseButton1Click:Connect(function()
-    updateSpectateList()
-    if #spectateList == 0 then return end
-
-    spectateIndex += 1
-    if spectateIndex > #spectateList then
-        spectateIndex = 1
-    end
-
-    spectatePlayer(spectateList[spectateIndex])
-end)
-
--- Prev
-prevBtn.MouseButton1Click:Connect(function()
-    updateSpectateList()
-    if #spectateList == 0 then return end
-
-    spectateIndex -= 1
-    if spectateIndex < 1 then
-        spectateIndex = #spectateList
-    end
-
-    spectatePlayer(spectateList[spectateIndex])
-end)
-
--- Info update
 RunService.RenderStepped:Connect(function()
-    if spectateList[spectateIndex] then
-        local p = spectateList[spectateIndex]
-        if p and p.Character then
-            local hum = p.Character:FindFirstChildOfClass("Humanoid")
-            local root = p.Character:FindFirstChild("HumanoidRootPart")
-            local myRoot = getRoot(LocalPlayer)
-
-            if hum and root and myRoot then
-                local dist = (root.Position - myRoot.Position).Magnitude
-
-                infoLabel.Text = string.format(
-                    "%s @%s\nHP: %d/%d\nDistance: %.1f",
-                    p.DisplayName,
-                    p.Name,
-                    math.floor(hum.Health),
-                    math.floor(hum.MaxHealth),
-                    dist
-                )
+    if watching then
+        local t = getTarget()
+        if t and getChar(t) then
+            local hum = getChar(t):FindFirstChildOfClass("Humanoid")
+            if hum then
+                Camera.CameraSubject = hum
             end
         end
     end
 end)
 
--- Aim
 Tab4:CreateToggle({
     Name = "Aim to player",
     CurrentValue = false,
@@ -3220,7 +2913,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Orbit
+-- ORBIT UI
 Tab4:CreateToggle({
     Name = "Orbit player",
     CurrentValue = false,
@@ -3231,7 +2924,7 @@ Tab4:CreateToggle({
 
 Tab4:CreateSlider({
     Name = "Orbit radius",
-    Range = {1, 250},
+    Range = {1, 100},
     Increment = 1,
     CurrentValue = 10,
     Callback = function(v)
@@ -3241,7 +2934,7 @@ Tab4:CreateSlider({
 
 Tab4:CreateSlider({
     Name = "Orbit speed",
-    Range = {1, 150},
+    Range = {1, 100},
     Increment = 1,
     CurrentValue = 30,
     Callback = function(v)
@@ -3249,6 +2942,7 @@ Tab4:CreateSlider({
     end
 })
 
+-- ORBIT LOGIC
 RunService.Heartbeat:Connect(function(dt)
     if orbiting then
         local t = getTarget()
