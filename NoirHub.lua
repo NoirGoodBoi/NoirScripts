@@ -3,7 +3,7 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
     Name = "Noir Hub",
     LoadingTitle = "Loading NoirHub...",
-    LoadingSubtitle = "Script By Noir",
+    LoadingSubtitle = "Script By Noir_Adono",
     ConfigurationSaving = {
         Enabled = false,
     }
@@ -19,11 +19,6 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 
 local MainTab = Window:CreateTab("Main", "home")
-
-MainTab:CreateButton({
-   Name = "Reset GUI Rayfield",
-   Callback = function() Rayfield:Destroy() end,
-})
 
 local AllIDs = {}
 local foundAnything = ""
@@ -118,6 +113,11 @@ MainTab:CreateButton({
       end
 
    end,
+})
+
+MainTab:CreateButton({
+   Name = "Reset GUI Rayfield",
+   Callback = function() Rayfield:Destroy() end,
 })
 
 MainTab:CreateSection("Thông Tin Bản Thân")
@@ -318,35 +318,119 @@ PlayerTab:CreateToggle({
     end
 })
 
---noclip
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local plr = Players.LocalPlayer
+local noclipEnabled = false
+
 PlayerTab:CreateToggle({
     Name = "NoClip",
     CurrentValue = false,
     Callback = function(state)
-        local RunService = game:GetService("RunService")
-        local plr = game.Players.LocalPlayer
-        local char = plr.Character or plr.CharacterAdded:Wait()
-
-        RunService:UnbindFromRenderStep("NoirNoClip")
+        noclipEnabled = state
 
         if state then
             RunService:BindToRenderStep("NoirNoClip", Enum.RenderPriority.Character.Value, function()
                 local char = plr.Character
-                if char and char:FindFirstChild("Humanoid") then
-                    char.Humanoid:ChangeState(11)
-                    for _, v in pairs(char:GetDescendants()) do
-                        if v:IsA("BasePart") then
-                            v.CanCollide = false
-                        end
+                if not char then return end
+
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if not humanoid then return end
+
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+
+                for _, v in pairs(char:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
                     end
                 end
             end)
         else
-            
+            RunService:UnbindFromRenderStep("NoirNoClip")
+
+            local char = plr.Character
+            if not char then return end
+
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.Running)
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+                humanoid.Jump = true
+            end
+
             for _, v in pairs(char:GetDescendants()) do
                 if v:IsA("BasePart") then
                     v.CanCollide = true
                 end
+            end
+        end
+    end
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local enabled = false
+local connection
+
+local function fixCharacter(char)
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not root then return end
+
+    humanoid.PlatformStand = false
+    humanoid.AutoRotate = true
+    humanoid:ChangeState(Enum.HumanoidStateType.Running)
+
+    humanoid.WalkSpeed = math.max(humanoid.WalkSpeed, 16)
+    humanoid.JumpPower = math.max(humanoid.JumpPower, 50)
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+
+    for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+        if track.Priority == Enum.AnimationPriority.Action then
+            track:Stop()
+        end
+    end
+
+    for _, v in pairs(char:GetDescendants()) do
+        if v:IsA("BallSocketConstraint") 
+        or v:IsA("HingeConstraint") then
+            v:Destroy()
+        end
+    end
+
+    root.AssemblyLinearVelocity = Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
+    root.AssemblyAngularVelocity = Vector3.new(0,0,0)
+
+    for _, v in pairs(root:GetChildren()) do
+        if v:IsA("BodyVelocity")
+        or v:IsA("BodyGyro")
+        or v:IsA("BodyPosition") then
+            v:Destroy()
+        end
+    end
+end
+
+PlayerTab:CreateToggle({
+    Name = "Anti Stun",
+    CurrentValue = false,
+    Callback = function(state)
+        enabled = state
+
+        if state then
+            connection = RunService.Heartbeat:Connect(function()
+                local char = LocalPlayer.Character
+                if char then
+                    fixCharacter(char)
+                end
+            end)
+        else
+            if connection then
+                connection:Disconnect()
+                connection = nil
             end
         end
     end
@@ -419,114 +503,230 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
-local MapGui, MapFrame, MapObjects = nil, nil, {}
+local MapGui, MapFrame, InfoPanel = nil, nil, nil
+local MapObjects = {}
 local MapEnabled = false
+local RenderConnection
 
+local Zoom = 4
+local SmoothYaw = 0
+local CurrentTarget = nil
+local TPMode = false
+
+--// UI
 local function createMap()
-MapGui = Instance.new("ScreenGui")
-MapGui.IgnoreGuiInset = true
-MapGui.ResetOnSpawn = false
-MapGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-MapGui.Parent = game.CoreGui
+    MapGui = Instance.new("ScreenGui")
+    MapGui.IgnoreGuiInset = true
+    MapGui.ResetOnSpawn = false
+    MapGui.Parent = game.CoreGui
 
-MapFrame = Instance.new("Frame")  
-MapFrame.Size = UDim2.new(0,150,0,150)  
-MapFrame.Position = UDim2.new(1,-160,0,10)   
-MapFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)  
-MapFrame.BackgroundTransparency = 0.4  
-MapFrame.BorderSizePixel = 0  
-MapFrame.Parent = MapGui  
-MapFrame.ClipsDescendants = true
+    -- minimap
+    MapFrame = Instance.new("Frame")
+    MapFrame.Size = UDim2.new(0,150,0,150)
+    MapFrame.Position = UDim2.new(1,-160,0,10)
+    MapFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    MapFrame.BackgroundTransparency = 0.4
+    MapFrame.BorderSizePixel = 0
+    MapFrame.ClipsDescendants = true
+    MapFrame.Parent = MapGui
+    Instance.new("UICorner", MapFrame)
 
+    -- TP BUTTON
+    local tpBtn = Instance.new("TextButton")
+    tpBtn.Size = UDim2.new(0,150,0,30)
+    tpBtn.Position = UDim2.new(1,-160,0,165)
+    tpBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    tpBtn.TextColor3 = Color3.new(1,1,1)
+    tpBtn.Text = "TP: OFF"
+    tpBtn.Parent = MapGui
+    Instance.new("UICorner", tpBtn)
+
+    tpBtn.MouseButton1Click:Connect(function()
+        TPMode = not TPMode
+        tpBtn.Text = TPMode and "TP: ON" or "TP: OFF"
+    end)
+
+    -- info panel
+    InfoPanel = Instance.new("Frame")
+    InfoPanel.Size = UDim2.new(0,170,0,95)
+    InfoPanel.Position = UDim2.new(1,-340,0,10)
+    InfoPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    InfoPanel.BackgroundTransparency = 0.3
+    InfoPanel.Visible = false
+    InfoPanel.Parent = MapGui
+    Instance.new("UICorner", InfoPanel)
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Name = "PlayerName"
+    nameLabel.Size = UDim2.new(1,0,0.4,0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.TextColor3 = Color3.new(1,1,1)
+    nameLabel.TextScaled = true
+    nameLabel.Parent = InfoPanel
+
+    local hp = Instance.new("TextLabel")
+    hp.Name = "HP"
+    hp.Size = UDim2.new(1,0,0.3,0)
+    hp.Position = UDim2.new(0,0,0.4,0)
+    hp.BackgroundTransparency = 1
+    hp.TextColor3 = Color3.new(0,1,0)
+    hp.TextScaled = true
+    hp.Parent = InfoPanel
+
+    local dist = Instance.new("TextLabel")
+    dist.Name = "Distance"
+    dist.Size = UDim2.new(1,0,0.3,0)
+    dist.Position = UDim2.new(0,0,0.7,0)
+    dist.BackgroundTransparency = 1
+    dist.TextColor3 = Color3.new(1,1,0)
+    dist.TextScaled = true
+    dist.Parent = InfoPanel
 end
 
-local function getDotColor(player)
-if player == LocalPlayer then
-return Color3.fromRGB(0,255,0), Color3.fromRGB(0,150,0), 3
-elseif LocalPlayer:IsFriendsWith(player.UserId) then
-return Color3.fromRGB(0,170,255), Color3.fromRGB(0,100,200), 2
-else
-return Color3.fromRGB(255,255,255), Color3.fromRGB(80,80,80), 1
-end
-end
-
+--// DOT
 local function createDot(player)
-if MapObjects[player] then return end
+    if MapObjects[player] then return end
 
-local dot = Instance.new("Frame")  
-dot.Size = UDim2.new(0,8,0,8)  
-dot.AnchorPoint = Vector2.new(0.5,0.5)  
+    local dot = Instance.new("ImageButton")
+    dot.Size = UDim2.new(0,20,0,20)
+    dot.AnchorPoint = Vector2.new(0.5,0.5)
+    dot.BackgroundTransparency = 1
+    dot.Parent = MapFrame
 
-local color, border, zindex = getDotColor(player)  
-dot.BackgroundColor3 = color  
-dot.ZIndex = zindex  
-dot.Parent = MapFrame  
+    dot.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=150&height=150&format=png"
+    Instance.new("UICorner", dot)
 
-local UICorner = Instance.new("UICorner")  
-UICorner.CornerRadius = UDim.new(1,0) 
-UICorner.Parent = dot  
+    dot.MouseButton1Click:Connect(function()
+        if TPMode then
+            local myChar = LocalPlayer.Character
+            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
 
-local UIStroke = Instance.new("UIStroke")  
-UIStroke.Thickness = 2  
-UIStroke.Color = border  
-UIStroke.Parent = dot  
+            local char = player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
-MapObjects[player] = dot
+            if myHRP and hrp then
+                myHRP.CFrame = hrp.CFrame + Vector3.new(0,3,0)
+            end
+            return
+        end
 
+        if CurrentTarget == player then
+            CurrentTarget = nil
+            InfoPanel.Visible = false
+        else
+            CurrentTarget = player
+            InfoPanel.Visible = true
+            InfoPanel.PlayerName.Text = player.DisplayName.." (@"..player.Name..")"
+        end
+    end)
+
+    MapObjects[player] = dot
 end
 
-local function updateDots()
+--// UPDATE
+local function updateDots(dt)
     if not MapEnabled then return end
-    local center = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+    local char = LocalPlayer.Character
+    local center = char and char:FindFirstChild("HumanoidRootPart")
     if not center then return end
 
-    local camYaw = math.atan2(Camera.CFrame.LookVector.Z, Camera.CFrame.LookVector.X) + math.rad(45)
+    local targetYaw = math.atan2(Camera.CFrame.LookVector.Z, Camera.CFrame.LookVector.X)
+    SmoothYaw = SmoothYaw + (targetYaw - SmoothYaw) * math.clamp(dt * 8, 0, 1)
 
     for player, dot in pairs(MapObjects) do
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = player.Character.HumanoidRootPart
-            local offset = (hrp.Position - center.Position) / 4
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
-            local rx = offset.X*math.cos(camYaw) + offset.Z*math.sin(camYaw)
-            local rz = -offset.X*math.sin(camYaw) + offset.Z*math.cos(camYaw)
+        if hrp then
+            local offset = (hrp.Position - center.Position) / Zoom
+
+            local rx = offset.X*math.cos(SmoothYaw) + offset.Z*math.sin(SmoothYaw)
+            local rz = -offset.X*math.sin(SmoothYaw) + offset.Z*math.cos(SmoothYaw)
 
             if math.abs(rx) <= 70 and math.abs(rz) <= 70 then
                 dot.Visible = true
-                dot.Position = UDim2.new(0.5,rx,0.5,rz)
+                dot.Position = UDim2.new(0.5, rx, 0.5, rz)
             else
-            dot.Visible = false
+                dot.Visible = false
             end
         else
             dot.Visible = false
         end
+
+        if player == CurrentTarget then
+            dot.ImageColor3 = Color3.fromRGB(255,100,100)
+        else
+            dot.ImageColor3 = Color3.fromRGB(255,255,255)
+        end
+    end
+
+    if CurrentTarget and InfoPanel.Visible then
+        local myChar = LocalPlayer.Character
+        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+
+        local char = CurrentTarget.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+        if hum then
+            InfoPanel.HP.Text = "HP: "..math.floor(hum.Health)
+        else
+            InfoPanel.HP.Text = "HP: N/A"
+        end
+
+        if myHRP and hrp then
+            local dist = (hrp.Position - myHRP.Position).Magnitude
+            InfoPanel.Distance.Text = "Dist: "..math.floor(dist).."m"
+        else
+            InfoPanel.Distance.Text = "Dist: N/A"
+        end
     end
 end
 
+--// INIT
 local function initMap()
-createMap()
-for _,p in pairs(Players:GetPlayers()) do
-createDot(p)
-end
-Players.PlayerAdded:Connect(createDot)
-Players.PlayerRemoving:Connect(function(p)
-if MapObjects[p] then MapObjects[p]:Destroy() MapObjects[p]=nil end
-end)
-RunService.RenderStepped:Connect(updateDots)
+    createMap()
+
+    for _,p in pairs(Players:GetPlayers()) do
+        createDot(p)
+    end
+
+    Players.PlayerAdded:Connect(createDot)
+
+    Players.PlayerRemoving:Connect(function(p)
+        if MapObjects[p] then
+            MapObjects[p]:Destroy()
+            MapObjects[p] = nil
+        end
+
+        if CurrentTarget == p then
+            CurrentTarget = nil
+            InfoPanel.Visible = false
+        end
+    end)
+
+    RenderConnection = RunService.RenderStepped:Connect(updateDots)
 end
 
+--// TOGGLE
 PlayerTab:CreateToggle({
-Name = "MiniMap",
-CurrentValue = false,
-Flag = "MiniMapToggle",
-Callback = function(state)
-MapEnabled = state
-if state then
-if not MapGui then initMap() end
-MapGui.Enabled = true
-else
-if MapGui then MapGui.Enabled = false end
-end
-end
+    Name = "MiniMap FINAL ABSOLUTE",
+    CurrentValue = false,
+    Callback = function(state)
+        MapEnabled = state
+
+        if state then
+            if not MapGui then initMap() end
+            MapGui.Enabled = true
+        else
+            if MapGui then MapGui.Enabled = false end
+            if RenderConnection then
+                RenderConnection:Disconnect()
+                RenderConnection = nil
+            end
+        end
+    end
 })
 
 -- Auto Jump System
@@ -813,25 +1013,34 @@ PlayerTab:CreateToggle({
     end
 })
 
--- No Camera Shake (Fixed)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+
 local connection
+local lastCF
 
 PlayerTab:CreateToggle({
-    Name = "No Camera Shake",
+    Name = "No Camera Shake (GOD)",
     CurrentValue = false,
     Callback = function(state)
 
         if state then
+            lastCF = Camera.CFrame
+
             connection = RunService.RenderStepped:Connect(function()
-                if Camera then
-                    local pos = Camera.CFrame.Position
-                    local _, y, _ = Camera.CFrame:ToEulerAnglesYXZ()
-                    Camera.CFrame = CFrame.new(pos) * CFrame.Angles(0, y, 0)
-                end
+                if not Camera then return end
+
+                local currentCF = Camera.CFrame
+
+                local newPos = lastCF.Position:Lerp(currentCF.Position, 0.2)
+
+                Camera.CFrame = CFrame.new(newPos) * (currentCF - currentCF.Position)
+
+                lastCF = Camera.CFrame
+
                 local char = LocalPlayer.Character
                 if char then
                     local hum = char:FindFirstChildOfClass("Humanoid")
@@ -840,6 +1049,7 @@ PlayerTab:CreateToggle({
                     end
                 end
             end)
+
         else
             if connection then
                 connection:Disconnect()
@@ -849,11 +1059,121 @@ PlayerTab:CreateToggle({
     end
 })
 
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+
+-- SETTINGS
+local dashLength = 100
+local dashTime = 0.05
+local yBoost = 10
+
+local dashGui = nil
+
+-- DASH FUNCTION
+local function Dash()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    local bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+
+    local bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(0, 1e5, 0)
+    bg.CFrame = hrp.CFrame
+
+    local look = hrp.CFrame.LookVector
+    local dir = Vector3.new(look.X, 0, look.Z).Unit
+
+    local speed = dashLength / dashTime
+
+    bv.Velocity = (dir * speed) + Vector3.new(0, yBoost, 0)
+
+    bv.Parent = hrp
+    bg.Parent = hrp
+
+    task.wait(dashTime)
+
+    bv:Destroy()
+    bg:Destroy()
+end
+
+-- CREATE FLOAT BUTTON
+local function createDashButton()
+    if dashGui then return end
+
+    dashGui = Instance.new("ScreenGui")
+    dashGui.Name = "NoirDashUI"
+    dashGui.Parent = game.CoreGui
+
+    local btn = Instance.new("TextButton")
+    btn.Parent = dashGui
+    btn.Size = UDim2.new(0, 90, 0, 90)
+    btn.Position = UDim2.new(0.8, 0, 0.6, 0)
+
+    btn.Text = "DASH"
+    btn.TextScaled = true
+    btn.Font = Enum.Font.GothamBold
+
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    -- tròn chuẩn
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = btn
+
+    -- viền nhẹ
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 2
+    stroke.Color = Color3.fromRGB(90, 90, 90)
+    stroke.Parent = btn
+
+    -- draggable
+    btn.Active = true
+    btn.Draggable = true
+
+    -- click dash
+    btn.MouseButton1Click:Connect(function()
+        Dash()
+    end)
+end
+
+-- REMOVE BUTTON
+local function removeDashButton()
+    if dashGui then
+        dashGui:Destroy()
+        dashGui = nil
+    end
+end
+
+-- TOGGLE
+PlayerTab:CreateToggle({
+    Name = "Enable Dash",
+    CurrentValue = false,
+    Callback = function(v)
+        if v then
+            createDashButton()
+        else
+            removeDashButton()
+        end
+    end
+})
+
+-- SLIDER LENGTH
+PlayerTab:CreateSlider({
+    Name = "Dash Length",
+    Range = {50, 500},
+    Increment = 10,
+    CurrentValue = 100,
+    Callback = function(v)
+        dashLength = v
+    end
+})
+
 local Lighting = game:GetService("Lighting")
 
 local FPSTab = Window:CreateTab("FPS", "gauge")
 
---================ VISUAL BOOST =================--
 FPSTab:CreateSection("Visual Boost")
 
 local oldBrightness = Lighting.Brightness
@@ -936,7 +1256,6 @@ FPSTab:CreateToggle({
     end,
 })
 
---================ PERFORMANCE =================--
 FPSTab:CreateSection("Performance")
 
 FPSTab:CreateToggle({
@@ -1906,6 +2225,15 @@ ScriptsTab:CreateButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
     end,
 })
+
+ScriptsTab:CreateButton({
+    Name = "Build A Bunker (Right-Shift for toggle)",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/CE0TU9ye"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("For in-game use only, not recommended for use in the lobby.")
 
 ScriptsTab:CreateButton({
     Name = "Forsaken",
