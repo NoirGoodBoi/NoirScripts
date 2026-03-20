@@ -436,17 +436,136 @@ PlayerTab:CreateToggle({
     end
 })
 
---anti afk
-PlayerTab:CreateButton({
-    Name = "Anti-AFK",
-    Callback = function()
-        for _, conn in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
-            conn:Disable()
-        end
-    end
+-- Vẽ tâm ảo
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local crosshairEnabled = false
+
+-- Circle crosshair
+local crosshair = Drawing.new("Circle")
+crosshair.Visible = false
+crosshair.Color = Color3.fromRGB(255,255,255)
+crosshair.Thickness = 1
+crosshair.Radius = 2
+crosshair.Filled = true
+
+-- + crosshair
+local lines = {}
+for i = 1,4 do
+	local line = Drawing.new("Line")
+	line.Visible = false
+	line.Color = Color3.fromRGB(255,0,0)
+	line.Thickness = 2
+	table.insert(lines,line)
+end
+
+local function drawPlus(pos)
+
+	local size = 6
+	local gap = 2
+
+	lines[1].From = Vector2.new(pos.X - size, pos.Y)
+	lines[1].To   = Vector2.new(pos.X - gap, pos.Y)
+
+	lines[2].From = Vector2.new(pos.X + gap, pos.Y)
+	lines[2].To   = Vector2.new(pos.X + size, pos.Y)
+
+	lines[3].From = Vector2.new(pos.X, pos.Y - size)
+	lines[3].To   = Vector2.new(pos.X, pos.Y - gap)
+
+	lines[4].From = Vector2.new(pos.X, pos.Y + gap)
+	lines[4].To   = Vector2.new(pos.X, pos.Y + size)
+
+end
+
+RunService.RenderStepped:Connect(function()
+
+	if not crosshairEnabled then
+		crosshair.Visible = false
+		for _,l in pairs(lines) do
+			l.Visible = false
+		end
+		return
+	end
+
+	local viewport = camera.ViewportSize
+	local center = viewport / 2
+
+	local character = player.Character
+	if not character or not character:FindFirstChild("Head") then return end
+
+	local head = character.Head
+	local distance = (camera.CFrame.Position - head.Position).Magnitude
+
+	local pos = center
+
+	if distance > 1 then
+		local offset = camera.CFrame.RightVector * 3 + camera.CFrame.UpVector * 1
+		local worldPoint = camera.CFrame.Position + camera.CFrame.LookVector * 1000 + offset
+		local screenPoint = camera:WorldToViewportPoint(worldPoint)
+		pos = Vector2.new(screenPoint.X,screenPoint.Y)
+	end
+
+	local rayParams = RaycastParams.new()
+	rayParams.FilterDescendantsInstances = {character}
+	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+	local ray = workspace:Raycast(
+		camera.CFrame.Position,
+		camera.CFrame.LookVector * 1000,
+		rayParams
+	)
+
+	local enemyFound = false
+
+	if ray and ray.Instance then
+		local model = ray.Instance:FindFirstAncestorOfClass("Model")
+		if model and Players:GetPlayerFromCharacter(model) then
+			enemyFound = true
+		end
+	end
+
+	if enemyFound then
+		crosshair.Visible = false
+		drawPlus(pos)
+
+		for _,l in pairs(lines) do
+			l.Visible = true
+		end
+	else
+		crosshair.Visible = true
+		crosshair.Position = pos
+
+		for _,l in pairs(lines) do
+			l.Visible = false
+		end
+	end
+
+end)
+
+-- Rayfield toggle
+PlayerTab:CreateToggle({
+	Name = "Crosshair",
+	CurrentValue = false,
+	Flag = "CrosshairToggle",
+	Callback = function(Value)
+		crosshairEnabled = Value
+	end,
 })
 
 PlayerTab:CreateSection("Funny Tools")
+
+PlayerTab:CreateButton({
+    Name = "ShiftLock",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/Shift_Lock"))()
+    end,
+})
+
 
 --ping&fps
 local statsGui
@@ -493,6 +612,54 @@ PlayerTab:CreateToggle({
                 statsGui:Destroy()
                 statsGui = nil
             end
+        end
+    end
+})
+
+local Players = game:GetService("Players")
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+local promptConn
+local clickConn
+
+local function enable()
+    -- Instant ProximityPrompt
+    promptConn = ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
+        if prompt then
+            fireproximityprompt(prompt)
+        end
+    end)
+
+    -- Instant ClickDetector
+    clickConn = mouse.Button1Down:Connect(function()
+        local target = mouse.Target
+        if target then
+            local cd = target:FindFirstChildOfClass("ClickDetector")
+            if cd then
+                fireclickdetector(cd)
+            end
+        end
+    end)
+end
+local function disable()
+    if promptConn then
+        promptConn:Disconnect()
+        promptConn = nil
+    end
+    if clickConn then
+        clickConn:Disconnect()
+        clickConn = nil
+    end
+end
+PlayerTab:CreateToggle({
+    Name = "Instant Interact (All)",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            enable()
+        else
+            disable()
         end
     end
 })
@@ -809,134 +976,6 @@ PlayerTab:CreateToggle({
     end
 })
 
-PlayerTab:CreateButton({
-    Name = "ShiftLock",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/Shift_Lock"))()
-    end,
-})
-
--- Vẽ tâm ảo
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
-
-local crosshairEnabled = false
-
--- Circle crosshair
-local crosshair = Drawing.new("Circle")
-crosshair.Visible = false
-crosshair.Color = Color3.fromRGB(255,255,255)
-crosshair.Thickness = 1
-crosshair.Radius = 2
-crosshair.Filled = true
-
--- + crosshair
-local lines = {}
-for i = 1,4 do
-	local line = Drawing.new("Line")
-	line.Visible = false
-	line.Color = Color3.fromRGB(255,0,0)
-	line.Thickness = 2
-	table.insert(lines,line)
-end
-
-local function drawPlus(pos)
-
-	local size = 6
-	local gap = 2
-
-	lines[1].From = Vector2.new(pos.X - size, pos.Y)
-	lines[1].To   = Vector2.new(pos.X - gap, pos.Y)
-
-	lines[2].From = Vector2.new(pos.X + gap, pos.Y)
-	lines[2].To   = Vector2.new(pos.X + size, pos.Y)
-
-	lines[3].From = Vector2.new(pos.X, pos.Y - size)
-	lines[3].To   = Vector2.new(pos.X, pos.Y - gap)
-
-	lines[4].From = Vector2.new(pos.X, pos.Y + gap)
-	lines[4].To   = Vector2.new(pos.X, pos.Y + size)
-
-end
-
-RunService.RenderStepped:Connect(function()
-
-	if not crosshairEnabled then
-		crosshair.Visible = false
-		for _,l in pairs(lines) do
-			l.Visible = false
-		end
-		return
-	end
-
-	local viewport = camera.ViewportSize
-	local center = viewport / 2
-
-	local character = player.Character
-	if not character or not character:FindFirstChild("Head") then return end
-
-	local head = character.Head
-	local distance = (camera.CFrame.Position - head.Position).Magnitude
-
-	local pos = center
-
-	if distance > 1 then
-		local offset = camera.CFrame.RightVector * 3.5 + camera.CFrame.UpVector * 0.5
-		local worldPoint = camera.CFrame.Position + camera.CFrame.LookVector * 1000 + offset
-		local screenPoint = camera:WorldToViewportPoint(worldPoint)
-		pos = Vector2.new(screenPoint.X,screenPoint.Y)
-	end
-
-	local rayParams = RaycastParams.new()
-	rayParams.FilterDescendantsInstances = {character}
-	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-
-	local ray = workspace:Raycast(
-		camera.CFrame.Position,
-		camera.CFrame.LookVector * 1000,
-		rayParams
-	)
-
-	local enemyFound = false
-
-	if ray and ray.Instance then
-		local model = ray.Instance:FindFirstAncestorOfClass("Model")
-		if model and Players:GetPlayerFromCharacter(model) then
-			enemyFound = true
-		end
-	end
-
-	if enemyFound then
-		crosshair.Visible = false
-		drawPlus(pos)
-
-		for _,l in pairs(lines) do
-			l.Visible = true
-		end
-	else
-		crosshair.Visible = true
-		crosshair.Position = pos
-
-		for _,l in pairs(lines) do
-			l.Visible = false
-		end
-	end
-
-end)
-
--- Rayfield toggle
-PlayerTab:CreateToggle({
-	Name = "Crosshair",
-	CurrentValue = false,
-	Flag = "CrosshairToggle",
-	Callback = function(Value)
-		crosshairEnabled = Value
-	end,
-})
-
 --FOV
 PlayerTab:CreateSlider({
     Name = "Field Of View",
@@ -1023,7 +1062,7 @@ local connection
 local lastCF
 
 PlayerTab:CreateToggle({
-    Name = "No Camera Shake (GOD)",
+    Name = "No Camera Shake",
     CurrentValue = false,
     Callback = function(state)
 
@@ -1250,6 +1289,16 @@ PlayerTab:CreateSlider({
     CurrentValue = 100,
     Callback = function(v)
         dashLength = v
+    end
+})
+
+--anti afk
+PlayerTab:CreateButton({
+    Name = "Anti-AFK",
+    Callback = function()
+        for _, conn in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+            conn:Disable()
+        end
     end
 })
 
