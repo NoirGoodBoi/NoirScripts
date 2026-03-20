@@ -653,7 +653,7 @@ local function disable()
     end
 end
 PlayerTab:CreateToggle({
-    Name = "Instant Interact (All)",
+    Name = "Instant Interact",
     CurrentValue = false,
     Callback = function(state)
         if state then
@@ -662,6 +662,27 @@ PlayerTab:CreateToggle({
             disable()
         end
     end
+})
+
+PlayerTab:CreateButton({
+    Name = "Tap to TP",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Tap_to_TP"))()
+    end,
+})
+
+PlayerTab:CreateButton({
+    Name = "Inventory Viewer by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
+    end,
+})
+
+PlayerTab:CreateButton({
+    Name = "Wikipedia Tool",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/4UMAeFvE"))()
+    end,
 })
 
 --minimap
@@ -1292,6 +1313,27 @@ PlayerTab:CreateSlider({
     end
 })
 
+ScriptsTab:CreateButton({
+    Name = "Server Menu Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/lumpiasallad/Roblox_ServerHop/refs/heads/main/ServerHopScript.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Server VIP I",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithExility/ZenikazeHub/refs/heads/main/ZenikazeV3.1"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Server VIP II",
+    Callback = function()
+        loadstring(game:HttpGet("https://gist.githubusercontent.com/Tesker-103/ed48b3ae8120b0c040584b661cbda063/raw/210408b3f107dc740a4c9b832bfa647f92aa25d1/FreePrivateServerGUI"))()
+    end,
+})
+
 --anti afk
 PlayerTab:CreateButton({
     Name = "Anti-AFK",
@@ -1507,7 +1549,7 @@ FPSTab:CreateToggle({
 })
 
 FPSTab:CreateButton({
-    Name = "FINAL POTATO MODE",
+    Name = "POTATO MODE",
     Callback = function()
 
         local Lighting = game:GetService("Lighting")
@@ -1937,6 +1979,604 @@ end
 end
 })
 
+local ScriptsTab = Window:CreateTab("Scripts", "file-text")
+
+ScriptsTab:CreateSection("Funny Scripts")
+
+ScriptsTab:CreateButton({
+    Name = "Vehicle Fly",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Vehicle%20Fly%20Gui"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Fly GUI V3",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/fly_gui_v3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Funny by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirFunny.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Wallhop",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Keyboard",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Delta Keyboard",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sparezirt/Script/refs/heads/main/.github/workflows/JustABaseplate.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "SilentAim by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAim.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Aim Bot",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Aimbot-Universal-For-Mobile-and-PC-29153"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Hitbox Extender (aimbot)",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/UI_LimbExtender.lua'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Aimbot Hub (player + NPC)",
+    Callback = function()
+        loadstring(game:HttpGet("https://api.junkie-development.de/api/v1/luascripts/public/71d988cded3d4e480f4ac8f009dbf117c82320704ce873bff04c64ddd7e6d550/download"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "SilentAimNPC by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAimNPC"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Aura (Like Gojo's Infinite)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hellohellohell012321/KAWAII-AURA/main/kawaii_aura.lua", true))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Fake Items Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/bUEfYpZn"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Reset UI by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetGUI"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "BloxsTrap",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/qwertyui-is-back/Bloxstrap/main/Initiate.lua'), 'lol')()
+    end,
+})
+
+ScriptsTab:CreateSection("For Some Game")
+
+ScriptsTab:CreateButton({
+    Name = "Jujutsu Shenanigans",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/cool5013/TBO/main/TBOscript"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Black flash Chain (JJS)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ggab2351-stack/Jjs/refs/heads/main/Betterblackflashchain"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Uma Racing",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/UPDATE-1.0-Uma-Racing-Simple-And-Open-Source-63947"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "M1 reset",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/M1Reset.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "The Strongest Battleground",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kaimm2/TSB/refs/heads/main/Tthanh%20Tong%20Hop%20Tech.txt"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "AK Gaming Ez Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Build A Bunker (Right-Shift for toggle)",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/CE0TU9ye"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("For in-game use only, not recommended for use in the lobby.")
+
+ScriptsTab:CreateButton({
+    Name = "Forsaken",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Snowt69/SNT-HUB/refs/heads/main/Forsaken"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Murder Mystery 2",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/wwfom1bX/raw", true))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Tower Of Zombies",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/gumanba/Scripts/main/TowerofZombies"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Survive Zombie Arena",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/qcHi3xbp/raw"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Raft 101 Survival",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/NUunqb1w"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "99 Night In The Forest",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/loader.lua", true))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Ink Game",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/wefwef34/inkgames.github.io/refs/heads/main/ringta.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Deadrail",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/erewe23/deadrailsring.github.io/refs/heads/main/ringta.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Blade Ball",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/AgentX771/ArgonHubX/main/Loader.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Break In 1",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Iptxt/AXHub-Loader/refs/heads/main/Loader"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Break In 2",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EnesXVC/Breakin2/main/script"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Doors",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Iliankytb/Iliankytb/main/NewBestDoorsScriptIliankytb"))()
+    end,
+})
+
+ScriptsTab:CreateSection("Admin Scripts")
+
+ScriptsTab:CreateButton({
+    Name = "Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Infinite Fun (IY)",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/Xane123/InfiniteFun_IY/master/source'))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "NameLess",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "NameLess version Testing",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "CMD-X",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source", true))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Fates Admin",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/fatesc/fates-admin/main/main.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Reviz Admin",
+    Callback = function()
+        loadstring(game:HttpGetAsync("https://pastebin.com/raw/gQg0G6iA"))()
+    end,
+})
+
+ScriptsTab:CreateSection("All in One Scripts")
+
+ScriptsTab:CreateButton({
+    Name = "Anon Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sa435125/AnonHub/refs/heads/main/anonhub.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Lua Land Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelo-Gitland/LuaLandHubV4Keyless/refs/heads/main/Lua%20Land%20Hub%20%7C%20V4%20Keyless%20Script%20Hub"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Yunas FE Script Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yunus154524/YunusLo1545-HUB/refs/heads/main/YunusLo1545%20HUB"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "c00lkidd GUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelo-Gitland/c00lkidd-Gui-V1-By-Lua-land/refs/heads/main/c00lkidd%20Gui%20V1%20By%20Lua%20Land"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "n0tGUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/Cz3xbk8h"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Welding Abuse Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/rangell8/Rexys-Welding-Hub/refs/heads/main/script"))()
+    end,
+})
+
+
+ScriptsTab:CreateButton({
+    Name = "Rob Visual Script Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/KSvbtcPE"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "KRware Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/KRWareHub/KRWare/refs/heads/main/KRWare%20Hub%20Loader.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "System Broken",
+    Callback = function()
+        loadstring(game:HttpGet("https://scriptblox.com/raw/Ragdoll-Engine-BEST-SCRIPT-WORKING-SystemBroken-7544"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Cryton v3",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/thesigmacorex/Crypton/main/Free"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "XVC hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/Piw5bqGq"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Trolling GUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "IndexZ Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/IndexZHub/Loader/main/Loader"))()
+    end,
+})
+
+ScriptsTab:CreateSection("Funny FE Scripts :))")
+
+ScriptsTab:CreateButton({
+    Name = "Sandevistan FE",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Sandevistan"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Wally West [Mobile]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zNHefpgc"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Wally West [For Mobile V2]",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Wally-West-Roblox-51462"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE The Flash",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/The_Flash"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Silly Car",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-SILLY-CAR-V1-48227"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Car Drift [Recommend for R6]",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Cat",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/Y1MkBRn3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE NPC Controller",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/dacXGb2W"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Replication UI",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/tMYrf22E"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invisible",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invisible"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invincible Fly [R6]",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Invincible Fly [R15]",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v2"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Sharingan [for mobile]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "FE Sharingan [only R6]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
+    end,
+})
+
+ScriptsTab:CreateLabel("(E)Fireball Jutsu")
+ScriptsTab:CreateLabel("(Q)Sharingan (copy movement)")
+ScriptsTab:CreateLabel("(R)Kamui")
+ScriptsTab:CreateLabel("(F)Amaterasu")
+ScriptsTab:CreateLabel("(P)Pose")
+
+PacksTab = Window:CreateTab("Packs", "package")
+
+PacksTab:CreateSection("Not FE")
+
+PacksTab:CreateButton({
+    Name = "Korblox",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Korblox.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Headless",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Headless.lua"))()
+    end,
+})
+
+PacksTab:CreateSection("Animation Pack & Emote FE")
+
+PacksTab:CreateButton({
+    Name = "Animation Pack",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/gwnrdt/gwnrdt/refs/heads/main/Animation.lua"))()
+    end,
+})
+
+PacksTab:CreateButton("Animation & Emote Scripts")
+
+PacksTab:CreateButton({
+    Name = "Animation v2.5",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Emerson2-creator/Scripts-Roblox/refs/heads/main/ScriptR6/AnimGuiV2.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Emote Tiktok",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Free-emote/refs/heads/main/Delta%20mad%20stuffs"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "FE Emote (emote walk)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "FE Emote GUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sypcerr/scripts/refs/heads/main/c15.lua",true))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "FE Animation Script Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://kbauu.neocities.org/animation-hub"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Animation GUI by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Animation_GUI"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Reanimation by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Reanimation"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Krystal Dance v3",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/somethingsimade/KDV3-Fixed/refs/heads/main/KrystalDance3"))()
+    end,
+})
+
+PacksTab:CreateSection("Shaders")
+
+PacksTab:CreateButton({
+    Name = "Shaders Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/pshade-ultimate/refs/heads/main/src/cd.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Shaders Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/pshade-ultimate/refs/heads/main/src/cd.lua"))()
+    end,
+})
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -2205,1016 +2845,6 @@ end
 
 end)
 
-local ScriptsTab = Window:CreateTab("Scripts", "file-text")
-
-ScriptsTab:CreateSection("Funny Scripts")
-
-ScriptsTab:CreateButton({
-    Name = "Vehicle Fly",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Vehicle%20Fly%20Gui"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Fly GUI V3",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/fly_gui_v3"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Funny by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirFunny.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Wallhop",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Keyboard",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Delta Keyboard",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/sparezirt/Script/refs/heads/main/.github/workflows/JustABaseplate.txt"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "SilentAim by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAim.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Aim Bot",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Aimbot-Universal-For-Mobile-and-PC-29153"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Hitbox Extender (aimbot)",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/UI_LimbExtender.lua'))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Aimbot Hub (player + NPC)",
-    Callback = function()
-        loadstring(game:HttpGet("https://api.junkie-development.de/api/v1/luascripts/public/71d988cded3d4e480f4ac8f009dbf117c82320704ce873bff04c64ddd7e6d550/download"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "SilentAimNPC by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAimNPC"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Aura (Like Gojo's Infinite)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/hellohellohell012321/KAWAII-AURA/main/kawaii_aura.lua", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Fake Items Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/bUEfYpZn"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Reset UI by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/ResetGUI"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "BloxsTrap",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/qwertyui-is-back/Bloxstrap/main/Initiate.lua'), 'lol')()
-    end,
-})
-
-ScriptsTab:CreateSection("For Some Game")
-
-ScriptsTab:CreateButton({
-    Name = "Jujutsu Shenanigans",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/cool5013/TBO/main/TBOscript"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Black flash Chain (JJS)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ggab2351-stack/Jjs/refs/heads/main/Betterblackflashchain"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Uma Racing",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/UPDATE-1.0-Uma-Racing-Simple-And-Open-Source-63947"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "M1 reset",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/M1Reset.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "The Strongest Battleground",
-    Callback = function()
-        loadstring(game:HttpGet("https://api.getpolsec.com/scripts/hosted/7bad5e3679f40a89db9300800355a40cd92b70f3ca4c354ffe0e52444c6341fb.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "AK Gaming Ez Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Build A Bunker (Right-Shift for toggle)",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/CE0TU9ye"))()
-    end,
-})
-
-ScriptsTab:CreateLabel("For in-game use only, not recommended for use in the lobby.")
-
-ScriptsTab:CreateButton({
-    Name = "Forsaken",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Snowt69/SNT-HUB/refs/heads/main/Forsaken"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Murder Mystery 2",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastefy.app/wwfom1bX/raw", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Tower Of Zombies",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/gumanba/Scripts/main/TowerofZombies"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Survive Zombie Arena",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastefy.app/qcHi3xbp/raw"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Raft 101 Survival",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/NUunqb1w"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "99 Night In The Forest",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/loader.lua", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Ink Game",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/wefwef34/inkgames.github.io/refs/heads/main/ringta.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Deadrail",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/erewe23/deadrailsring.github.io/refs/heads/main/ringta.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Farm Bond (Skull Hub)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/hungquan99/SkullHub/main/loader.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Blade Ball",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/AgentX771/ArgonHubX/main/Loader.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Break In 1",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Iptxt/AXHub-Loader/refs/heads/main/Loader"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Break In 2",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/EnesXVC/Breakin2/main/script"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Doors",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Iliankytb/Iliankytb/main/NewBestDoorsScriptIliankytb"))()
-    end,
-})
-
-
-ScriptsTab:CreateSection("Animation & Emote Scripts")
-
-ScriptsTab:CreateButton({
-    Name = "Animation v2.5",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Emerson2-creator/Scripts-Roblox/refs/heads/main/ScriptR6/AnimGuiV2.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Emote Tiktok",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Free-emote/refs/heads/main/Delta%20mad%20stuffs"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Emote (emote walk)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Emote GUI",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/sypcerr/scripts/refs/heads/main/c15.lua",true))()
-    end,
-})
-
-
-ScriptsTab:CreateButton({
-    Name = "FE Animation Script Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://kbauu.neocities.org/animation-hub"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Animation GUI by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Animation_GUI"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Reanimation by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Reanimation"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Krystal Dance v3",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/somethingsimade/KDV3-Fixed/refs/heads/main/KrystalDance3"))()
-    end,
-})
-
-ScriptsTab:CreateSection("Shaders")
-
-ScriptsTab:CreateButton({
-    Name = "Shaders Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/pshade-ultimate/refs/heads/main/src/cd.lua"))()
-    end,
-})
-
-ScriptsTab:CreateSection("Admin Scripts")
-
-ScriptsTab:CreateButton({
-    Name = "Infinite Yield",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Infinite Fun (IY)",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/Xane123/InfiniteFun_IY/master/source'))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "NameLess",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "NameLess version Testing",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/NA%20testing.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "CMD-X",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Fates Admin",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/fatesc/fates-admin/main/main.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Reviz Admin",
-    Callback = function()
-        loadstring(game:HttpGetAsync("https://pastebin.com/raw/gQg0G6iA"))()
-    end,
-})
-
-ScriptsTab:CreateSection("All in One Scripts")
-
-ScriptsTab:CreateButton({
-    Name = "Anon Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/sa435125/AnonHub/refs/heads/main/anonhub.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Lua Land Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelo-Gitland/LuaLandHubV4Keyless/refs/heads/main/Lua%20Land%20Hub%20%7C%20V4%20Keyless%20Script%20Hub"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Yunas FE Script Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/yunus154524/YunusLo1545-HUB/refs/heads/main/YunusLo1545%20HUB"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "c00lkidd GUI",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Angelo-Gitland/c00lkidd-Gui-V1-By-Lua-land/refs/heads/main/c00lkidd%20Gui%20V1%20By%20Lua%20Land"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "n0tGUI",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/Cz3xbk8h"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Welding Abuse Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/rangell8/Rexys-Welding-Hub/refs/heads/main/script"))()
-    end,
-})
-
-
-ScriptsTab:CreateButton({
-    Name = "Rob Visual Script Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/KSvbtcPE"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "KRware Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/KRWareHub/KRWare/refs/heads/main/KRWare%20Hub%20Loader.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "System Broken",
-    Callback = function()
-        loadstring(game:HttpGet("https://scriptblox.com/raw/Ragdoll-Engine-BEST-SCRIPT-WORKING-SystemBroken-7544"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Cryton v3",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/thesigmacorex/Crypton/main/Free"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "XVC hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/Piw5bqGq"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Trolling GUI",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "IndexZ Hub",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/IndexZHub/Loader/main/Loader"))()
-    end,
-})
-
-ScriptsTab:CreateSection("Funny FE Scripts :))")
-
-ScriptsTab:CreateButton({
-    Name = "Inventory Viewer by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Wikipedia Tool",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/4UMAeFvE"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Sandevistan FE",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Sandevistan"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Tap to TP",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Tap_to_TP"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Wally West [Mobile]",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/zNHefpgc"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Wally West [For Mobile V2]",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Wally-West-Roblox-51462"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE The Flash",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/The_Flash"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Silly Car",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-SILLY-CAR-V1-48227"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Car Drift [Recommend for R6]",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/AstraOutlight/my-scripts/refs/heads/main/fe%20car%20v3"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Cat",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/Y1MkBRn3"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE NPC Controller",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/dacXGb2W"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Invisible",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invisible"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Invincible Fly [R6]",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v1"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Invincible Fly [R15]",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/FE_invincible_v2"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Sharingan [for mobile]",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/zSEfVjPE"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "FE Sharingan [only R6]",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/bidQM5Bz"))()
-    end,
-})
-
-ScriptsTab:CreateLabel("(E)Fireball Jutsu")
-
-ScriptsTab:CreateLabel("(Q)Sharingan (copy movement)")
-
-ScriptsTab:CreateLabel("(R)Kamui")
-
-ScriptsTab:CreateLabel("(F)Amaterasu")
-
-ScriptsTab:CreateLabel("(P)Pose")
-
-ScriptsTab:CreateButton({
-    Name = "Replication UI",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/tMYrf22E"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Server VIP I",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithExility/ZenikazeHub/refs/heads/main/ZenikazeV3.1"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Server VIP II",
-    Callback = function()
-        loadstring(game:HttpGet("https://gist.githubusercontent.com/Tesker-103/ed48b3ae8120b0c040584b661cbda063/raw/210408b3f107dc740a4c9b832bfa647f92aa25d1/FreePrivateServerGUI"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Server Menu Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/lumpiasallad/Roblox_ServerHop/refs/heads/main/ServerHopScript.lua"))()
-    end,
-})
-
-PacksTab = Window:CreateTab("Packs", "package")
-
-PacksTab:CreateSection("Not Fe & just use for R15")
-
-PacksTab:CreateButton({
-    Name = "Korblox",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Korblox.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Headless",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Headless.lua"))()
-    end,
-})
-
-PacksTab:CreateSection("FE & just use for R15")
-
-PacksTab:CreateButton({
-    Name = "Ninja",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Ninja.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Robot",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Robot.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Levitate",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Levitate.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Mage",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Mage.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Stylish",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Stylish.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Hero",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Hero.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Astronaut",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Astronaut.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Bubbly",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Bubbly.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Cartoony",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Cartoony.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Elder",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Elder.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Ghost",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Ghost.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Knight",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Knight.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Vampire",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Vampire.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Werewolf",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Werewolf.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Zombie",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Zombie.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Oldschool",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Oldschool.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Bold",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Bold.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Adidas",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Adidas.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Adidas2",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Adidas2.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Catwalk",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Catwalk.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Walmart",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Walmart.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Wicked",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Wicked.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "NFL",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/NFL.lua"))()
-    end,
-})
-
-PacksTab:CreateButton({
-    Name = "Pirate",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Pirate.lua"))()
-    end,
-})
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-
-local Tab4 = Window:CreateTab("People", "users")
-
-local currentTarget = nil
-local loopTeleport = false
-local watching = false
-local aimingTarget = false
-local aimStrength = 0.35
-
--- orbit variables
-local orbiting = false
-local orbitRadius = 10
-local orbitSpeed = 30
-local orbitAngle = 0
-
-local playerDropdown = Tab4:CreateDropdown({
-    Name = "Player List",
-    Options = {},
-    CurrentOption = {},
-    Multi = false,
-    Flag = "obj_playerlist",
-    Callback = function(option)
-        if type(option) == "table" and #option > 0 then
-            currentTarget = option[1]
-        else
-            currentTarget = nil
-        end
-    end
-})
-
-local function refreshPlayers()
-    local opts = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(opts, p.Name)
-        end
-    end
-    playerDropdown:Refresh(opts, true)
-    if not table.find(opts, currentTarget) then
-        currentTarget = nil
-    end
-end
-
-Players.PlayerAdded:Connect(refreshPlayers)
-Players.PlayerRemoving:Connect(refreshPlayers)
-refreshPlayers()
-
-local function getTarget()
-    if not currentTarget then return nil end
-    return Players:FindFirstChild(currentTarget)
-end
-
-local function getChar(p)
-    if not p then return nil end
-    return p.Character
-end
-
-Tab4:CreateButton({
-    Name = "Teleport to player",
-    Callback = function()
-        local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-            if hrp1 and hrp2 then
-                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
-            end
-        end
-    end
-})
-
-Tab4:CreateToggle({
-    Name = "Teleport loop",
-    CurrentValue = false,
-    Callback = function(v)
-        loopTeleport = v
-    end
-})
-
-RunService.Heartbeat:Connect(function()
-    if loopTeleport then
-        local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-            if hrp1 and hrp2 then
-                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
-            end
-        end
-    end
-end)
-
-Tab4:CreateToggle({
-    Name = "Watch player",
-    CurrentValue = false,
-    Callback = function(v)
-        watching = v
-        if not v then
-            Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        end
-    end
-})
-
-RunService.RenderStepped:Connect(function()
-    if watching then
-        local t = getTarget()
-        if t and getChar(t) then
-            local hum = getChar(t):FindFirstChildOfClass("Humanoid")
-            if hum then
-                Camera.CameraSubject = hum
-            end
-        end
-    end
-end)
-
-Tab4:CreateToggle({
-    Name = "Aim to player",
-    CurrentValue = false,
-    Callback = function(v)
-        aimingTarget = v
-    end
-})
-
-Tab4:CreateSlider({
-    Name = "Aim strength",
-    Range = {0.1, 1},
-    Increment = 0.05,
-    CurrentValue = 0.35,
-    Callback = function(v)
-        aimStrength = v
-    end
-})
-
-RunService.RenderStepped:Connect(function()
-    if aimingTarget then
-        local t = getTarget()
-        if t and getChar(t) then
-            local hrp = getChar(t):FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local predictedPos = hrp.Position + (hrp.Velocity * 0.1)
-                local targetCF = CFrame.new(Camera.CFrame.Position, predictedPos)
-                Camera.CFrame = Camera.CFrame:Lerp(targetCF, aimStrength)
-            end
-        end
-    end
-end)
-
--- ORBIT UI
-Tab4:CreateToggle({
-    Name = "Orbit player",
-    CurrentValue = false,
-    Callback = function(v)
-        orbiting = v
-    end
-})
-
-Tab4:CreateSlider({
-    Name = "Orbit radius",
-    Range = {1, 100},
-    Increment = 1,
-    CurrentValue = 10,
-    Callback = function(v)
-        orbitRadius = v
-    end
-})
-
-Tab4:CreateSlider({
-    Name = "Orbit speed",
-    Range = {1, 100},
-    Increment = 1,
-    CurrentValue = 30,
-    Callback = function(v)
-        orbitSpeed = v
-    end
-})
-
--- ORBIT LOGIC
-RunService.Heartbeat:Connect(function(dt)
-    if orbiting then
-        local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-
-            if hrp1 and hrp2 then
-                orbitAngle += orbitSpeed * dt
-
-                local offset = Vector3.new(
-                    math.cos(orbitAngle) * orbitRadius,
-                    0,
-                    math.sin(orbitAngle) * orbitRadius
-                )
-
-                hrp1.CFrame = CFrame.new(hrp2.Position + offset, hrp2.Position)
-            end
-        end
-    end
-end)
-
 --Tab Limbs
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -3320,3 +2950,424 @@ LocalPlayer.CharacterAdded:Connect(characterAdded)
 if LocalPlayer.Character then
     characterAdded(LocalPlayer.Character)
 end
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local Tab4 = Window:CreateTab("People", "users")
+
+local currentTarget = nil
+local loopTeleport = false
+local spectateIndex = 1
+local spectateList = {}
+local aimingTarget = false
+local aimStrength = 0.35
+
+-- orbit variables
+local orbiting = false
+local orbitRadius = 10
+local orbitSpeed = 30
+local orbitAngle = 0
+
+local playerDropdown = Tab4:CreateDropdown({
+    Name = "Player List",
+    Options = {},
+    CurrentOption = {},
+    Multi = false,
+    Flag = "obj_playerlist",
+    Callback = function(option)
+        if type(option) == "table" and #option > 0 then
+            local full = option[1]
+            local username = string.match(full, "@(.+)")
+            currentTarget = username
+        else
+            currentTarget = nil
+        end
+    end
+})
+
+local function refreshPlayers()
+    local opts = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(opts, p.DisplayName .. " @" .. p.Name)
+        end
+    end
+    playerDropdown:Refresh(opts, true)
+
+    -- reset target if not exist
+    local exists = false
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.Name == currentTarget then
+            exists = true
+            break
+        end
+    end
+
+    if not exists then
+        currentTarget = nil
+    end
+end
+
+Players.PlayerAdded:Connect(refreshPlayers)
+Players.PlayerRemoving:Connect(refreshPlayers)
+refreshPlayers()
+
+local function getTarget()
+    if not currentTarget then return nil end
+    return Players:FindFirstChild(currentTarget)
+end
+
+local function getChar(p)
+    if not p then return nil end
+    return p.Character
+end
+
+-- helper
+local function getRoot(p)
+    local char = getChar(p)
+    if not char then return nil end
+    return char:FindFirstChild("HumanoidRootPart")
+end
+
+local function teleportToPlayer(p)
+    if not p then return end
+    local root = getRoot(p)
+    local myRoot = getRoot(LocalPlayer)
+    if root and myRoot then
+        myRoot.CFrame = root.CFrame * CFrame.new(2,0,2)
+    end
+end
+
+local function getClosestPlayer()
+    local myRoot = getRoot(LocalPlayer)
+    if not myRoot then return nil end
+
+    local closest = nil
+    local shortest = math.huge
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            local root = getRoot(p)
+            if root then
+                local dist = (root.Position - myRoot.Position).Magnitude
+                if dist < shortest then
+                    shortest = dist
+                    closest = p
+                end
+            end
+        end
+    end
+
+    return closest
+end
+
+local function getFriendPlayers()
+    local friends = {}
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            local success, result = pcall(function()
+                return LocalPlayer:IsFriendsWith(p.UserId)
+            end)
+
+            if success and result then
+                table.insert(friends, p)
+            end
+        end
+    end
+
+    return friends
+end
+
+-- Teleport to selected
+Tab4:CreateButton({
+    Name = "Teleport to player",
+    Callback = function()
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+            if hrp1 and hrp2 then
+                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
+            end
+        end
+    end
+})
+
+-- Random
+Tab4:CreateButton({
+    Name = "Teleport Random Player",
+    Callback = function()
+        local list = {}
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer then
+                table.insert(list, p)
+            end
+        end
+
+        if #list > 0 then
+            teleportToPlayer(list[math.random(1, #list)])
+        end
+    end
+})
+
+-- Nearest
+Tab4:CreateButton({
+    Name = "Teleport Nearest Player",
+    Callback = function()
+        local target = getClosestPlayer()
+        if target then
+            teleportToPlayer(target)
+        end
+    end
+})
+
+-- Friend
+Tab4:CreateButton({
+    Name = "Teleport to Friend",
+    Callback = function()
+        local friends = getFriendPlayers()
+        if #friends > 0 then
+            teleportToPlayer(friends[math.random(1, #friends)])
+        end
+    end
+})
+
+-- Loop teleport
+Tab4:CreateToggle({
+    Name = "Teleport loop",
+    CurrentValue = false,
+    Callback = function(v)
+        loopTeleport = v
+    end
+})
+
+RunService.Heartbeat:Connect(function()
+    if loopTeleport then
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+            if hrp1 and hrp2 then
+                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
+            end
+        end
+    end
+end)
+
+-- UI container
+local spectateUI = Instance.new("Frame")
+spectateUI.Size = UDim2.new(0, 200, 0, 120)
+spectateUI.Position = UDim2.new(0, 10, 0, 150)
+spectateUI.BackgroundTransparency = 1
+spectateUI.Visible = false
+spectateUI.Parent = game.CoreGui
+
+-- Buttons
+local nextBtn = Instance.new("TextButton")
+nextBtn.Size = UDim2.new(0, 90, 0, 35)
+nextBtn.Position = UDim2.new(0, 5, 0, 70)
+nextBtn.Text = "Next"
+nextBtn.Parent = spectateUI
+
+local prevBtn = Instance.new("TextButton")
+prevBtn.Size = UDim2.new(0, 90, 0, 35)
+prevBtn.Position = UDim2.new(0, 105, 0, 70)
+prevBtn.Text = "Prev"
+prevBtn.Parent = spectateUI
+
+-- Info overlay (gọn, góc màn)
+local infoLabel = Instance.new("TextLabel")
+infoLabel.Size = UDim2.new(0, 220, 0, 80)
+infoLabel.Position = UDim2.new(0, 10, 0, 10)
+infoLabel.BackgroundTransparency = 0.7
+infoLabel.TextScaled = true
+infoLabel.TextWrapped = true
+infoLabel.TextXAlignment = Enum.TextXAlignment.Left
+infoLabel.TextYAlignment = Enum.TextYAlignment.Top
+infoLabel.Parent = game.CoreGui
+
+-- Get root
+local function getRoot(p)
+    if not p or not p.Character then return nil end
+    return p.Character:FindFirstChild("HumanoidRootPart")
+end
+
+-- Update list
+local function updateSpectateList()
+    spectateList = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(spectateList, p)
+        end
+    end
+end
+
+-- Spectate
+local function spectatePlayer(p)
+    if p and p.Character then
+        local hum = p.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            workspace.CurrentCamera.CameraSubject = hum
+        end
+    end
+end
+
+-- Toggle spectate
+Tab4:CreateToggle({
+    Name = "Spectate Player",
+    CurrentValue = false,
+    Callback = function(v)
+        if v then
+            spectateUI.Visible = true
+            updateSpectateList()
+
+            if #spectateList > 0 then
+                spectateIndex = 1
+                spectatePlayer(spectateList[spectateIndex])
+            end
+        else
+            spectateUI.Visible = false
+            infoLabel.Text = ""
+            workspace.CurrentCamera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        end
+    end
+})
+
+-- Next
+nextBtn.MouseButton1Click:Connect(function()
+    updateSpectateList()
+    if #spectateList == 0 then return end
+
+    spectateIndex += 1
+    if spectateIndex > #spectateList then
+        spectateIndex = 1
+    end
+
+    spectatePlayer(spectateList[spectateIndex])
+end)
+
+-- Prev
+prevBtn.MouseButton1Click:Connect(function()
+    updateSpectateList()
+    if #spectateList == 0 then return end
+
+    spectateIndex -= 1
+    if spectateIndex < 1 then
+        spectateIndex = #spectateList
+    end
+
+    spectatePlayer(spectateList[spectateIndex])
+end)
+
+-- Info update
+RunService.RenderStepped:Connect(function()
+    if spectateList[spectateIndex] then
+        local p = spectateList[spectateIndex]
+        if p and p.Character then
+            local hum = p.Character:FindFirstChildOfClass("Humanoid")
+            local root = p.Character:FindFirstChild("HumanoidRootPart")
+            local myRoot = getRoot(LocalPlayer)
+
+            if hum and root and myRoot then
+                local dist = (root.Position - myRoot.Position).Magnitude
+
+                infoLabel.Text = string.format(
+                    "%s @%s\nHP: %d/%d\nDistance: %.1f",
+                    p.DisplayName,
+                    p.Name,
+                    math.floor(hum.Health),
+                    math.floor(hum.MaxHealth),
+                    dist
+                )
+            end
+        end
+    end
+end)
+
+-- Aim
+Tab4:CreateToggle({
+    Name = "Aim to player",
+    CurrentValue = false,
+    Callback = function(v)
+        aimingTarget = v
+    end
+})
+
+Tab4:CreateSlider({
+    Name = "Aim strength",
+    Range = {0.1, 1},
+    Increment = 0.05,
+    CurrentValue = 0.35,
+    Callback = function(v)
+        aimStrength = v
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if aimingTarget then
+        local t = getTarget()
+        if t and getChar(t) then
+            local hrp = getChar(t):FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local predictedPos = hrp.Position + (hrp.Velocity * 0.1)
+                local targetCF = CFrame.new(Camera.CFrame.Position, predictedPos)
+                Camera.CFrame = Camera.CFrame:Lerp(targetCF, aimStrength)
+            end
+        end
+    end
+end)
+
+-- Orbit
+Tab4:CreateToggle({
+    Name = "Orbit player",
+    CurrentValue = false,
+    Callback = function(v)
+        orbiting = v
+    end
+})
+
+Tab4:CreateSlider({
+    Name = "Orbit radius",
+    Range = {1, 250},
+    Increment = 1,
+    CurrentValue = 10,
+    Callback = function(v)
+        orbitRadius = v
+    end
+})
+
+Tab4:CreateSlider({
+    Name = "Orbit speed",
+    Range = {1, 150},
+    Increment = 1,
+    CurrentValue = 30,
+    Callback = function(v)
+        orbitSpeed = v
+    end
+})
+
+RunService.Heartbeat:Connect(function(dt)
+    if orbiting then
+        local t = getTarget()
+        if t and getChar(t) and getChar(LocalPlayer) then
+            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
+            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
+
+            if hrp1 and hrp2 then
+                orbitAngle += orbitSpeed * dt
+
+                local offset = Vector3.new(
+                    math.cos(orbitAngle) * orbitRadius,
+                    0,
+                    math.sin(orbitAngle) * orbitRadius
+                )
+
+                hrp1.CFrame = CFrame.new(hrp2.Position + offset, hrp2.Position)
+            end
+        end
+    end
+end)
