@@ -1060,6 +1060,89 @@ PlayerTab:CreateToggle({
 })
 
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- lưu lịch sử vị trí
+local positionHistory = {}
+
+-- cập nhật liên tục
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            table.insert(positionHistory, {
+                time = tick(),
+                cf = char.HumanoidRootPart.CFrame
+            })
+
+            -- giữ lịch sử ngắn (tránh full memory)
+            for i = #positionHistory, 1, -1 do
+                if tick() - positionHistory[i].time > 5 then
+                    table.remove(positionHistory, i)
+                end
+            end
+        end
+    end
+end)
+
+local flashButton
+
+PlayerTab:CreateToggle({
+    Name = "Flash Back (5s)",
+    CurrentValue = false,
+    Callback = function(state)
+
+        if state then
+            flashButton = Instance.new("TextButton")
+            flashButton.Size = UDim2.new(0, 120, 0, 40)
+            flashButton.Position = UDim2.new(0.8, 0, 0.5, 0)
+            flashButton.Text = "Flash Back"
+            flashButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+            flashButton.TextColor3 = Color3.fromRGB(255,255,255)
+            flashButton.Parent = game.CoreGui
+
+            flashButton.MouseButton1Click:Connect(function()
+                local char = LocalPlayer.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                -- tìm vị trí gần nhất nhưng trong 5s
+                local target = nil
+                for i = #positionHistory, 1, -1 do
+                    local data = positionHistory[i]
+                    if tick() - data.time <= 5 then
+                        target = data.cf
+                        break
+                    end
+                end
+
+                if target then
+                    local distance = (hrp.Position - target.Position).Magnitude
+                    local speed = 60
+                    local time = distance / speed
+
+                    TweenService:Create(
+                        hrp,
+                        TweenInfo.new(time, Enum.EasingStyle.Linear),
+                        {CFrame = target}
+                    ):Play()
+                end
+            end)
+
+        else
+            if flashButton then
+                flashButton:Destroy()
+                flashButton = nil
+            end
+        end
+    end
+})
+
+local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 -- SETTINGS
@@ -1583,7 +1666,7 @@ CurrentOption = {"Display + @Username"},
 MultipleOptions = false,
 Callback = function(opt)
 
-local o = opt[1]
+local o = opt[2]
 
 if o == "@Username" then
 nameMode = 1
