@@ -1630,7 +1630,7 @@ CurrentOption = {"Display + @Username"},
 MultipleOptions = false,
 Callback = function(opt)
 
-local o = opt[2]
+local o = opt[1]
 
 if o == "@Username" then
 nameMode = 1
