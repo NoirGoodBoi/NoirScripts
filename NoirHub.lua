@@ -1102,7 +1102,7 @@ local plr = Players.LocalPlayer
 -- SETTINGS
 local dashLength = 100
 local dashTime = 0.05
-local yBoost = 10
+local yBoost = 20
 
 local dashGui = nil
 
@@ -1144,7 +1144,7 @@ local function createDashButton()
 
     local btn = Instance.new("TextButton")
     btn.Parent = dashGui
-    btn.Size = UDim2.new(0, 90, 0, 90)
+    btn.Size = UDim2.new(0, 75, 0, 75)
     btn.Position = UDim2.new(0.8, 0, 0.6, 0)
 
     btn.Text = "DASH"
@@ -1199,9 +1199,9 @@ PlayerTab:CreateToggle({
 -- SLIDER LENGTH
 PlayerTab:CreateSlider({
     Name = "Dash Length",
-    Range = {10, 500},
-    Increment = 10,
-    CurrentValue = 30,
+    Range = {5, 50},
+    Increment = 5,
+    CurrentValue = 5,
     Callback = function(v)
         dashLength = v
     end
