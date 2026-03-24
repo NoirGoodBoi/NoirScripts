@@ -204,7 +204,7 @@ local defaultSpeed = nil
 
 PlayerTab:CreateSlider({
     Name = "Speed",
-    Range = {16, 1000},
+    Range = {1, 1000},
     Increment = 1,
     CurrentValue = 16,
     Callback = function(v)
@@ -2274,9 +2274,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Build A Bunker (Right-Shift for toggle)",
+    Name = "Legend Battleground",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/CE0TU9ye"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/solarastuff/legendsbattlegrounds/refs/heads/main/legendary.lua"))()
     end,
 })
 
