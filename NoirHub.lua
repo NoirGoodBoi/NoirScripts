@@ -267,7 +267,7 @@ end
 -- slider
 PlayerTab:CreateSlider({
     Name = "Power Jump",
-    Range = {50, 1000},
+    Range = {1, 1000},
     Increment = 1,
     CurrentValue = 50,
     Callback = function(v)
