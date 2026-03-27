@@ -320,7 +320,6 @@ PlayerTab:CreateToggle({
 
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
-
 local plr = Players.LocalPlayer
 local noclipEnabled = false
 
@@ -329,17 +328,11 @@ PlayerTab:CreateToggle({
     CurrentValue = false,
     Callback = function(state)
         noclipEnabled = state
-
+        
         if state then
             RunService:BindToRenderStep("NoirNoClip", Enum.RenderPriority.Character.Value, function()
                 local char = plr.Character
                 if not char then return end
-
-                local humanoid = char:FindFirstChildOfClass("Humanoid")
-                if not humanoid then return end
-
-                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-
                 for _, v in pairs(char:GetDescendants()) do
                     if v:IsA("BasePart") then
                         v.CanCollide = false
@@ -348,17 +341,8 @@ PlayerTab:CreateToggle({
             end)
         else
             RunService:UnbindFromRenderStep("NoirNoClip")
-
             local char = plr.Character
             if not char then return end
-
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-                humanoid.Jump = true
-            end
-
             for _, v in pairs(char:GetDescendants()) do
                 if v:IsA("BasePart") then
                     v.CanCollide = true
@@ -368,43 +352,61 @@ PlayerTab:CreateToggle({
     end
 })
 
+local RunService = game:GetService("RunService")
+local camConnection
+
+PlayerTab:CreateToggle({
+    Name = "No Clip Cam",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            camConnection = RunService.RenderStepped:Connect(function()
+                local cam = workspace.CurrentCamera
+                if cam then
+                    cam.CameraCollisionMode = Enum.CameraCollisionMode.Invisible
+                end
+            end)
+        else
+            if camConnection then
+                camConnection:Disconnect()
+                camConnection = nil
+            end
+            local cam = workspace.CurrentCamera
+            if cam then
+                cam.CameraCollisionMode = Enum.CameraCollisionMode.Zoom
+            end
+        end
+    end
+})
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-
 local LocalPlayer = Players.LocalPlayer
-
 local enabled = false
 local connection
-
 local function fixCharacter(char)
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     local root = char:FindFirstChild("HumanoidRootPart")
     if not humanoid or not root then return end
-
     humanoid.PlatformStand = false
     humanoid.AutoRotate = true
     humanoid:ChangeState(Enum.HumanoidStateType.Running)
-
     humanoid.WalkSpeed = math.max(humanoid.WalkSpeed, 16)
     humanoid.JumpPower = math.max(humanoid.JumpPower, 50)
     humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-
     for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
         if track.Priority == Enum.AnimationPriority.Action then
             track:Stop()
         end
     end
-
     for _, v in pairs(char:GetDescendants()) do
         if v:IsA("BallSocketConstraint") 
         or v:IsA("HingeConstraint") then
             v:Destroy()
         end
     end
-
     root.AssemblyLinearVelocity = Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
     root.AssemblyAngularVelocity = Vector3.new(0,0,0)
-
     for _, v in pairs(root:GetChildren()) do
         if v:IsA("BodyVelocity")
         or v:IsA("BodyGyro")
@@ -419,7 +421,6 @@ PlayerTab:CreateToggle({
     CurrentValue = false,
     Callback = function(state)
         enabled = state
-
         if state then
             connection = RunService.Heartbeat:Connect(function()
                 local char = LocalPlayer.Character
@@ -431,6 +432,47 @@ PlayerTab:CreateToggle({
             if connection then
                 connection:Disconnect()
                 connection = nil
+            end
+        end
+    end
+})
+
+--forcefield
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+
+local enabled = false
+
+local function applyForceField(char)
+    if not enabled or not char then return end
+    
+    if not char:FindFirstChildOfClass("ForceField") then
+        local ff = Instance.new("ForceField")
+        ff.Visible = true -- muốn ẩn thì đổi false
+        ff.Parent = char
+    end
+end
+
+plr.CharacterAdded:Connect(function(char)
+    task.wait(0.2)
+    applyForceField(char)
+end)
+
+PlayerTab:CreateToggle({
+    Name = "God Mode (ForceField)",
+    CurrentValue = false,
+    Callback = function(v)
+        enabled = v
+
+        local char = plr.Character
+        if not char then return end
+
+        if v then
+            applyForceField(char)
+        else
+            local ff = char:FindFirstChildOfClass("ForceField")
+            if ff then
+                ff:Destroy()
             end
         end
     end
@@ -750,7 +792,6 @@ local function createMap()
     dist.Parent = InfoPanel
 end
 
---// DOT
 local function createDot(player)
     if MapObjects[player] then return end
 
@@ -790,7 +831,6 @@ local function createDot(player)
     MapObjects[player] = dot
 end
 
---// UPDATE
 local function updateDots(dt)
     if not MapEnabled then return end
 
@@ -835,13 +875,11 @@ local function updateDots(dt)
         local char = CurrentTarget.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         local hum = char and char:FindFirstChildOfClass("Humanoid")
-
         if hum then
             InfoPanel.HP.Text = "HP: "..math.floor(hum.Health)
         else
             InfoPanel.HP.Text = "HP: N/A"
         end
-
         if myHRP and hrp then
             local dist = (hrp.Position - myHRP.Position).Magnitude
             InfoPanel.Distance.Text = "Dist: "..math.floor(dist).."m"
@@ -851,16 +889,12 @@ local function updateDots(dt)
     end
 end
 
---// INIT
 local function initMap()
     createMap()
-
     for _,p in pairs(Players:GetPlayers()) do
         createDot(p)
     end
-
     Players.PlayerAdded:Connect(createDot)
-
     Players.PlayerRemoving:Connect(function(p)
         if MapObjects[p] then
             MapObjects[p]:Destroy()
@@ -872,17 +906,14 @@ local function initMap()
             InfoPanel.Visible = false
         end
     end)
-
     RenderConnection = RunService.RenderStepped:Connect(updateDots)
 end
 
---// TOGGLE
 PlayerTab:CreateToggle({
-    Name = "MiniMap FINAL ABSOLUTE",
+    Name = "MiniMap",
     CurrentValue = false,
     Callback = function(state)
         MapEnabled = state
-
         if state then
             if not MapGui then initMap() end
             MapGui.Enabled = true
@@ -974,133 +1005,11 @@ PlayerTab:CreateToggle({
     end
 })
 
---FOV
-PlayerTab:CreateSlider({
-    Name = "Field Of View",
-    Range = {30,120},
-    Increment = 1,
-    CurrentValue = Camera.FieldOfView,
-    Callback = function(v)
-        Camera.FieldOfView = v
-    end
-})
-
---Lock cam
-local Players = game:GetService("Players")
-local Camera = workspace.CurrentCamera
-local RunService = game:GetService("RunService")
-
-local locked = false
-local savedCFrame
-local conn
-
-PlayerTab:CreateToggle({
-    Name = "Lock Camera",
-    CurrentValue = false,
-    Callback = function(Value)
-        locked = Value
-        if locked then
-            savedCFrame = Camera.CFrame
-            conn = RunService.RenderStepped:Connect(function()
-                if locked and savedCFrame then
-                    Camera.CFrame = savedCFrame
-                end
-            end)
-        else
-            if conn then conn:Disconnect() conn = nil end
-            savedCFrame = nil
-        end
-    end,
-})
-
---firstp
-PlayerTab:CreateButton({
-    Name = "Lock First Person",
-    Callback = function()
-        LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
-        LocalPlayer.CameraMinZoomDistance = 0
-        LocalPlayer.CameraMaxZoomDistance = 0
-    end
-})
-
--- Third Person Force Toggle
-local thirdPersonEnabled = false
-local thirdPersonLoop = nil
-
-PlayerTab:CreateToggle({
-    Name = "Force Third Person",
-    CurrentValue = false,
-    Callback = function(state)
-        thirdPersonEnabled = state
-
-        if state then
-            thirdPersonLoop = game:GetService("RunService").RenderStepped:Connect(function()
-                if LocalPlayer and LocalPlayer.Character then
-                    LocalPlayer.CameraMode = Enum.CameraMode.Classic
-                    LocalPlayer.CameraMinZoomDistance = 0
-                    LocalPlayer.CameraMaxZoomDistance = math.huge
-                end
-            end)
-        else
-            if thirdPersonLoop then
-                thirdPersonLoop:Disconnect()
-                thirdPersonLoop = nil
-            end
-        end
-    end
-})
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-
-local connection
-local lastCF
-
-PlayerTab:CreateToggle({
-    Name = "No Camera Shake",
-    CurrentValue = false,
-    Callback = function(state)
-
-        if state then
-            lastCF = Camera.CFrame
-
-            connection = RunService.RenderStepped:Connect(function()
-                if not Camera then return end
-
-                local currentCF = Camera.CFrame
-
-                local newPos = lastCF.Position:Lerp(currentCF.Position, 0.2)
-
-                Camera.CFrame = CFrame.new(newPos) * (currentCF - currentCF.Position)
-
-                lastCF = Camera.CFrame
-
-                local char = LocalPlayer.Character
-                if char then
-                    local hum = char:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        hum.CameraOffset = Vector3.new(0,0,0)
-                    end
-                end
-            end)
-
-        else
-            if connection then
-                connection:Disconnect()
-                connection = nil
-            end
-        end
-    end
-})
-
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 -- SETTINGS
-local dashLength = 100
+local dashLength = 5
 local dashTime = 0.05
 local yBoost = 20
 
@@ -1207,6 +1116,103 @@ PlayerTab:CreateSlider({
     end
 })
 
+-- Third Person Force Toggle
+local thirdPersonEnabled = false
+local thirdPersonLoop = nil
+
+PlayerTab:CreateToggle({
+    Name = "Force Third Person",
+    CurrentValue = false,
+    Callback = function(state)
+        thirdPersonEnabled = state
+
+        if state then
+            thirdPersonLoop = game:GetService("RunService").RenderStepped:Connect(function()
+                if LocalPlayer and LocalPlayer.Character then
+                    LocalPlayer.CameraMode = Enum.CameraMode.Classic
+                    LocalPlayer.CameraMinZoomDistance = 0
+                    LocalPlayer.CameraMaxZoomDistance = math.huge
+                end
+            end)
+        else
+            if thirdPersonLoop then
+                thirdPersonLoop:Disconnect()
+                thirdPersonLoop = nil
+            end
+        end
+    end
+})
+
+--firstp
+PlayerTab:CreateButton({
+    Name = "Lock First Person",
+    Callback = function()
+        LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+        LocalPlayer.CameraMinZoomDistance = 0
+        LocalPlayer.CameraMaxZoomDistance = 0
+    end
+})
+
+--Lock cam
+local Players = game:GetService("Players")
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+local locked = false
+local savedCFrame
+local conn
+
+PlayerTab:CreateToggle({
+    Name = "Lock Camera",
+    CurrentValue = false,
+    Callback = function(Value)
+        locked = Value
+        if locked then
+            savedCFrame = Camera.CFrame
+            conn = RunService.RenderStepped:Connect(function()
+                if locked and savedCFrame then
+                    Camera.CFrame = savedCFrame
+                end
+            end)
+        else
+            if conn then conn:Disconnect() conn = nil end
+            savedCFrame = nil
+        end
+    end,
+})
+
+PlayerTab:CreateButton({
+    Name = "Tap to TP",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Tap_to_TP"))()
+    end,
+})
+
+--FOV
+PlayerTab:CreateSlider({
+    Name = "Field Of View",
+    Range = {30,120},
+    Increment = 1,
+    CurrentValue = Camera.FieldOfView,
+    Callback = function(v)
+        Camera.FieldOfView = v
+    end
+})
+
+PlayerTab:CreateButton({
+    Name = "Inventory Viewer",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
+    end,
+})
+
+PlayerTab:CreateButton({
+    Name = "Wikipedia Tools",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/4UMAeFvE"))()
+    end,
+})
+
 --anti afk
 PlayerTab:CreateButton({
     Name = "Anti-AFK",
@@ -1309,18 +1315,18 @@ FPSTab:CreateToggle({
     Name = "Unlock FPS",
     CurrentValue = false,
     Callback = function(v)
-
         if v then
             setfpscap(0)
         else
-            setfpscap(60)
-        end
-
+            setfpscap(240)
+        end        
     end,
 })
 
+local Lighting = game:GetService("Lighting")
+
 -- Boost FPS
-local removedEffects = {}
+local disabledEffects = {}
 
 FPSTab:CreateToggle({
     Name = "Boost FPS",
@@ -1328,47 +1334,47 @@ FPSTab:CreateToggle({
     Callback = function(v)
 
         if v then
-
             Lighting.GlobalShadows = false
 
-            for _,obj in pairs(game:GetDescendants()) do
-                if obj:IsA("BloomEffect")
-                or obj:IsA("SunRaysEffect")
-                or obj:IsA("DepthOfFieldEffect")
-                or obj:IsA("ColorCorrectionEffect")
-                or obj:IsA("BlurEffect")
-                or obj:IsA("Atmosphere")
-                or obj:IsA("ParticleEmitter")
+            for _, obj in pairs(game:GetDescendants()) do
+                if obj:IsA("ParticleEmitter")
                 or obj:IsA("Trail")
                 or obj:IsA("Smoke")
                 or obj:IsA("Fire")
                 or obj:IsA("Sparkles") then
 
-                    removedEffects[obj] = obj.Parent
-                    obj.Parent = nil
+                    disabledEffects[obj] = obj.Enabled
+                    obj.Enabled = false
 
+                elseif obj:IsA("BloomEffect")
+                or obj:IsA("SunRaysEffect")
+                or obj:IsA("DepthOfFieldEffect")
+                or obj:IsA("ColorCorrectionEffect")
+                or obj:IsA("BlurEffect") then
+
+                    disabledEffects[obj] = true
+                    obj.Enabled = false
                 end
             end
 
         else
-
             Lighting.GlobalShadows = true
 
-            for obj,parent in pairs(removedEffects) do
-                if obj then
-                    obj.Parent = parent
-                end
+            for obj, state in pairs(disabledEffects) do
+                pcall(function()
+                    if obj then
+                        obj.Enabled = state
+                    end
+                end)
             end
 
-            removedEffects = {}
-
+            disabledEffects = {}
         end
-
     end,
 })
 
--- Ultra Boost
-local removedUltra = {}
+-- Ultra Boost FPS
+local ultraDisabled = {}
 
 FPSTab:CreateToggle({
     Name = "Ultra Boost FPS",
@@ -1376,7 +1382,6 @@ FPSTab:CreateToggle({
     Callback = function(v)
 
         if v then
-
             settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
             Lighting.GlobalShadows = false
 
@@ -1385,96 +1390,55 @@ FPSTab:CreateToggle({
             workspace.Terrain.WaterReflectance = 0
             workspace.Terrain.WaterTransparency = 1
 
-            for _,obj in pairs(game:GetDescendants()) do
+            for _, obj in pairs(game:GetDescendants()) do
 
-                if obj:IsA("BloomEffect")
-                or obj:IsA("SunRaysEffect")
-                or obj:IsA("DepthOfFieldEffect")
-                or obj:IsA("ColorCorrectionEffect")
-                or obj:IsA("BlurEffect")
-                or obj:IsA("Atmosphere")
-                or obj:IsA("ParticleEmitter")
+                if obj:IsA("BasePart") then
+                    ultraDisabled[obj] = obj.Material
+                    obj.Material = Enum.Material.SmoothPlastic
+
+                elseif obj:IsA("Texture") or obj:IsA("Decal") then
+                    ultraDisabled[obj] = obj.Transparency
+                    obj.Transparency = 1
+
+                elseif obj:IsA("ParticleEmitter")
                 or obj:IsA("Trail")
                 or obj:IsA("Smoke")
                 or obj:IsA("Fire")
-                or obj:IsA("Sparkles")
-                or obj:IsA("Texture")
-                or obj:IsA("Decal") then
+                or obj:IsA("Sparkles") then
 
-                    removedUltra[obj] = obj.Parent
-                    obj.Parent = nil
+                    ultraDisabled[obj] = obj.Enabled
+                    obj.Enabled = false
                 end
             end
-        else
 
+        else
             Lighting.GlobalShadows = true
             settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
 
-            for obj,parent in pairs(removedUltra) do
-                if obj then
-                    obj.Parent = parent
-                end
+            for obj, val in pairs(ultraDisabled) do
+                pcall(function()
+                    if obj then
+                        if obj:IsA("BasePart") then
+                            obj.Material = val
+                        elseif obj:IsA("Texture") or obj:IsA("Decal") then
+                            obj.Transparency = val
+                        else
+                            obj.Enabled = val
+                        end
+                    end
+                end)
             end
 
-            removedUltra = {}
+            ultraDisabled = {}
         end
     end,
 })
 
 FPSTab:CreateButton({
-    Name = "FINAL POTATO MODE",
+    Name = "UniverHub FPS Booster",
     Callback = function()
-
-        local Lighting = game:GetService("Lighting")
-        local Terrain = workspace:FindFirstChildOfClass("Terrain")
-
-        -- 1 Shadows OFF
-        Lighting.GlobalShadows = false
-
-        -- 2 Water + Grass
-        if Terrain then
-            Terrain.Decoration = false
-            Terrain.WaterWaveSize = 0
-            Terrain.WaterWaveSpeed = 0
-            Terrain.WaterReflectance = 0
-            Terrain.WaterTransparency = 1
-        end
-
-        -- 3 Graphics Level
-        pcall(function()
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-        end)
-
-        -- 4 Simplify nearby objects ONLY
-        local function process(obj)
-
-            if obj:IsA("BasePart") then
-                obj.Material = Enum.Material.Plastic
-                obj.CastShadow = false
-                obj.Reflectance = 0
-            end
-
-            if obj:IsA("MeshPart") then
-                obj.RenderFidelity = Enum.RenderFidelity.Performance
-            end
-
-        end
-
-        -- Không scan toàn map
-        for _,v in ipairs(workspace:GetChildren()) do
-            for _,obj in ipairs(v:GetDescendants()) do
-                process(obj)
-            end
-        end
-
-        -- xử lý object spawn sau
-        workspace.DescendantAdded:Connect(function(obj)
-            task.spawn(function()
-                process(obj)
-            end)
-        end)
-
-    end
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Uranus197/-Univers-Hub-Graphics-Script-/refs/heads/main/UniversHub"))()
+    end,
 })
 
 local Players = game:GetService("Players")
@@ -1489,7 +1453,7 @@ ESP:CreateSection("ESP")
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
-local nameMode = 3
+local nameMode = 1
 
 local espSettings = {
 UseOutline = false,
@@ -2521,30 +2485,9 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateSection("Funny FE Scripts :))")
 
 ScriptsTab:CreateButton({
-    Name = "Inventory Viewer by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Wikipedia Tool",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/4UMAeFvE"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
     Name = "Sandevistan FE",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Sandevistan"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Tap to TP",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Tap_to_TP"))()
     end,
 })
 
