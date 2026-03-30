@@ -352,61 +352,121 @@ PlayerTab:CreateToggle({
     end
 })
 
+--noclip cam
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local camConnection
+
+local player = Players.LocalPlayer
+local cam = workspace.CurrentCamera
+
+local enabled = false
+local hookDone = false
+
+local function hookCamera()
+    local success = pcall(function()
+        local PlayerModule = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"))
+        local CameraModule = PlayerModule:GetCameras()
+
+        if CameraModule and CameraModule.activeCameraController then
+            local controller = CameraModule.activeCameraController
+
+            if controller and not controller._noclipHooked then
+                controller._noclipHooked = true
+
+                if controller.GetLargestCutoffDistance then
+                    controller.GetLargestCutoffDistance = function()
+                        return 0
+                    end
+                end
+            end
+        end
+    end)
+
+    if success then
+        hookDone = true
+    end
+end
+
+local function onCharacterAdded()
+    hookDone = false
+    task.wait(1)
+    if enabled then
+        hookCamera()
+    end
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+
+RunService.RenderStepped:Connect(function()
+    if enabled and not hookDone then
+        hookCamera()
+    end
+end)
 
 PlayerTab:CreateToggle({
-    Name = "No Clip Cam",
+    Name = "NoClip Cam",
     CurrentValue = false,
     Callback = function(state)
+        enabled = state
+
         if state then
-            camConnection = RunService.RenderStepped:Connect(function()
-                local cam = workspace.CurrentCamera
-                if cam then
-                    cam.CameraCollisionMode = Enum.CameraCollisionMode.Invisible
-                end
-            end)
+            hookCamera()
         else
-            if camConnection then
-                camConnection:Disconnect()
-                camConnection = nil
-            end
-            local cam = workspace.CurrentCamera
-            if cam then
-                cam.CameraCollisionMode = Enum.CameraCollisionMode.Zoom
+            hookDone = false
+
+            local char = player.Character
+            if char then
+                cam.CameraSubject = char:FindFirstChildOfClass("Humanoid")
+                cam.CameraType = Enum.CameraType.Custom
             end
         end
     end
 })
 
+--anti stun
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+
 local LocalPlayer = Players.LocalPlayer
 local enabled = false
 local connection
+
+local function isStunned(humanoid)
+    return humanoid.PlatformStand 
+        or humanoid:GetState() == Enum.HumanoidStateType.Physics
+        or humanoid:GetState() == Enum.HumanoidStateType.FallingDown
+        or humanoid:GetState() == Enum.HumanoidStateType.Ragdoll
+end
+
 local function fixCharacter(char)
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     local root = char:FindFirstChild("HumanoidRootPart")
     if not humanoid or not root then return end
+
+    if not isStunned(humanoid) then return end
+
     humanoid.PlatformStand = false
     humanoid.AutoRotate = true
-    humanoid:ChangeState(Enum.HumanoidStateType.Running)
-    humanoid.WalkSpeed = math.max(humanoid.WalkSpeed, 16)
-    humanoid.JumpPower = math.max(humanoid.JumpPower, 50)
+    humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+
     humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+
     for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
         if track.Priority == Enum.AnimationPriority.Action then
             track:Stop()
         end
     end
+
     for _, v in pairs(char:GetDescendants()) do
         if v:IsA("BallSocketConstraint") 
         or v:IsA("HingeConstraint") then
             v:Destroy()
         end
     end
+
     root.AssemblyLinearVelocity = Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
     root.AssemblyAngularVelocity = Vector3.new(0,0,0)
+
     for _, v in pairs(root:GetChildren()) do
         if v:IsA("BodyVelocity")
         or v:IsA("BodyGyro")
@@ -421,6 +481,7 @@ PlayerTab:CreateToggle({
     CurrentValue = false,
     Callback = function(state)
         enabled = state
+
         if state then
             connection = RunService.Heartbeat:Connect(function()
                 local char = LocalPlayer.Character
@@ -440,26 +501,25 @@ PlayerTab:CreateToggle({
 --forcefield
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
-
 local enabled = false
-
 local function applyForceField(char)
     if not enabled or not char then return end
-    
     if not char:FindFirstChildOfClass("ForceField") then
         local ff = Instance.new("ForceField")
         ff.Visible = true -- muốn ẩn thì đổi false
         ff.Parent = char
     end
 end
-
 plr.CharacterAdded:Connect(function(char)
-    task.wait(0.2)
+    plr.CharacterAdded:Connect(function(char)
+    char:WaitForChild("Humanoid")
+    applyForceField(char)
+end)
     applyForceField(char)
 end)
 
 PlayerTab:CreateToggle({
-    Name = "God Mode (ForceField)",
+    Name = "Force Field",
     CurrentValue = false,
     Callback = function(v)
         enabled = v
@@ -507,7 +567,7 @@ end
 
 local function drawPlus(pos)
 
-	local size = 6
+	local size = 8
 	local gap = 2
 
 	lines[1].From = Vector2.new(pos.X - size, pos.Y)
@@ -1453,7 +1513,7 @@ ESP:CreateSection("ESP")
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
-local nameMode = 1
+local nameMode = 2
 
 local espSettings = {
 UseOutline = false,
@@ -1463,8 +1523,6 @@ ShowHitbox = false,
 HitboxTransparency = 0.5,
 HitboxColor = Color3.fromRGB(255,0,0),
 }
-
--- NAME MODE
 
 local function getName(plr)
 
@@ -1816,6 +1874,221 @@ end
 end
 })
 
+ESP:CreateSection("Etc.")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local xrayEnabled = false
+local saved = {}
+local transparencyValue = 0.5
+
+local function isPlayerCharacter(obj)
+    local model = obj:FindFirstAncestorOfClass("Model")
+    if model and Players:GetPlayerFromCharacter(model) then
+        return true
+    end
+    return false
+end
+
+local function applyXray(state)
+    xrayEnabled = state
+
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            if isPlayerCharacter(obj) then continue end
+            if LocalPlayer.Character and obj:IsDescendantOf(LocalPlayer.Character) then continue end
+
+            if state then
+                if not saved[obj] then
+                    saved[obj] = obj.Transparency
+                end
+                obj.Transparency = transparencyValue
+            else
+                if saved[obj] then
+                    obj.Transparency = saved[obj]
+                end
+            end
+        end
+    end
+end
+
+ESP:CreateToggle({
+    Name = "X-Ray",
+    CurrentValue = false,
+    Callback = function(value)
+        applyXray(value)
+    end
+})
+
+ESP:CreateSlider({
+    Name = "X-Ray Transparency",
+    Range = {0.3, 1},
+    Increment = 0.1,
+    CurrentValue = 0.5,
+    Callback = function(value)
+        transparencyValue = value
+
+        if xrayEnabled then
+            applyXray(true)
+        end
+    end
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local showHealth = false
+local showTracer = false
+local tracerDistance = 1000
+
+local ESPs = {}
+local Tracers = {}
+
+local function createHealthESP(player)
+    local char = player.Character
+    if not char then return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not humanoid then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Size = UDim2.new(0, 60, 0, 8)
+    billboard.Adornee = hrp
+    billboard.AlwaysOnTop = true
+
+    local bg = Instance.new("Frame")
+    bg.Size = UDim2.new(1,0,1,0)
+    bg.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    bg.BorderSizePixel = 0
+    bg.Parent = billboard
+
+    local bar = Instance.new("Frame")
+    bar.Size = UDim2.new(1,0,1,0)
+    bar.BorderSizePixel = 0
+    bar.Parent = bg
+
+    billboard.Parent = LocalPlayer.PlayerGui
+
+    ESPs[player] = {
+        humanoid = humanoid,
+        bar = bar,
+        billboard = billboard
+    }
+end
+
+local function removeESP(player)
+    if ESPs[player] then
+        ESPs[player].billboard:Destroy()
+        ESPs[player] = nil
+    end
+    if Tracers[player] then
+        Tracers[player]:Remove()
+        Tracers[player] = nil
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    local myChar = LocalPlayer.Character
+    if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return end
+    local myHRP = myChar.HumanoidRootPart
+
+    for player, data in pairs(ESPs) do
+        if data.humanoid and data.humanoid.Health > 0 and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            
+            local targetHRP = player.Character.HumanoidRootPart
+            local dist = (myHRP.Position - targetHRP.Position).Magnitude
+
+            if dist <= 2000 and showHealth then
+                local hp = data.humanoid.Health / data.humanoid.MaxHealth
+                data.bar.Size = UDim2.new(hp,0,1,0)
+
+                data.bar.BackgroundColor3 = Color3.fromRGB(
+                    255 - (hp * 255),
+                    hp * 255,
+                    0
+                )
+
+                data.billboard.Enabled = true
+            else
+                data.billboard.Enabled = false
+            end
+        else
+            removeESP(player)
+        end
+    end
+
+    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = player.Character.HumanoidRootPart
+            local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+
+            local dist = (myHRP.Position - hrp.Position).Magnitude
+
+            if showTracer and onScreen and dist <= tracerDistance then
+                if not Tracers[player] then
+                    local line = Drawing.new("Line")
+                    line.Thickness = 1.5
+                    line.Color = Color3.fromRGB(255, 0, 0)
+                    Tracers[player] = line
+                end
+
+                Tracers[player].From = center
+                Tracers[player].To = Vector2.new(pos.X, pos.Y)
+                Tracers[player].Visible = true
+            elseif Tracers[player] then
+                Tracers[player].Visible = false
+            end
+        end
+    end
+end)
+
+for _, plr in pairs(Players:GetPlayers()) do
+    if plr ~= LocalPlayer then
+        plr.CharacterAdded:Connect(function()
+            task.wait(1)
+            createHealthESP(plr)
+        end)
+        if plr.Character then
+            createHealthESP(plr)
+        end
+    end
+end
+
+Players.PlayerRemoving:Connect(removeESP)
+
+ESP:CreateToggle({
+    Name = "Health Bar ESP",
+    CurrentValue = false,
+    Callback = function(v)
+        showHealth = v
+    end
+})
+
+ESP:CreateToggle({
+    Name = "Tracer",
+    CurrentValue = false,
+    Callback = function(v)
+        showTracer = v
+    end
+})
+
+ESP:CreateSlider({
+    Name = "Tracer Distance",
+    Range = {500, 10000},
+    Increment = 100,
+    Suffix = "studs",
+    CurrentValue = 2000,
+    Callback = function(v)
+        tracerDistance = v
+    end
+})
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -2089,9 +2362,9 @@ local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 ScriptsTab:CreateSection("Funny Scripts")
 
 ScriptsTab:CreateButton({
-    Name = "Vehicle Fly",
+    Name = "Fly GUI V4",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Vehicle%20Fly%20Gui"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/linhmcfake/Script/refs/heads/main/FLYGUIV4"))()
     end,
 })
 
@@ -2244,7 +2517,12 @@ ScriptsTab:CreateButton({
     end,
 })
 
-ScriptsTab:CreateLabel("For in-game use only, not recommended for use in the lobby.")
+ScriptsTab:CreateButton({
+    Name = "Fling Things And People (key: BestScriptYK)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/BloodyV2/BloodyScript/refs/heads/main/Free"))()
+    end,
+})
 
 ScriptsTab:CreateButton({
     Name = "Forsaken",
@@ -2472,6 +2750,13 @@ ScriptsTab:CreateButton({
     Name = "FE Trolling GUI",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Ultimate Trolling GUI [REBRON]",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/cZhmvb1G/raw"))()
     end,
 })
 
