@@ -194,6 +194,16 @@ Players.PlayerAdded:Connect(function(player)
     MainTab:CreateLabel(player.DisplayName .. " [@" .. player.Name .. "]")
 end)
 
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local mouse = player:GetMouse()
+
 local PlayerTab = Window:CreateTab("Player", "user")
 
 PlayerTab:CreateSection("Tools")
@@ -212,7 +222,6 @@ PlayerTab:CreateSlider({
     end
 })
 
---InSpeed
 local speedLoop = nil
 PlayerTab:CreateToggle({
     Name = "Increase Speed",
@@ -251,8 +260,6 @@ PlayerTab:CreateToggle({
 --jump
 local jumppower = 50
 local jumpEnabled = false
-local Players = game:GetService("Players")
-local plr = Players.LocalPlayer
 
 local function applyJump()
     if plr.Character then
@@ -264,7 +271,6 @@ local function applyJump()
     end
 end
 
--- slider
 PlayerTab:CreateSlider({
     Name = "Power Jump",
     Range = {1, 1000},
@@ -276,7 +282,6 @@ PlayerTab:CreateSlider({
     end
 })
 
--- toggle
 PlayerTab:CreateToggle({
     Name = "Increase Power Jump",
     CurrentValue = false,
@@ -286,17 +291,12 @@ PlayerTab:CreateToggle({
     end
 })
 
--- giữ sau khi respawn
 plr.CharacterAdded:Connect(function()
     task.wait(0.5)
     applyJump()
 end)
 
 --infJump
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-
 local infJumpConnection
 PlayerTab:CreateToggle({
     Name = "Infinity Jump",
@@ -318,9 +318,6 @@ PlayerTab:CreateToggle({
     end
 })
 
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local plr = Players.LocalPlayer
 local noclipEnabled = false
 
 PlayerTab:CreateToggle({
@@ -352,82 +349,7 @@ PlayerTab:CreateToggle({
     end
 })
 
---noclip cam
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local cam = workspace.CurrentCamera
-
-local enabled = false
-local hookDone = false
-
-local function hookCamera()
-    local success = pcall(function()
-        local PlayerModule = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"))
-        local CameraModule = PlayerModule:GetCameras()
-
-        if CameraModule and CameraModule.activeCameraController then
-            local controller = CameraModule.activeCameraController
-
-            if controller and not controller._noclipHooked then
-                controller._noclipHooked = true
-
-                if controller.GetLargestCutoffDistance then
-                    controller.GetLargestCutoffDistance = function()
-                        return 0
-                    end
-                end
-            end
-        end
-    end)
-
-    if success then
-        hookDone = true
-    end
-end
-
-local function onCharacterAdded()
-    hookDone = false
-    task.wait(1)
-    if enabled then
-        hookCamera()
-    end
-end
-
-player.CharacterAdded:Connect(onCharacterAdded)
-
-RunService.RenderStepped:Connect(function()
-    if enabled and not hookDone then
-        hookCamera()
-    end
-end)
-
-PlayerTab:CreateToggle({
-    Name = "NoClip Cam",
-    CurrentValue = false,
-    Callback = function(state)
-        enabled = state
-
-        if state then
-            hookCamera()
-        else
-            hookDone = false
-
-            local char = player.Character
-            if char then
-                cam.CameraSubject = char:FindFirstChildOfClass("Humanoid")
-                cam.CameraType = Enum.CameraType.Custom
-            end
-        end
-    end
-})
-
 --anti stun
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local LocalPlayer = Players.LocalPlayer
 local enabled = false
 local connection
 
@@ -499,8 +421,6 @@ PlayerTab:CreateToggle({
 })
 
 --forcefield
-local Players = game:GetService("Players")
-local plr = Players.LocalPlayer
 local enabled = false
 local function applyForceField(char)
     if not enabled or not char then return end
@@ -537,13 +457,6 @@ PlayerTab:CreateToggle({
         end
     end
 })
-
--- Vẽ tâm ảo
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
 
 local crosshairEnabled = false
 
@@ -718,22 +631,16 @@ PlayerTab:CreateToggle({
     end
 })
 
-local Players = game:GetService("Players")
-local ProximityPromptService = game:GetService("ProximityPromptService")
-local player = Players.LocalPlayer
-local mouse = player:GetMouse()
 local promptConn
 local clickConn
 
 local function enable()
-    -- Instant ProximityPrompt
     promptConn = ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
         if prompt then
             fireproximityprompt(prompt)
         end
     end)
 
-    -- Instant ClickDetector
     clickConn = mouse.Button1Down:Connect(function()
         local target = mouse.Target
         if target then
@@ -767,11 +674,6 @@ PlayerTab:CreateToggle({
 })
 
 --minimap
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-
 local MapGui, MapFrame, InfoPanel = nil, nil, nil
 local MapObjects = {}
 local MapEnabled = false
@@ -988,10 +890,6 @@ PlayerTab:CreateToggle({
 })
 
 -- Auto Jump System
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-
 local humanoid
 local jumpConnection
 local mode = "Normal"
@@ -1065,17 +963,13 @@ PlayerTab:CreateToggle({
     end
 })
 
-local Players = game:GetService("Players")
-local plr = Players.LocalPlayer
-
--- SETTINGS
+--dash
 local dashLength = 5
 local dashTime = 0.05
 local yBoost = 20
 
 local dashGui = nil
 
--- DASH FUNCTION
 local function Dash()
     local char = plr.Character or plr.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
@@ -1103,7 +997,6 @@ local function Dash()
     bg:Destroy()
 end
 
--- CREATE FLOAT BUTTON
 local function createDashButton()
     if dashGui then return end
 
@@ -1123,28 +1016,23 @@ local function createDashButton()
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-    -- tròn chuẩn
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = btn
 
-    -- viền nhẹ
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 2
     stroke.Color = Color3.fromRGB(90, 90, 90)
     stroke.Parent = btn
 
-    -- draggable
     btn.Active = true
     btn.Draggable = true
 
-    -- click dash
     btn.MouseButton1Click:Connect(function()
         Dash()
     end)
 end
 
--- REMOVE BUTTON
 local function removeDashButton()
     if dashGui then
         dashGui:Destroy()
@@ -1152,7 +1040,6 @@ local function removeDashButton()
     end
 end
 
--- TOGGLE
 PlayerTab:CreateToggle({
     Name = "Enable Dash",
     CurrentValue = false,
@@ -1165,7 +1052,6 @@ PlayerTab:CreateToggle({
     end
 })
 
--- SLIDER LENGTH
 PlayerTab:CreateSlider({
     Name = "Dash Length",
     Range = {5, 50},
@@ -1214,10 +1100,6 @@ PlayerTab:CreateButton({
 })
 
 --Lock cam
-local Players = game:GetService("Players")
-local Camera = workspace.CurrentCamera
-local RunService = game:GetService("RunService")
-
 local locked = false
 local savedCFrame
 local conn
@@ -1263,13 +1145,6 @@ PlayerTab:CreateButton({
     Name = "Inventory Viewer",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
-    end,
-})
-
-PlayerTab:CreateButton({
-    Name = "Wikipedia Tools",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/4UMAeFvE"))()
     end,
 })
 
@@ -1382,8 +1257,6 @@ FPSTab:CreateToggle({
         end        
     end,
 })
-
-local Lighting = game:GetService("Lighting")
 
 -- Boost FPS
 local disabledEffects = {}
@@ -1503,8 +1376,8 @@ FPSTab:CreateButton({
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
 local ESP = Window:CreateTab("Visual","eye")
 
@@ -1876,9 +1749,6 @@ end
 
 ESP:CreateSection("Etc.")
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
 local xrayEnabled = false
 local saved = {}
 local transparencyValue = 0.5
@@ -1934,11 +1804,6 @@ ESP:CreateSlider({
         end
     end
 })
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
 
 local showHealth = false
 local showTracer = false
@@ -2089,6 +1954,7 @@ ESP:CreateSlider({
     end
 })
 
+--
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -2249,7 +2115,6 @@ RefreshNPCs()
 end
 end)
 
--- Target Finder
 local function GetClosestTarget()
 
 local closest=nil
@@ -2313,7 +2178,6 @@ end
 
 end
 
--- PLAYER
 if AimbotEnabled then
 for _,p in pairs(Players:GetPlayers()) do
 if p~=LocalPlayer and p.Character then
@@ -2322,7 +2186,6 @@ end
 end
 end
 
--- NPC
 if NPCAimbotEnabled then
 for _,npc in pairs(NPCList) do
 checkCharacter(npc,nil)
@@ -2333,7 +2196,6 @@ return closest
 
 end
 
--- AIM LOOP
 RunService.RenderStepped:Connect(function()
 
 if not (AimbotEnabled or NPCAimbotEnabled) then return end
@@ -2356,6 +2218,112 @@ Camera.CFrame=Camera.CFrame:Lerp(newCF,math.clamp(Smoothness,0,1))
 end
 
 end)
+
+--Tab Limbs
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+getgenv().le = getgenv().le or loadstring(game:HttpGet("https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/LimbExtender.lua"))()
+local LimbExtender = getgenv().le
+
+local le = LimbExtender({
+    LISTEN_FOR_INPUT = false,
+    USE_HIGHLIGHT = false,
+})
+
+local LimbTab = Window:CreateTab("Limbs", "scale-3d")
+
+local ModifyLimbs = LimbTab:CreateToggle({
+    Name = "Modify Limbs",
+    CurrentValue = false,
+    Callback = function(v)
+        le:Toggle(v)
+    end,
+})
+
+LimbTab:CreateToggle({
+    Name = "Team Check",
+    CurrentValue = le:Get("TEAM_CHECK"),
+    Callback = function(v)
+        le:Set("TEAM_CHECK", v)
+    end,
+})
+
+LimbTab:CreateToggle({
+    Name = "ForceField Check",
+    CurrentValue = le:Get("FORCEFIELD_CHECK"),
+    Callback = function(v)
+        le:Set("FORCEFIELD_CHECK", v)
+    end,
+})
+
+LimbTab:CreateToggle({
+    Name = "Limb Collisions",
+    CurrentValue = le:Get("LIMB_CAN_COLLIDE"),
+    Callback = function(v)
+        le:Set("LIMB_CAN_COLLIDE", v)
+    end,
+})
+
+LimbTab:CreateSlider({
+    Name = "Limb Size",
+    Range = {5,100},
+    Increment = 0.5,
+    CurrentValue = le:Get("LIMB_SIZE"),
+    Callback = function(v)
+        le:Set("LIMB_SIZE", v)
+    end,
+})
+
+LimbTab:CreateSlider({
+    Name = "Limb Transparency",
+    Range = {0,1},
+    Increment = 0.1,
+    CurrentValue = le:Get("LIMB_TRANSPARENCY"),
+    Callback = function(v)
+        le:Set("LIMB_TRANSPARENCY", v)
+    end,
+})
+
+local TargetLimb = LimbTab:CreateDropdown({
+    Name = "Target Limb",
+    Options = {},
+    CurrentOption = { le:Get("TARGET_LIMB") },
+    MultipleOptions = false,
+    Callback = function(opt)
+        le:Set("TARGET_LIMB", opt[1])
+    end,
+})
+
+local limbs = {}
+
+local function addLimbIfNew(name)
+    if not table.find(limbs, name) then
+        table.insert(limbs, name)
+        table.sort(limbs)
+        TargetLimb:Refresh(limbs)
+    end
+end
+
+local function characterAdded(Character)
+    for _, part in ipairs(Character:GetChildren()) do
+        if part:IsA("BasePart") then
+            addLimbIfNew(part.Name)
+        end
+    end
+
+    Character.ChildAdded:Connect(function(child)
+        if child:IsA("BasePart") then
+            addLimbIfNew(child.Name)
+        end
+    end)
+end
+
+LocalPlayer.CharacterAdded:Connect(characterAdded)
+
+if LocalPlayer.Character then
+    characterAdded(LocalPlayer.Character)
+end
 
 local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 
@@ -2442,13 +2410,6 @@ ScriptsTab:CreateButton({
     Name = "Aura (Like Gojo's Infinite)",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hellohellohell012321/KAWAII-AURA/main/kawaii_aura.lua", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Fake Items Script",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/bUEfYpZn"))()
     end,
 })
 
@@ -2900,7 +2861,7 @@ ScriptsTab:CreateButton({
 
 PacksTab = Window:CreateTab("Packs", "package")
 
-PacksTab:CreateSection("Not Fe")
+PacksTab:CreateSection("Bundle")
 
 PacksTab:CreateButton({
     Name = "Korblox",
@@ -2913,6 +2874,13 @@ PacksTab:CreateButton({
     Name = "Headless",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirPacks/main/Headless.lua"))()
+    end,
+})
+
+PacksTab:CreateButton({
+    Name = "Fake Items Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/bUEfYpZn"))()
     end,
 })
 
@@ -2990,6 +2958,7 @@ PacksTab:CreateButton({
     end,
 })
 
+--tab4
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -2997,29 +2966,119 @@ local Camera = workspace.CurrentCamera
 
 local Tab4 = Window:CreateTab("People", "users")
 
+Tab4:CreateSection("Teleport Tools")
+
 local currentTarget = nil
 local loopTeleport = false
 local watching = false
 local aimingTarget = false
 local aimStrength = 0.35
 
--- orbit variables
-local orbiting = false
-local orbitRadius = 10
-local orbitSpeed = 30
-local orbitAngle = 0
+local following = false
+local followSpeed = 20
+
+local function getChar(p)
+    return p and p.Character
+end
+
+local function getHRP(p)
+    local c = getChar(p)
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+local function getTarget()
+    return currentTarget and Players:FindFirstChild(currentTarget)
+end
+
+local function teleportTo(p)
+    local hrp1 = getHRP(LocalPlayer)
+    local hrp2 = getHRP(p)
+    if hrp1 and hrp2 then
+        hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
+    end
+end
+
+local function getAllTargets()
+    local list = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(list, p)
+        end
+    end
+    return list
+end
+
+local function getNearest()
+    local best, dist = nil, math.huge
+    local my = getHRP(LocalPlayer)
+    if not my then return end
+
+    for _, p in ipairs(getAllTargets()) do
+        local hrp = getHRP(p)
+        if hrp then
+            local d = (my.Position - hrp.Position).Magnitude
+            if d < dist then
+                dist = d
+                best = p
+            end
+        end
+    end
+    return best
+end
+
+local function getFarthest()
+    local best, dist = nil, 0
+    local my = getHRP(LocalPlayer)
+    if not my then return end
+
+    for _, p in ipairs(getAllTargets()) do
+        local hrp = getHRP(p)
+        if hrp then
+            local d = (my.Position - hrp.Position).Magnitude
+            if d > dist then
+                dist = d
+                best = p
+            end
+        end
+    end
+    return best
+end
+
+Tab4:CreateButton({
+    Name = "TP nearest player",
+    Callback = function()
+        teleportTo(getNearest())
+    end
+})
+
+Tab4:CreateButton({
+    Name = "TP farthest player",
+    Callback = function()
+        teleportTo(getFarthest())
+    end
+})
+
+Tab4:CreateButton({
+    Name = "TP random player",
+    Callback = function()
+        local list = getAllTargets()
+        if #list > 0 then
+            teleportTo(list[math.random(1,#list)])
+        end
+    end
+})
+
+Tab4:CreateSection("Has Target")
 
 local playerDropdown = Tab4:CreateDropdown({
     Name = "Player List",
     Options = {},
     CurrentOption = {},
     Multi = false,
-    Flag = "obj_playerlist",
-    Callback = function(option)
-        if type(option) == "table" and #option > 0 then
-            currentTarget = option[1]
-        else
-            currentTarget = nil
+    Callback = function(opt)
+        if opt[1] then
+            local name = opt[1]:match("%[@(.-)%]")
+            currentTarget = name
         end
     end
 })
@@ -3028,69 +3087,108 @@ local function refreshPlayers()
     local opts = {}
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer then
-            table.insert(opts, p.Name)
+            table.insert(opts, p.DisplayName.." [@"..p.Name.."]")
         end
     end
     playerDropdown:Refresh(opts, true)
-    if not table.find(opts, currentTarget) then
-        currentTarget = nil
-    end
-end
-
-Players.PlayerAdded:Connect(refreshPlayers)
-Players.PlayerRemoving:Connect(refreshPlayers)
-refreshPlayers()
-
-local function getTarget()
-    if not currentTarget then return nil end
-    return Players:FindFirstChild(currentTarget)
-end
-
-local function getChar(p)
-    if not p then return nil end
-    return p.Character
 end
 
 Tab4:CreateButton({
-    Name = "Teleport to player",
-    Callback = function()
-        local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-            if hrp1 and hrp2 then
-                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
-            end
-        end
-    end
+    Name = "Refresh player list",
+    Callback = refreshPlayers
 })
+
+refreshPlayers()
 
 Tab4:CreateToggle({
-    Name = "Teleport loop",
-    CurrentValue = false,
+    Name = "Follow player",
     Callback = function(v)
-        loopTeleport = v
+        following = v
     end
 })
 
-RunService.Heartbeat:Connect(function()
-    if loopTeleport then
+Tab4:CreateSlider({
+    Name = "Follow speed",
+    Range = {5,100},
+    Increment = 5,
+    CurrentValue = 20,
+    Callback = function(v)
+        followSpeed = v
+    end
+})
+
+RunService.Heartbeat:Connect(function(dt)
+    if following then
         local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-            if hrp1 and hrp2 then
-                hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
-            end
+        local hrp1 = getHRP(LocalPlayer)
+        local hrp2 = getHRP(t)
+
+        if hrp1 and hrp2 then
+            local pos = hrp2.Position + Vector3.new(0,0,3)
+            hrp1.CFrame = hrp1.CFrame:Lerp(CFrame.new(pos), dt * (followSpeed/10))
         end
+    end
+end)
+
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Enabled = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,260,0,120)
+frame.Position = UDim2.new(1,-270,0.3,0)
+frame.BackgroundTransparency = 0.2
+
+local avatar = Instance.new("ImageLabel", frame)
+avatar.Size = UDim2.new(0,50,0,50)
+avatar.Position = UDim2.new(0,10,0,10)
+avatar.BackgroundTransparency = 1
+
+local info = Instance.new("TextLabel", frame)
+info.Size = UDim2.new(1,-70,1,-20)
+info.Position = UDim2.new(0,70,0,10)
+info.BackgroundTransparency = 1
+info.TextScaled = true
+info.TextXAlignment = Enum.TextXAlignment.Left
+
+local left = Instance.new("TextButton", frame)
+left.Size = UDim2.new(0,25,0,25)
+left.Position = UDim2.new(0,10,1,-30)
+left.Text = "<"
+
+local right = Instance.new("TextButton", frame)
+right.Size = UDim2.new(0,25,0,25)
+right.Position = UDim2.new(0,40,1,-30)
+right.Text = ">"
+
+local function getIndex()
+    local list = getAllTargets()
+    for i,v in ipairs(list) do
+        if v.Name == currentTarget then
+            return i, list
+        end
+    end
+end
+
+left.MouseButton1Click:Connect(function()
+    local i, list = getIndex()
+    if i and list[i-1] then
+        currentTarget = list[i-1].Name
+    end
+end)
+
+right.MouseButton1Click:Connect(function()
+    local i, list = getIndex()
+    if i and list[i+1] then
+        currentTarget = list[i+1].Name
     end
 end)
 
 Tab4:CreateToggle({
     Name = "Watch player",
-    CurrentValue = false,
     Callback = function(v)
         watching = v
+        gui.Enabled = v
+
         if not v then
             Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         end
@@ -3102,199 +3200,27 @@ RunService.RenderStepped:Connect(function()
         local t = getTarget()
         if t and getChar(t) then
             local hum = getChar(t):FindFirstChildOfClass("Humanoid")
-            if hum then
+            local hrp = getHRP(t)
+
+            if hum and hrp then
                 Camera.CameraSubject = hum
+
+                local my = getHRP(LocalPlayer)
+                local dist = my and math.floor((my.Position - hrp.Position).Magnitude) or 0
+
+                local velocity = hrp.Velocity
+                local realSpeed = math.floor(Vector3.new(velocity.X,0,velocity.Z).Magnitude)
+
+                local jumpState = hum:GetState() == Enum.HumanoidStateType.Jumping and "Jumping" or "Ground"
+
+                avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..t.UserId.."&width=150&height=150&format=png"
+
+                info.Text =
+                    t.DisplayName.." [@"..t.Name.."]\n"..
+                    "Dist: "..dist.."\n"..
+                    "Speed: "..realSpeed.."\n"..
+                    "State: "..jumpState
             end
         end
     end
 end)
-
-Tab4:CreateToggle({
-    Name = "Aim to player",
-    CurrentValue = false,
-    Callback = function(v)
-        aimingTarget = v
-    end
-})
-
-Tab4:CreateSlider({
-    Name = "Aim strength",
-    Range = {0.1, 1},
-    Increment = 0.05,
-    CurrentValue = 0.35,
-    Callback = function(v)
-        aimStrength = v
-    end
-})
-
-RunService.RenderStepped:Connect(function()
-    if aimingTarget then
-        local t = getTarget()
-        if t and getChar(t) then
-            local hrp = getChar(t):FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local predictedPos = hrp.Position + (hrp.Velocity * 0.1)
-                local targetCF = CFrame.new(Camera.CFrame.Position, predictedPos)
-                Camera.CFrame = Camera.CFrame:Lerp(targetCF, aimStrength)
-            end
-        end
-    end
-end)
-
--- ORBIT UI
-Tab4:CreateToggle({
-    Name = "Orbit player",
-    CurrentValue = false,
-    Callback = function(v)
-        orbiting = v
-    end
-})
-
-Tab4:CreateSlider({
-    Name = "Orbit radius",
-    Range = {1, 100},
-    Increment = 1,
-    CurrentValue = 10,
-    Callback = function(v)
-        orbitRadius = v
-    end
-})
-
-Tab4:CreateSlider({
-    Name = "Orbit speed",
-    Range = {1, 100},
-    Increment = 1,
-    CurrentValue = 30,
-    Callback = function(v)
-        orbitSpeed = v
-    end
-})
-
--- ORBIT LOGIC
-RunService.Heartbeat:Connect(function(dt)
-    if orbiting then
-        local t = getTarget()
-        if t and getChar(t) and getChar(LocalPlayer) then
-            local hrp1 = getChar(LocalPlayer):FindFirstChild("HumanoidRootPart")
-            local hrp2 = getChar(t):FindFirstChild("HumanoidRootPart")
-
-            if hrp1 and hrp2 then
-                orbitAngle += orbitSpeed * dt
-
-                local offset = Vector3.new(
-                    math.cos(orbitAngle) * orbitRadius,
-                    0,
-                    math.sin(orbitAngle) * orbitRadius
-                )
-
-                hrp1.CFrame = CFrame.new(hrp2.Position + offset, hrp2.Position)
-            end
-        end
-    end
-end)
-
---Tab Limbs
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-getgenv().le = getgenv().le or loadstring(game:HttpGet("https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/LimbExtender.lua"))()
-local LimbExtender = getgenv().le
-
-local le = LimbExtender({
-    LISTEN_FOR_INPUT = false,
-    USE_HIGHLIGHT = false,
-})
-
-local LimbTab = Window:CreateTab("Limbs", "scale-3d")
-
-local ModifyLimbs = LimbTab:CreateToggle({
-    Name = "Modify Limbs",
-    CurrentValue = false,
-    Callback = function(v)
-        le:Toggle(v)
-    end,
-})
-
-LimbTab:CreateToggle({
-    Name = "Team Check",
-    CurrentValue = le:Get("TEAM_CHECK"),
-    Callback = function(v)
-        le:Set("TEAM_CHECK", v)
-    end,
-})
-
-LimbTab:CreateToggle({
-    Name = "ForceField Check",
-    CurrentValue = le:Get("FORCEFIELD_CHECK"),
-    Callback = function(v)
-        le:Set("FORCEFIELD_CHECK", v)
-    end,
-})
-
-LimbTab:CreateToggle({
-    Name = "Limb Collisions",
-    CurrentValue = le:Get("LIMB_CAN_COLLIDE"),
-    Callback = function(v)
-        le:Set("LIMB_CAN_COLLIDE", v)
-    end,
-})
-
-LimbTab:CreateSlider({
-    Name = "Limb Size",
-    Range = {5,100},
-    Increment = 0.5,
-    CurrentValue = le:Get("LIMB_SIZE"),
-    Callback = function(v)
-        le:Set("LIMB_SIZE", v)
-    end,
-})
-
-LimbTab:CreateSlider({
-    Name = "Limb Transparency",
-    Range = {0,1},
-    Increment = 0.1,
-    CurrentValue = le:Get("LIMB_TRANSPARENCY"),
-    Callback = function(v)
-        le:Set("LIMB_TRANSPARENCY", v)
-    end,
-})
-
-local TargetLimb = LimbTab:CreateDropdown({
-    Name = "Target Limb",
-    Options = {},
-    CurrentOption = { le:Get("TARGET_LIMB") },
-    MultipleOptions = false,
-    Callback = function(opt)
-        le:Set("TARGET_LIMB", opt[1])
-    end,
-})
-
-local limbs = {}
-
-local function addLimbIfNew(name)
-    if not table.find(limbs, name) then
-        table.insert(limbs, name)
-        table.sort(limbs)
-        TargetLimb:Refresh(limbs)
-    end
-end
-
-local function characterAdded(Character)
-    for _, part in ipairs(Character:GetChildren()) do
-        if part:IsA("BasePart") then
-            addLimbIfNew(part.Name)
-        end
-    end
-
-    Character.ChildAdded:Connect(function(child)
-        if child:IsA("BasePart") then
-            addLimbIfNew(child.Name)
-        end
-    end)
-end
-
-LocalPlayer.CharacterAdded:Connect(characterAdded)
-
-if LocalPlayer.Character then
-    characterAdded(LocalPlayer.Character)
-end
