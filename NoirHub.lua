@@ -1,13 +1,103 @@
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local player = game.Players.LocalPlayer
 
-local Window = Rayfield:CreateWindow({
-    Name = "Noir Hub",
-    LoadingTitle = "Loading NoirHub...",
-    LoadingSubtitle = "Script By Noir_Adono",
-    ConfigurationSaving = {
-        Enabled = false,
-    }
-})
+local Rayfield
+task.spawn(function()
+    Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+end)
+
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+
+local bg = Instance.new("Frame", gui)
+bg.Size = UDim2.new(1,0,1,0)
+bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
+bg.BackgroundTransparency = 0.4
+
+local blur = Instance.new("BlurEffect", Lighting)
+blur.Size = 0
+TweenService:Create(blur, TweenInfo.new(1), {Size = 12}):Play()
+
+local logo = Instance.new("ImageLabel", bg)
+logo.Size = UDim2.new(0,180,0,180)
+logo.Position = UDim2.new(0.5,-90,0.35,-90)
+logo.BackgroundTransparency = 1
+logo.Image = "rbxassetid://75918923719594"
+logo.ImageTransparency = 1
+
+local title = Instance.new("TextLabel", bg)
+title.Size = UDim2.new(1,0,0.1,0)
+title.Position = UDim2.new(0,0,0.55,0)
+title.BackgroundTransparency = 1
+title.Text = "NOIR HUB"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.TextTransparency = 1
+
+local loading = Instance.new("TextLabel", bg)
+loading.Size = UDim2.new(1,0,0.05,0)
+loading.Position = UDim2.new(0,0,0.65,0)
+loading.BackgroundTransparency = 1
+loading.Text = "Loading"
+loading.TextColor3 = Color3.fromRGB(180,180,180)
+loading.TextScaled = true
+loading.Font = Enum.Font.Gotham
+loading.TextTransparency = 1
+
+local glow = Instance.new("UIStroke", logo)
+glow.Thickness = 2
+glow.Color = Color3.fromRGB(0,170,255)
+glow.Transparency = 1
+
+TweenService:Create(logo, TweenInfo.new(1), {ImageTransparency = 0}):Play()
+TweenService:Create(title, TweenInfo.new(1), {TextTransparency = 0}):Play()
+TweenService:Create(loading, TweenInfo.new(1), {TextTransparency = 0}):Play()
+TweenService:Create(glow, TweenInfo.new(1), {Transparency = 0}):Play()
+
+task.spawn(function()
+    while true do
+        TweenService:Create(glow, TweenInfo.new(1), {Thickness = 5}):Play()
+        task.wait(1)
+        TweenService:Create(glow, TweenInfo.new(1), {Thickness = 2}):Play()
+        task.wait(1)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        for i = 1,3 do
+            loading.Text = "Loading" .. string.rep(".", i)
+            task.wait(0.4)
+        end
+    end
+end)
+
+local t = 0
+repeat task.wait(0.1) t += 0.1 until Rayfield or t > 5
+
+TweenService:Create(bg, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
+TweenService:Create(logo, TweenInfo.new(1), {ImageTransparency = 1}):Play()
+TweenService:Create(title, TweenInfo.new(1), {TextTransparency = 1}):Play()
+TweenService:Create(loading, TweenInfo.new(1), {TextTransparency = 1}):Play()
+TweenService:Create(glow, TweenInfo.new(1), {Transparency = 1}):Play()
+TweenService:Create(blur, TweenInfo.new(1), {Size = 0}):Play()
+
+task.wait(1)
+
+gui:Destroy()
+blur:Destroy()
+
+if Rayfield then
+    local Window = Rayfield:CreateWindow({
+        Name = "Noir Hub",
+        LoadingTitle = "Loading NoirHub...",
+        LoadingSubtitle = "Script By Noir_Adono",
+        ConfigurationSaving = {Enabled = false}
+    })
+end
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
