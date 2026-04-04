@@ -17,13 +17,15 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Stats = game:GetService("Stats")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
 
 local MainTab = Window:CreateTab("Main", "home")
+
+MainTab:CreateSection("Server")
 
 local AllIDs = {}
 local foundAnything = ""
 
--- Rejoin
 MainTab:CreateButton({
    Name = "Rejoin Server",
    Callback = function()
@@ -31,7 +33,6 @@ MainTab:CreateButton({
    end,
 })
 
--- Server Hop
 MainTab:CreateButton({
    Name = "Server Hop",
    Callback = function()
@@ -72,7 +73,6 @@ MainTab:CreateButton({
    end,
 })
 
--- Join Server Small
 MainTab:CreateButton({
    Name = "Join Server Small",
    Callback = function()
@@ -97,7 +97,6 @@ MainTab:CreateButton({
    end,
 })
 
--- Join Server Fast
 MainTab:CreateButton({
    Name = "Join Server Fast",
    Callback = function()
@@ -115,24 +114,18 @@ MainTab:CreateButton({
    end,
 })
 
-MainTab:CreateButton({
-   Name = "Reset GUI Rayfield",
-   Callback = function() Rayfield:Destroy() end,
-})
+MainTab:CreateSection("Information")
 
-MainTab:CreateSection("Thông Tin Bản Thân")
 MainTab:CreateLabel("Username: " .. LocalPlayer.Name)
 MainTab:CreateLabel("DisplayName: " .. LocalPlayer.DisplayName)
 MainTab:CreateLabel("UserId: " .. LocalPlayer.UserId)
 MainTab:CreateLabel("Account Age: " .. LocalPlayer.AccountAge .. " days")
 
--- Ping
 local PingLabel = MainTab:CreateLabel("Ping: ...")
 RunService.Heartbeat:Connect(function()
     PingLabel:Set("Ping: " .. tostring(math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())) .. " ms")
 end)
 
--- Thời gian chơi (tính từ lúc join)
 local joinTime = tick()
 local TimePlayedLabel = MainTab:CreateLabel("Time Played: 0s")
 RunService.RenderStepped:Connect(function()
@@ -142,7 +135,6 @@ RunService.RenderStepped:Connect(function()
     TimePlayedLabel:Set(string.format("Time Played: %d min %02d s", mins, secs))
 end)
 
--- Toạ độ
 local PosLabel = MainTab:CreateLabel("Position: ...")
 RunService.RenderStepped:Connect(function()
     local char = LocalPlayer.Character
@@ -155,19 +147,16 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Tên game
 pcall(function()
     local info = MarketplaceService:GetProductInfo(game.PlaceId)
     MainTab:CreateLabel("Game Name: " .. info.Name)
 end)
 
--- PlaceId, GameId, JobId, Version
 MainTab:CreateLabel("PlaceId: " .. game.PlaceId)
 MainTab:CreateLabel("GameId: " .. game.GameId)
 MainTab:CreateLabel("JobId: " .. game.JobId)
 MainTab:CreateLabel("Game Version: " .. game.PlaceVersion)
 
--- Số người chơi trong server
 local PlayerCountLabel = MainTab:CreateLabel("Players: " .. #Players:GetPlayers())
 
 Players.PlayerAdded:Connect(function()
@@ -178,7 +167,7 @@ Players.PlayerRemoving:Connect(function()
     PlayerCountLabel:Set("Players: " .. #Players:GetPlayers())
 end)
 
-local Players = game:GetService("Players")
+MainTab:CreateSection("Player")
 
 MainTab:CreateLabel("Players:")
 
@@ -206,7 +195,7 @@ local mouse = player:GetMouse()
 
 local PlayerTab = Window:CreateTab("Player", "user")
 
-PlayerTab:CreateSection("Tools")
+PlayerTab:CreateSection("Movement")
 
 --Speed
 local walkspeed = 16
@@ -313,577 +302,6 @@ PlayerTab:CreateToggle({
             if infJumpConnection then
                 infJumpConnection:Disconnect()
                 infJumpConnection = nil
-            end
-        end
-    end
-})
-
-local noclipEnabled = false
-
-PlayerTab:CreateToggle({
-    Name = "NoClip",
-    CurrentValue = false,
-    Callback = function(state)
-        noclipEnabled = state
-        
-        if state then
-            RunService:BindToRenderStep("NoirNoClip", Enum.RenderPriority.Character.Value, function()
-                local char = plr.Character
-                if not char then return end
-                for _, v in pairs(char:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = false
-                    end
-                end
-            end)
-        else
-            RunService:UnbindFromRenderStep("NoirNoClip")
-            local char = plr.Character
-            if not char then return end
-            for _, v in pairs(char:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = true
-                end
-            end
-        end
-    end
-})
-
---anti stun
-local enabled = false
-local connection
-
-local function isStunned(humanoid)
-    return humanoid.PlatformStand 
-        or humanoid:GetState() == Enum.HumanoidStateType.Physics
-        or humanoid:GetState() == Enum.HumanoidStateType.FallingDown
-        or humanoid:GetState() == Enum.HumanoidStateType.Ragdoll
-end
-
-local function fixCharacter(char)
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not humanoid or not root then return end
-
-    if not isStunned(humanoid) then return end
-
-    humanoid.PlatformStand = false
-    humanoid.AutoRotate = true
-    humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-
-    humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-
-    for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
-        if track.Priority == Enum.AnimationPriority.Action then
-            track:Stop()
-        end
-    end
-
-    for _, v in pairs(char:GetDescendants()) do
-        if v:IsA("BallSocketConstraint") 
-        or v:IsA("HingeConstraint") then
-            v:Destroy()
-        end
-    end
-
-    root.AssemblyLinearVelocity = Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
-    root.AssemblyAngularVelocity = Vector3.new(0,0,0)
-
-    for _, v in pairs(root:GetChildren()) do
-        if v:IsA("BodyVelocity")
-        or v:IsA("BodyGyro")
-        or v:IsA("BodyPosition") then
-            v:Destroy()
-        end
-    end
-end
-
-PlayerTab:CreateToggle({
-    Name = "Anti Stun",
-    CurrentValue = false,
-    Callback = function(state)
-        enabled = state
-
-        if state then
-            connection = RunService.Heartbeat:Connect(function()
-                local char = LocalPlayer.Character
-                if char then
-                    fixCharacter(char)
-                end
-            end)
-        else
-            if connection then
-                connection:Disconnect()
-                connection = nil
-            end
-        end
-    end
-})
-
---forcefield
-local enabled = false
-local function applyForceField(char)
-    if not enabled or not char then return end
-    if not char:FindFirstChildOfClass("ForceField") then
-        local ff = Instance.new("ForceField")
-        ff.Visible = true -- muốn ẩn thì đổi false
-        ff.Parent = char
-    end
-end
-plr.CharacterAdded:Connect(function(char)
-    plr.CharacterAdded:Connect(function(char)
-    char:WaitForChild("Humanoid")
-    applyForceField(char)
-end)
-    applyForceField(char)
-end)
-
-PlayerTab:CreateToggle({
-    Name = "Force Field",
-    CurrentValue = false,
-    Callback = function(v)
-        enabled = v
-
-        local char = plr.Character
-        if not char then return end
-
-        if v then
-            applyForceField(char)
-        else
-            local ff = char:FindFirstChildOfClass("ForceField")
-            if ff then
-                ff:Destroy()
-            end
-        end
-    end
-})
-
-local crosshairEnabled = false
-
--- Circle crosshair
-local crosshair = Drawing.new("Circle")
-crosshair.Visible = false
-crosshair.Color = Color3.fromRGB(255,255,255)
-crosshair.Thickness = 1
-crosshair.Radius = 2
-crosshair.Filled = true
-
--- + crosshair
-local lines = {}
-for i = 1,4 do
-	local line = Drawing.new("Line")
-	line.Visible = false
-	line.Color = Color3.fromRGB(255,0,0)
-	line.Thickness = 2
-	table.insert(lines,line)
-end
-
-local function drawPlus(pos)
-
-	local size = 8
-	local gap = 2
-
-	lines[1].From = Vector2.new(pos.X - size, pos.Y)
-	lines[1].To   = Vector2.new(pos.X - gap, pos.Y)
-
-	lines[2].From = Vector2.new(pos.X + gap, pos.Y)
-	lines[2].To   = Vector2.new(pos.X + size, pos.Y)
-
-	lines[3].From = Vector2.new(pos.X, pos.Y - size)
-	lines[3].To   = Vector2.new(pos.X, pos.Y - gap)
-
-	lines[4].From = Vector2.new(pos.X, pos.Y + gap)
-	lines[4].To   = Vector2.new(pos.X, pos.Y + size)
-
-end
-
-RunService.RenderStepped:Connect(function()
-
-	if not crosshairEnabled then
-		crosshair.Visible = false
-		for _,l in pairs(lines) do
-			l.Visible = false
-		end
-		return
-	end
-
-	local viewport = camera.ViewportSize
-	local center = viewport / 2
-
-	local character = player.Character
-	if not character or not character:FindFirstChild("Head") then return end
-
-	local head = character.Head
-	local distance = (camera.CFrame.Position - head.Position).Magnitude
-
-	local pos = center
-
-	if distance > 1 then
-		local offset = camera.CFrame.RightVector * 3 + camera.CFrame.UpVector * 1
-		local worldPoint = camera.CFrame.Position + camera.CFrame.LookVector * 1000 + offset
-		local screenPoint = camera:WorldToViewportPoint(worldPoint)
-		pos = Vector2.new(screenPoint.X,screenPoint.Y)
-	end
-
-	local rayParams = RaycastParams.new()
-	rayParams.FilterDescendantsInstances = {character}
-	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-
-	local ray = workspace:Raycast(
-		camera.CFrame.Position,
-		camera.CFrame.LookVector * 1000,
-		rayParams
-	)
-
-	local enemyFound = false
-
-	if ray and ray.Instance then
-		local model = ray.Instance:FindFirstAncestorOfClass("Model")
-		if model and Players:GetPlayerFromCharacter(model) then
-			enemyFound = true
-		end
-	end
-
-	if enemyFound then
-		crosshair.Visible = false
-		drawPlus(pos)
-
-		for _,l in pairs(lines) do
-			l.Visible = true
-		end
-	else
-		crosshair.Visible = true
-		crosshair.Position = pos
-
-		for _,l in pairs(lines) do
-			l.Visible = false
-		end
-	end
-
-end)
-
--- Rayfield toggle
-PlayerTab:CreateToggle({
-	Name = "Crosshair",
-	CurrentValue = false,
-	Flag = "CrosshairToggle",
-	Callback = function(Value)
-		crosshairEnabled = Value
-	end,
-})
-
-PlayerTab:CreateSection("Funny Tools")
-
-PlayerTab:CreateButton({
-    Name = "ShiftLock",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/Shift_Lock"))()
-    end,
-})
-
-
---ping&fps
-local statsGui
-local showStats = false
-
-local function createStatsGui()
-    if statsGui then statsGui:Destroy() end
-
-    statsGui = Instance.new("ScreenGui")
-    statsGui.Name = "NoirStatsGui"
-    statsGui.IgnoreGuiInset = true
-    statsGui.ResetOnSpawn = false
-    statsGui.Parent = game:GetService("CoreGui")
-
-    local label = Instance.new("TextLabel")
-    label.Name = "StatsLabel"
-    label.Size = UDim2.new(0, 200, 0, 25)
-    label.Position = UDim2.new(0, 10, 0, 55)
-    label.BackgroundTransparency = 0.5
-    label.BackgroundColor3 = Color3.new(0, 0, 0)
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.Font = Enum.Font.SourceSansBold
-    label.TextSize = 18
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = statsGui
-
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if not showStats then return end
-        local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()) .. " ms"
-        local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait()) .. " FPS"
-        label.Text = "Ping: " .. ping .. "   FPS: " .. fps
-    end)
-end
-
-PlayerTab:CreateToggle({
-    Name = "Show Ping & FPS",
-    CurrentValue = false,
-    Callback = function(state)
-        showStats = state
-        if state then
-            createStatsGui()
-        else
-            if statsGui then
-                statsGui:Destroy()
-                statsGui = nil
-            end
-        end
-    end
-})
-
-local promptConn
-local clickConn
-
-local function enable()
-    promptConn = ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
-        if prompt then
-            fireproximityprompt(prompt)
-        end
-    end)
-
-    clickConn = mouse.Button1Down:Connect(function()
-        local target = mouse.Target
-        if target then
-            local cd = target:FindFirstChildOfClass("ClickDetector")
-            if cd then
-                fireclickdetector(cd)
-            end
-        end
-    end)
-end
-local function disable()
-    if promptConn then
-        promptConn:Disconnect()
-        promptConn = nil
-    end
-    if clickConn then
-        clickConn:Disconnect()
-        clickConn = nil
-    end
-end
-PlayerTab:CreateToggle({
-    Name = "Instant Interact (All)",
-    CurrentValue = false,
-    Callback = function(state)
-        if state then
-            enable()
-        else
-            disable()
-        end
-    end
-})
-
---minimap
-local MapGui, MapFrame, InfoPanel = nil, nil, nil
-local MapObjects = {}
-local MapEnabled = false
-local RenderConnection
-
-local Zoom = 4
-local SmoothYaw = 0
-local CurrentTarget = nil
-local TPMode = false
-
---// UI
-local function createMap()
-    MapGui = Instance.new("ScreenGui")
-    MapGui.IgnoreGuiInset = true
-    MapGui.ResetOnSpawn = false
-    MapGui.Parent = game.CoreGui
-
-    -- minimap
-    MapFrame = Instance.new("Frame")
-    MapFrame.Size = UDim2.new(0,150,0,150)
-    MapFrame.Position = UDim2.new(1,-160,0,10)
-    MapFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    MapFrame.BackgroundTransparency = 0.4
-    MapFrame.BorderSizePixel = 0
-    MapFrame.ClipsDescendants = true
-    MapFrame.Parent = MapGui
-    Instance.new("UICorner", MapFrame)
-
-    -- TP BUTTON
-    local tpBtn = Instance.new("TextButton")
-    tpBtn.Size = UDim2.new(0,150,0,30)
-    tpBtn.Position = UDim2.new(1,-160,0,165)
-    tpBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    tpBtn.TextColor3 = Color3.new(1,1,1)
-    tpBtn.Text = "TP: OFF"
-    tpBtn.Parent = MapGui
-    Instance.new("UICorner", tpBtn)
-
-    tpBtn.MouseButton1Click:Connect(function()
-        TPMode = not TPMode
-        tpBtn.Text = TPMode and "TP: ON" or "TP: OFF"
-    end)
-
-    -- info panel
-    InfoPanel = Instance.new("Frame")
-    InfoPanel.Size = UDim2.new(0,170,0,95)
-    InfoPanel.Position = UDim2.new(1,-340,0,10)
-    InfoPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    InfoPanel.BackgroundTransparency = 0.3
-    InfoPanel.Visible = false
-    InfoPanel.Parent = MapGui
-    Instance.new("UICorner", InfoPanel)
-
-    local nameLabel = Instance.new("TextLabel")
-    nameLabel.Name = "PlayerName"
-    nameLabel.Size = UDim2.new(1,0,0.4,0)
-    nameLabel.BackgroundTransparency = 1
-    nameLabel.TextColor3 = Color3.new(1,1,1)
-    nameLabel.TextScaled = true
-    nameLabel.Parent = InfoPanel
-
-    local hp = Instance.new("TextLabel")
-    hp.Name = "HP"
-    hp.Size = UDim2.new(1,0,0.3,0)
-    hp.Position = UDim2.new(0,0,0.4,0)
-    hp.BackgroundTransparency = 1
-    hp.TextColor3 = Color3.new(0,1,0)
-    hp.TextScaled = true
-    hp.Parent = InfoPanel
-
-    local dist = Instance.new("TextLabel")
-    dist.Name = "Distance"
-    dist.Size = UDim2.new(1,0,0.3,0)
-    dist.Position = UDim2.new(0,0,0.7,0)
-    dist.BackgroundTransparency = 1
-    dist.TextColor3 = Color3.new(1,1,0)
-    dist.TextScaled = true
-    dist.Parent = InfoPanel
-end
-
-local function createDot(player)
-    if MapObjects[player] then return end
-
-    local dot = Instance.new("ImageButton")
-    dot.Size = UDim2.new(0,20,0,20)
-    dot.AnchorPoint = Vector2.new(0.5,0.5)
-    dot.BackgroundTransparency = 1
-    dot.Parent = MapFrame
-
-    dot.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=150&height=150&format=png"
-    Instance.new("UICorner", dot)
-
-    dot.MouseButton1Click:Connect(function()
-        if TPMode then
-            local myChar = LocalPlayer.Character
-            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
-
-            local char = player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-            if myHRP and hrp then
-                myHRP.CFrame = hrp.CFrame + Vector3.new(0,3,0)
-            end
-            return
-        end
-
-        if CurrentTarget == player then
-            CurrentTarget = nil
-            InfoPanel.Visible = false
-        else
-            CurrentTarget = player
-            InfoPanel.Visible = true
-            InfoPanel.PlayerName.Text = player.DisplayName.." (@"..player.Name..")"
-        end
-    end)
-
-    MapObjects[player] = dot
-end
-
-local function updateDots(dt)
-    if not MapEnabled then return end
-
-    local char = LocalPlayer.Character
-    local center = char and char:FindFirstChild("HumanoidRootPart")
-    if not center then return end
-
-    local targetYaw = math.atan2(Camera.CFrame.LookVector.Z, Camera.CFrame.LookVector.X)
-    SmoothYaw = SmoothYaw + (targetYaw - SmoothYaw) * math.clamp(dt * 8, 0, 1)
-
-    for player, dot in pairs(MapObjects) do
-        local char = player.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-        if hrp then
-            local offset = (hrp.Position - center.Position) / Zoom
-
-            local rx = offset.X*math.cos(SmoothYaw) + offset.Z*math.sin(SmoothYaw)
-            local rz = -offset.X*math.sin(SmoothYaw) + offset.Z*math.cos(SmoothYaw)
-
-            if math.abs(rx) <= 70 and math.abs(rz) <= 70 then
-                dot.Visible = true
-                dot.Position = UDim2.new(0.5, rx, 0.5, rz)
-            else
-                dot.Visible = false
-            end
-        else
-            dot.Visible = false
-        end
-
-        if player == CurrentTarget then
-            dot.ImageColor3 = Color3.fromRGB(255,100,100)
-        else
-            dot.ImageColor3 = Color3.fromRGB(255,255,255)
-        end
-    end
-
-    if CurrentTarget and InfoPanel.Visible then
-        local myChar = LocalPlayer.Character
-        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
-
-        local char = CurrentTarget.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            InfoPanel.HP.Text = "HP: "..math.floor(hum.Health)
-        else
-            InfoPanel.HP.Text = "HP: N/A"
-        end
-        if myHRP and hrp then
-            local dist = (hrp.Position - myHRP.Position).Magnitude
-            InfoPanel.Distance.Text = "Dist: "..math.floor(dist).."m"
-        else
-            InfoPanel.Distance.Text = "Dist: N/A"
-        end
-    end
-end
-
-local function initMap()
-    createMap()
-    for _,p in pairs(Players:GetPlayers()) do
-        createDot(p)
-    end
-    Players.PlayerAdded:Connect(createDot)
-    Players.PlayerRemoving:Connect(function(p)
-        if MapObjects[p] then
-            MapObjects[p]:Destroy()
-            MapObjects[p] = nil
-        end
-
-        if CurrentTarget == p then
-            CurrentTarget = nil
-            InfoPanel.Visible = false
-        end
-    end)
-    RenderConnection = RunService.RenderStepped:Connect(updateDots)
-end
-
-PlayerTab:CreateToggle({
-    Name = "MiniMap",
-    CurrentValue = false,
-    Callback = function(state)
-        MapEnabled = state
-        if state then
-            if not MapGui then initMap() end
-            MapGui.Enabled = true
-        else
-            if MapGui then MapGui.Enabled = false end
-            if RenderConnection then
-                RenderConnection:Disconnect()
-                RenderConnection = nil
             end
         end
     end
@@ -1062,6 +480,418 @@ PlayerTab:CreateSlider({
     end
 })
 
+PlayerTab:CreateSection("Player")
+
+local noclipEnabled = false
+
+PlayerTab:CreateToggle({
+    Name = "NoClip",
+    CurrentValue = false,
+    Callback = function(state)
+        noclipEnabled = state
+        
+        if state then
+            RunService:BindToRenderStep("NoirNoClip", Enum.RenderPriority.Character.Value, function()
+                local char = plr.Character
+                if not char then return end
+                for _, v in pairs(char:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
+                end
+            end)
+        else
+            RunService:UnbindFromRenderStep("NoirNoClip")
+            local char = plr.Character
+            if not char then return end
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CanCollide = true
+                end
+            end
+        end
+    end
+})
+
+--instant..
+local promptConn
+local clickConn
+
+local function enable()
+    promptConn = ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
+        if prompt then
+            fireproximityprompt(prompt)
+        end
+    end)
+
+    clickConn = mouse.Button1Down:Connect(function()
+        local target = mouse.Target
+        if target then
+            local cd = target:FindFirstChildOfClass("ClickDetector")
+            if cd then
+                fireclickdetector(cd)
+            end
+        end
+    end)
+end
+local function disable()
+    if promptConn then
+        promptConn:Disconnect()
+        promptConn = nil
+    end
+    if clickConn then
+        clickConn:Disconnect()
+        clickConn = nil
+    end
+end
+PlayerTab:CreateToggle({
+    Name = "Instant Interact",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            enable()
+        else
+            disable()
+        end
+    end
+})
+
+
+--crosshair
+local crosshairEnabled = false
+
+local crosshair = Drawing.new("Circle")
+crosshair.Visible = false
+crosshair.Color = Color3.fromRGB(255,255,255)
+crosshair.Thickness = 1
+crosshair.Radius = 2
+crosshair.Filled = true
+
+local lines = {}
+for i = 1,4 do
+	local line = Drawing.new("Line")
+	line.Visible = false
+	line.Color = Color3.fromRGB(255,0,0)
+	line.Thickness = 2
+	table.insert(lines,line)
+end
+
+local function drawPlus(pos)
+
+	local size = 8
+	local gap = 2
+
+	lines[1].From = Vector2.new(pos.X - size, pos.Y)
+	lines[1].To   = Vector2.new(pos.X - gap, pos.Y)
+
+	lines[2].From = Vector2.new(pos.X + gap, pos.Y)
+	lines[2].To   = Vector2.new(pos.X + size, pos.Y)
+
+	lines[3].From = Vector2.new(pos.X, pos.Y - size)
+	lines[3].To   = Vector2.new(pos.X, pos.Y - gap)
+
+	lines[4].From = Vector2.new(pos.X, pos.Y + gap)
+	lines[4].To   = Vector2.new(pos.X, pos.Y + size)
+
+end
+
+RunService.RenderStepped:Connect(function()
+
+	if not crosshairEnabled then
+		crosshair.Visible = false
+		for _,l in pairs(lines) do
+			l.Visible = false
+		end
+		return
+	end
+
+	local viewport = camera.ViewportSize
+	local center = viewport / 2
+
+	local character = player.Character
+	if not character or not character:FindFirstChild("Head") then return end
+
+	local head = character.Head
+	local distance = (camera.CFrame.Position - head.Position).Magnitude
+
+	local pos = center
+
+	if distance > 1 then
+		local offset = camera.CFrame.RightVector * 3 + camera.CFrame.UpVector * 1
+		local worldPoint = camera.CFrame.Position + camera.CFrame.LookVector * 1000 + offset
+		local screenPoint = camera:WorldToViewportPoint(worldPoint)
+		pos = Vector2.new(screenPoint.X,screenPoint.Y)
+	end
+
+	local rayParams = RaycastParams.new()
+	rayParams.FilterDescendantsInstances = {character}
+	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+	local ray = workspace:Raycast(
+		camera.CFrame.Position,
+		camera.CFrame.LookVector * 1000,
+		rayParams
+	)
+
+	local enemyFound = false
+
+	if ray and ray.Instance then
+		local model = ray.Instance:FindFirstAncestorOfClass("Model")
+		if model and Players:GetPlayerFromCharacter(model) then
+			enemyFound = true
+		end
+	end
+
+	if enemyFound then
+		crosshair.Visible = false
+		drawPlus(pos)
+
+		for _,l in pairs(lines) do
+			l.Visible = true
+		end
+	else
+		crosshair.Visible = true
+		crosshair.Position = pos
+
+		for _,l in pairs(lines) do
+			l.Visible = false
+		end
+	end
+
+end)
+
+PlayerTab:CreateToggle({
+	Name = "Crosshair",
+	CurrentValue = false,
+	Flag = "CrosshairToggle",
+	Callback = function(Value)
+		crosshairEnabled = Value
+	end,
+})
+
+PlayerTab:CreateButton({
+    Name = "ShiftLock",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/Shift_Lock"))()
+    end,
+})
+
+PlayerTab:CreateSection("Map")
+
+--minimap
+local MapGui, MapFrame, InfoPanel = nil, nil, nil
+local MapObjects = {}
+local MapEnabled = false
+local RenderConnection
+
+local Zoom = 4
+local SmoothYaw = 0
+local CurrentTarget = nil
+local TPMode = false
+
+local function createMap()
+    MapGui = Instance.new("ScreenGui")
+    MapGui.IgnoreGuiInset = true
+    MapGui.ResetOnSpawn = false
+    MapGui.Parent = game.CoreGui
+
+    MapFrame = Instance.new("Frame")
+    MapFrame.Size = UDim2.new(0,150,0,150)
+    MapFrame.Position = UDim2.new(1,-160,0,10)
+    MapFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    MapFrame.BackgroundTransparency = 0.4
+    MapFrame.BorderSizePixel = 0
+    MapFrame.ClipsDescendants = true
+    MapFrame.Parent = MapGui
+    Instance.new("UICorner", MapFrame)
+
+    local tpBtn = Instance.new("TextButton")
+    tpBtn.Size = UDim2.new(0,150,0,30)
+    tpBtn.Position = UDim2.new(1,-160,0,165)
+    tpBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    tpBtn.TextColor3 = Color3.new(1,1,1)
+    tpBtn.Text = "TP: OFF"
+    tpBtn.Parent = MapGui
+    Instance.new("UICorner", tpBtn)
+
+    tpBtn.MouseButton1Click:Connect(function()
+        TPMode = not TPMode
+        tpBtn.Text = TPMode and "TP: ON" or "TP: OFF"
+    end)
+
+    InfoPanel = Instance.new("Frame")
+    InfoPanel.Size = UDim2.new(0,170,0,95)
+    InfoPanel.Position = UDim2.new(1,-340,0,10)
+    InfoPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    InfoPanel.BackgroundTransparency = 0.3
+    InfoPanel.Visible = false
+    InfoPanel.Parent = MapGui
+    Instance.new("UICorner", InfoPanel)
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Name = "PlayerName"
+    nameLabel.Size = UDim2.new(1,0,0.4,0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.TextColor3 = Color3.new(1,1,1)
+    nameLabel.TextScaled = true
+    nameLabel.Parent = InfoPanel
+
+    local hp = Instance.new("TextLabel")
+    hp.Name = "HP"
+    hp.Size = UDim2.new(1,0,0.3,0)
+    hp.Position = UDim2.new(0,0,0.4,0)
+    hp.BackgroundTransparency = 1
+    hp.TextColor3 = Color3.new(0,1,0)
+    hp.TextScaled = true
+    hp.Parent = InfoPanel
+
+    local dist = Instance.new("TextLabel")
+    dist.Name = "Distance"
+    dist.Size = UDim2.new(1,0,0.3,0)
+    dist.Position = UDim2.new(0,0,0.7,0)
+    dist.BackgroundTransparency = 1
+    dist.TextColor3 = Color3.new(1,1,0)
+    dist.TextScaled = true
+    dist.Parent = InfoPanel
+end
+
+local function createDot(player)
+    if MapObjects[player] then return end
+
+    local dot = Instance.new("ImageButton")
+    dot.Size = UDim2.new(0,20,0,20)
+    dot.AnchorPoint = Vector2.new(0.5,0.5)
+    dot.BackgroundTransparency = 1
+    dot.Parent = MapFrame
+
+    dot.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=150&height=150&format=png"
+    Instance.new("UICorner", dot)
+
+    dot.MouseButton1Click:Connect(function()
+        if TPMode then
+            local myChar = LocalPlayer.Character
+            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+
+            local char = player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+            if myHRP and hrp then
+                myHRP.CFrame = hrp.CFrame + Vector3.new(0,3,0)
+            end
+            return
+        end
+
+        if CurrentTarget == player then
+            CurrentTarget = nil
+            InfoPanel.Visible = false
+        else
+            CurrentTarget = player
+            InfoPanel.Visible = true
+            InfoPanel.PlayerName.Text = player.DisplayName.." (@"..player.Name..")"
+        end
+    end)
+
+    MapObjects[player] = dot
+end
+
+local function updateDots(dt)
+    if not MapEnabled then return end
+
+    local char = LocalPlayer.Character
+    local center = char and char:FindFirstChild("HumanoidRootPart")
+    if not center then return end
+
+    local targetYaw = math.atan2(Camera.CFrame.LookVector.Z, Camera.CFrame.LookVector.X)
+    SmoothYaw = SmoothYaw + (targetYaw - SmoothYaw) * math.clamp(dt * 8, 0, 1)
+
+    for player, dot in pairs(MapObjects) do
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+        if hrp then
+            local offset = (hrp.Position - center.Position) / Zoom
+
+            local rx = offset.X*math.cos(SmoothYaw) + offset.Z*math.sin(SmoothYaw)
+            local rz = -offset.X*math.sin(SmoothYaw) + offset.Z*math.cos(SmoothYaw)
+
+            if math.abs(rx) <= 70 and math.abs(rz) <= 70 then
+                dot.Visible = true
+                dot.Position = UDim2.new(0.5, rx, 0.5, rz)
+            else
+                dot.Visible = false
+            end
+        else
+            dot.Visible = false
+        end
+
+        if player == CurrentTarget then
+            dot.ImageColor3 = Color3.fromRGB(255,100,100)
+        else
+            dot.ImageColor3 = Color3.fromRGB(255,255,255)
+        end
+    end
+
+    if CurrentTarget and InfoPanel.Visible then
+        local myChar = LocalPlayer.Character
+        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+
+        local char = CurrentTarget.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            InfoPanel.HP.Text = "HP: "..math.floor(hum.Health)
+        else
+            InfoPanel.HP.Text = "HP: N/A"
+        end
+        if myHRP and hrp then
+            local dist = (hrp.Position - myHRP.Position).Magnitude
+            InfoPanel.Distance.Text = "Dist: "..math.floor(dist).."m"
+        else
+            InfoPanel.Distance.Text = "Dist: N/A"
+        end
+    end
+end
+
+local function initMap()
+    createMap()
+    for _,p in pairs(Players:GetPlayers()) do
+        createDot(p)
+    end
+    Players.PlayerAdded:Connect(createDot)
+    Players.PlayerRemoving:Connect(function(p)
+        if MapObjects[p] then
+            MapObjects[p]:Destroy()
+            MapObjects[p] = nil
+        end
+
+        if CurrentTarget == p then
+            CurrentTarget = nil
+            InfoPanel.Visible = false
+        end
+    end)
+    RenderConnection = RunService.RenderStepped:Connect(updateDots)
+end
+
+PlayerTab:CreateToggle({
+    Name = "MiniMap",
+    CurrentValue = false,
+    Callback = function(state)
+        MapEnabled = state
+        if state then
+            if not MapGui then initMap() end
+            MapGui.Enabled = true
+        else
+            if MapGui then MapGui.Enabled = false end
+            if RenderConnection then
+                RenderConnection:Disconnect()
+                RenderConnection = nil
+            end
+        end
+    end
+})
+
+PlayerTab:CreateSection("Camera")
+
 -- Third Person Force Toggle
 local thirdPersonEnabled = false
 local thirdPersonLoop = nil
@@ -1123,13 +953,6 @@ PlayerTab:CreateToggle({
     end,
 })
 
-PlayerTab:CreateButton({
-    Name = "Tap to TP",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Tap_to_TP"))()
-    end,
-})
-
 --FOV
 PlayerTab:CreateSlider({
     Name = "Field Of View",
@@ -1141,19 +964,114 @@ PlayerTab:CreateSlider({
     end
 })
 
-PlayerTab:CreateButton({
-    Name = "Inventory Viewer",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/Funny_FE_Scripts/main/Inventory_Viewer"))()
-    end,
+--performance
+PlayerTab:CreateSection("performance")
+
+local statsGui
+local fpsFrame, memFrame
+
+local function destroyStats()
+    if statsGui then
+        statsGui:Destroy()
+        statsGui = nil
+    end
+end
+
+local function createStats()
+    destroyStats()
+
+    statsGui = Instance.new("ScreenGui")
+    statsGui.Name = "NoirStats"
+    statsGui.IgnoreGuiInset = true
+    statsGui.ResetOnSpawn = false
+    statsGui.Parent = game:GetService("CoreGui")
+
+    fpsFrame = Instance.new("TextLabel")
+    fpsFrame.Size = UDim2.new(0, 140, 0, 25)
+    fpsFrame.Position = UDim2.new(0, 10, 0, 60)
+    fpsFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    fpsFrame.BackgroundTransparency = 0.5
+    fpsFrame.TextColor3 = Color3.fromRGB(255,255,255)
+    fpsFrame.Font = Enum.Font.SourceSansBold
+    fpsFrame.TextSize = 14
+    fpsFrame.Text = ""
+    fpsFrame.Visible = false
+    fpsFrame.Parent = statsGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0,6)
+    corner.Parent = fpsFrame
+
+    memFrame = Instance.new("TextLabel")
+    memFrame.Size = UDim2.new(0, 140, 0, 25)
+    memFrame.Position = UDim2.new(0, 10, 0, 90)
+    memFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    memFrame.BackgroundTransparency = 0.4
+    memFrame.TextColor3 = Color3.fromRGB(255,255,255)
+    memFrame.Font = Enum.Font.SourceSansBold
+    memFrame.TextSize = 14
+    memFrame.Text = ""
+    memFrame.Visible = false
+    memFrame.Parent = statsGui
+
+    local corner2 = Instance.new("UICorner")
+    corner2.CornerRadius = UDim.new(0,6)
+    corner2.Parent = memFrame
+
+    local stats = game:GetService("Stats")
+
+    game:GetService("RunService").RenderStepped:Connect(function(dt)
+        if fpsFrame and fpsFrame.Visible then
+            local pingStat = stats.Network.ServerStatsItem:FindFirstChild("Data Ping")
+            local ping = pingStat and math.floor(pingStat:GetValue()) or 0
+            local fps = math.floor(1/dt)
+            fpsFrame.Text = "Ping: "..ping.." | FPS: "..fps
+        end
+
+        if memFrame and memFrame.Visible then
+            local mem = math.floor(stats:GetTotalMemoryUsageMb())
+            memFrame.Text = "Memory: "..mem.." MB"
+        end
+    end)
+end
+
+local fpsToggle = false
+local memToggle = false
+
+PlayerTab:CreateToggle({
+    Name = "Show FPS & Ping",
+    Callback = function(v)
+        fpsToggle = v
+
+        if not statsGui then
+            createStats()
+        end
+
+        if fpsFrame then
+            fpsFrame.Visible = v
+        end
+
+        if not fpsToggle and not memToggle then
+            destroyStats()
+        end
+    end
 })
 
---anti afk
-PlayerTab:CreateButton({
-    Name = "Anti-AFK",
-    Callback = function()
-        for _, conn in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
-            conn:Disable()
+PlayerTab:CreateToggle({
+    Name = "Show Memory",
+    Callback = function(v)
+        memToggle = v
+
+        if not statsGui then
+            createStats()
+        end
+
+        if memFrame then
+            memFrame.Visible = v
+        end
+
+        if not fpsToggle and not memToggle then
+            destroyStats()
         end
     end
 })
@@ -1162,7 +1080,7 @@ local Lighting = game:GetService("Lighting")
 
 local FPSTab = Window:CreateTab("FPS", "gauge")
 
-FPSTab:CreateSection("Visual Boost")
+FPSTab:CreateSection("Misc.")
 
 local oldBrightness = Lighting.Brightness
 local oldClockTime = Lighting.ClockTime
@@ -1244,7 +1162,7 @@ FPSTab:CreateToggle({
     end,
 })
 
-FPSTab:CreateSection("Performance")
+FPSTab:CreateSection("Boost FPS")
 
 FPSTab:CreateToggle({
     Name = "Unlock FPS",
@@ -1258,7 +1176,6 @@ FPSTab:CreateToggle({
     end,
 })
 
--- Boost FPS
 local disabledEffects = {}
 
 FPSTab:CreateToggle({
@@ -1306,7 +1223,6 @@ FPSTab:CreateToggle({
     end,
 })
 
--- Ultra Boost FPS
 local ultraDisabled = {}
 
 FPSTab:CreateToggle({
@@ -1381,8 +1297,7 @@ local Camera = workspace.CurrentCamera
 
 local ESP = Window:CreateTab("Visual","eye")
 
-ESP:CreateSection("ESP")
-
+ESP:CreateSection("Player")
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
@@ -1747,7 +1662,7 @@ end
 end
 })
 
-ESP:CreateSection("Etc.")
+ESP:CreateSection("Misc.")
 
 local xrayEnabled = false
 local saved = {}
@@ -1954,13 +1869,11 @@ ESP:CreateSlider({
     end
 })
 
---
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- Config
 local AimbotEnabled = false
 local NPCAimbotEnabled = false
 local TeamCheck = true
@@ -1971,7 +1884,6 @@ local Smoothness = 0.4
 local AimPart = "Head"
 local Prediction = 0.12
 
--- FOV
 local CoreGui = game:GetService("CoreGui")
 
 local ScreenGui = Instance.new("ScreenGui")
@@ -1998,6 +1910,8 @@ corner.CornerRadius = UDim.new(1,0)
 -- TAB
 local Taba = Window:CreateTab("Aimbot","target")
 
+Taba:CreateSection("Aimbot")
+
 Taba:CreateToggle({
 Name="Active Aimbot",
 CurrentValue=false,
@@ -2022,6 +1936,8 @@ FOVCircle.Visible=v
 end
 })
 
+Taba:CreateSection("Check")
+
 Taba:CreateToggle({
 Name="Team Check",
 CurrentValue=true,
@@ -2045,6 +1961,8 @@ Callback=function(v)
 DeathCheck=v
 end
 })
+
+Taba:CreateSection("Settings")
 
 Taba:CreateSlider({
 Name="Circle FOV",
@@ -2087,7 +2005,6 @@ AimPart=v
 end
 })
 
--- NPC Cache (FPS Boost)
 local NPCList={}
 
 local function RefreshNPCs()
@@ -2219,7 +2136,6 @@ end
 
 end)
 
---Tab Limbs
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
@@ -2233,6 +2149,8 @@ local le = LimbExtender({
 
 local LimbTab = Window:CreateTab("Limbs", "scale-3d")
 
+LimbTab:CreateSection("Limbs")
+
 local ModifyLimbs = LimbTab:CreateToggle({
     Name = "Modify Limbs",
     CurrentValue = false,
@@ -2240,6 +2158,8 @@ local ModifyLimbs = LimbTab:CreateToggle({
         le:Toggle(v)
     end,
 })
+
+LimbTab:CreateSection("Check")
 
 LimbTab:CreateToggle({
     Name = "Team Check",
@@ -2264,6 +2184,8 @@ LimbTab:CreateToggle({
         le:Set("LIMB_CAN_COLLIDE", v)
     end,
 })
+
+LimbTab:CreateSection("Settings")
 
 LimbTab:CreateSlider({
     Name = "Limb Size",
@@ -2327,7 +2249,7 @@ end
 
 local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 
-ScriptsTab:CreateSection("Funny Scripts")
+ScriptsTab:CreateSection("Script")
 
 ScriptsTab:CreateButton({
     Name = "Fly GUI V4",
@@ -2427,7 +2349,7 @@ ScriptsTab:CreateButton({
     end,
 })
 
-ScriptsTab:CreateSection("For Some Game")
+ScriptsTab:CreateSection("Games")
 
 ScriptsTab:CreateButton({
     Name = "Jujutsu Shenanigans",
@@ -2576,7 +2498,7 @@ ScriptsTab:CreateButton({
     end,
 })
 
-ScriptsTab:CreateSection("Admin Scripts")
+ScriptsTab:CreateSection("Admin Script")
 
 ScriptsTab:CreateButton({
     Name = "Infinite Yield",
@@ -2627,7 +2549,7 @@ ScriptsTab:CreateButton({
     end,
 })
 
-ScriptsTab:CreateSection("All in One Scripts")
+ScriptsTab:CreateSection("Script Hub")
 
 ScriptsTab:CreateButton({
     Name = "Anon Hub",
@@ -2670,7 +2592,6 @@ ScriptsTab:CreateButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/rangell8/Rexys-Welding-Hub/refs/heads/main/script"))()
     end,
 })
-
 
 ScriptsTab:CreateButton({
     Name = "Rob Visual Script Hub",
@@ -2728,7 +2649,7 @@ ScriptsTab:CreateButton({
     end,
 })
 
-ScriptsTab:CreateSection("Funny FE Scripts :))")
+ScriptsTab:CreateSection("Funny Script")
 
 ScriptsTab:CreateButton({
     Name = "Sandevistan FE",
@@ -2861,7 +2782,7 @@ ScriptsTab:CreateButton({
 
 PacksTab = Window:CreateTab("Packs", "package")
 
-PacksTab:CreateSection("Bundle")
+PacksTab:CreateSection("Outfit")
 
 PacksTab:CreateButton({
     Name = "Korblox",
@@ -2884,7 +2805,7 @@ PacksTab:CreateButton({
     end,
 })
 
-PacksTab:CreateSection("Animation Pack & Emote FE")
+PacksTab:CreateSection("Emote & Animation")
 
 PacksTab:CreateButton({
     Name = "Animation Pack",
@@ -2949,7 +2870,7 @@ PacksTab:CreateButton({
     end,
 })
 
-PacksTab:CreateSection("Shaders")
+PacksTab:CreateSection("Shader")
 
 PacksTab:CreateButton({
     Name = "Shaders Script",
@@ -2958,7 +2879,6 @@ PacksTab:CreateButton({
     end,
 })
 
---tab4
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -2966,44 +2886,31 @@ local Camera = workspace.CurrentCamera
 
 local Tab4 = Window:CreateTab("People", "users")
 
-Tab4:CreateSection("Teleport Tools")
-
 local currentTarget = nil
 local loopTeleport = false
 local watching = false
 local aimingTarget = false
-local aimStrength = 0.35
-
+local aimStrength = 0.4
 local following = false
 local followSpeed = 20
+local orbiting = false
+local orbitRadius = 10
+local orbitSpeed = 30
+local orbitAngle = 0
 
-local function getChar(p)
-    return p and p.Character
-end
-
-local function getHRP(p)
-    local c = getChar(p)
-    return c and c:FindFirstChild("HumanoidRootPart")
-end
-
-local function getTarget()
-    return currentTarget and Players:FindFirstChild(currentTarget)
-end
-
+local function getChar(p) return p and p.Character end
+local function getHRP(p) local c = getChar(p) return c and c:FindFirstChild("HumanoidRootPart") end
+local function getTarget() return currentTarget and Players:FindFirstChild(currentTarget) end
 local function teleportTo(p)
     local hrp1 = getHRP(LocalPlayer)
     local hrp2 = getHRP(p)
-    if hrp1 and hrp2 then
-        hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2)
-    end
+    if hrp1 and hrp2 then hrp1.CFrame = hrp2.CFrame * CFrame.new(2,0,2) end
 end
 
 local function getAllTargets()
     local list = {}
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(list, p)
-        end
+        if p ~= LocalPlayer then table.insert(list,p) end
     end
     return list
 end
@@ -3012,15 +2919,11 @@ local function getNearest()
     local best, dist = nil, math.huge
     local my = getHRP(LocalPlayer)
     if not my then return end
-
     for _, p in ipairs(getAllTargets()) do
         local hrp = getHRP(p)
         if hrp then
             local d = (my.Position - hrp.Position).Magnitude
-            if d < dist then
-                dist = d
-                best = p
-            end
+            if d < dist then dist = d best = p end
         end
     end
     return best
@@ -3030,45 +2933,17 @@ local function getFarthest()
     local best, dist = nil, 0
     local my = getHRP(LocalPlayer)
     if not my then return end
-
     for _, p in ipairs(getAllTargets()) do
         local hrp = getHRP(p)
         if hrp then
             local d = (my.Position - hrp.Position).Magnitude
-            if d > dist then
-                dist = d
-                best = p
-            end
+            if d > dist then dist = d best = p end
         end
     end
     return best
 end
 
-Tab4:CreateButton({
-    Name = "TP nearest player",
-    Callback = function()
-        teleportTo(getNearest())
-    end
-})
-
-Tab4:CreateButton({
-    Name = "TP farthest player",
-    Callback = function()
-        teleportTo(getFarthest())
-    end
-})
-
-Tab4:CreateButton({
-    Name = "TP random player",
-    Callback = function()
-        local list = getAllTargets()
-        if #list > 0 then
-            teleportTo(list[math.random(1,#list)])
-        end
-    end
-})
-
-Tab4:CreateSection("Has Target")
+Tab4:CreateSection("Teleport")
 
 local playerDropdown = Tab4:CreateDropdown({
     Name = "Player List",
@@ -3093,134 +2968,135 @@ local function refreshPlayers()
     playerDropdown:Refresh(opts, true)
 end
 
-Tab4:CreateButton({
-    Name = "Refresh player list",
-    Callback = refreshPlayers
-})
-
+Tab4:CreateButton({ Name="Refresh player list", Callback=refreshPlayers })
 refreshPlayers()
 
-Tab4:CreateToggle({
-    Name = "Follow player",
-    Callback = function(v)
-        following = v
-    end
-})
+Tab4:CreateButton({ Name="TP nearest player", Callback=function() teleportTo(getNearest()) end })
+Tab4:CreateButton({ Name="TP farthest player", Callback=function() teleportTo(getFarthest()) end })
+Tab4:CreateButton({ Name="TP random player", Callback=function()
+    local list=getAllTargets()
+    if #list>0 then teleportTo(list[math.random(1,#list)]) end
+end })
 
-Tab4:CreateSlider({
-    Name = "Follow speed",
-    Range = {5,100},
-    Increment = 5,
-    CurrentValue = 20,
-    Callback = function(v)
-        followSpeed = v
-    end
-})
+Tab4:CreateButton({ Name="Teleport to player", Callback=function()
+    local t=getTarget()
+    teleportTo(t)
+end })
 
-RunService.Heartbeat:Connect(function(dt)
-    if following then
-        local t = getTarget()
-        local hrp1 = getHRP(LocalPlayer)
-        local hrp2 = getHRP(t)
+Tab4:CreateToggle({ Name="Teleport loop (target)", CurrentValue=false, Callback=function(v) loopTeleport=v end })
 
-        if hrp1 and hrp2 then
-            local pos = hrp2.Position + Vector3.new(0,0,3)
-            hrp1.CFrame = hrp1.CFrame:Lerp(CFrame.new(pos), dt * (followSpeed/10))
-        end
-    end
-end)
+Tab4:CreateToggle({ Name="Follow player", Callback=function(v) following=v end })
+Tab4:CreateSlider({ Name="Follow speed", Range={5,100}, Increment=5, CurrentValue=20, Callback=function(v) followSpeed=v end })
+
+Tab4:CreateSection("Aim Camera")
+
+Tab4:CreateToggle({ Name="Aim to player", CurrentValue=false, Callback=function(v) aimingTarget=v end })
+Tab4:CreateSlider({ Name="Aim strength", Range={0.1,1}, Increment=0.05, CurrentValue=0.35, Callback=function(v) aimStrength=v end })
+
+Tab4:CreateSection("Orbit")
+
+Tab4:CreateToggle({ Name="Orbit player", CurrentValue=false, Callback=function(v) orbiting=v end })
+Tab4:CreateSlider({ Name="Orbit radius", Range={1,100}, Increment=1, CurrentValue=10, Callback=function(v) orbitRadius=v end })
+Tab4:CreateSlider({ Name="Orbit speed", Range={1,100}, Increment=1, CurrentValue=30, Callback=function(v) orbitSpeed=v end })
 
 local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Enabled = false
-
+gui.Enabled=false
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0,260,0,120)
 frame.Position = UDim2.new(1,-270,0.3,0)
-frame.BackgroundTransparency = 0.2
+frame.BackgroundTransparency=0.2
 
 local avatar = Instance.new("ImageLabel", frame)
 avatar.Size = UDim2.new(0,50,0,50)
 avatar.Position = UDim2.new(0,10,0,10)
-avatar.BackgroundTransparency = 1
+avatar.BackgroundTransparency=1
 
 local info = Instance.new("TextLabel", frame)
-info.Size = UDim2.new(1,-70,1,-20)
-info.Position = UDim2.new(0,70,0,10)
-info.BackgroundTransparency = 1
-info.TextScaled = true
-info.TextXAlignment = Enum.TextXAlignment.Left
+info.Size=UDim2.new(1,-70,1,-20)
+info.Position=UDim2.new(0,70,0,10)
+info.BackgroundTransparency=1
+info.TextScaled=true
+info.TextXAlignment=Enum.TextXAlignment.Left
 
 local left = Instance.new("TextButton", frame)
-left.Size = UDim2.new(0,25,0,25)
-left.Position = UDim2.new(0,10,1,-30)
-left.Text = "<"
+left.Size=UDim2.new(0,25,0,25)
+left.Position=UDim2.new(0,10,1,-30)
+left.Text="<"
 
 local right = Instance.new("TextButton", frame)
-right.Size = UDim2.new(0,25,0,25)
-right.Position = UDim2.new(0,40,1,-30)
-right.Text = ">"
+right.Size=UDim2.new(0,25,0,25)
+right.Position=UDim2.new(0,40,1,-30)
+right.Text=">"
 
 local function getIndex()
-    local list = getAllTargets()
+    local list=getAllTargets()
     for i,v in ipairs(list) do
-        if v.Name == currentTarget then
-            return i, list
-        end
+        if v.Name==currentTarget then return i,list end
     end
 end
 
 left.MouseButton1Click:Connect(function()
-    local i, list = getIndex()
-    if i and list[i-1] then
-        currentTarget = list[i-1].Name
-    end
+    local i,list=getIndex()
+    if i and list[i-1] then currentTarget=list[i-1].Name end
 end)
-
 right.MouseButton1Click:Connect(function()
-    local i, list = getIndex()
-    if i and list[i+1] then
-        currentTarget = list[i+1].Name
+    local i,list=getIndex()
+    if i and list[i+1] then currentTarget=list[i+1].Name end
+end)
+
+Tab4:CreateSection("Spectate")
+
+Tab4:CreateToggle({ Name="Spectate player", Callback=function(v)
+    watching=v
+    gui.Enabled=v
+    if not v then Camera.CameraSubject=LocalPlayer.Character:FindFirstChildOfClass("Humanoid") end
+end })
+
+RunService.Heartbeat:Connect(function(dt)
+    local t=getTarget()
+    local hrp1=getHRP(LocalPlayer)
+    local hrp2=t and getHRP(t)
+
+    if loopTeleport and t then teleportTo(t) end
+
+    if following and hrp1 and hrp2 then
+        local pos = hrp2.Position+Vector3.new(0,0,3)
+        hrp1.CFrame=hrp1.CFrame:Lerp(CFrame.new(pos), dt*(followSpeed/10))
+    end
+
+    if orbiting and hrp1 and hrp2 then
+        orbitAngle += orbitSpeed*dt
+        local offset = Vector3.new(math.cos(orbitAngle)*orbitRadius,0,math.sin(orbitAngle)*orbitRadius)
+        hrp1.CFrame=CFrame.new(hrp2.Position+offset, hrp2.Position)
     end
 end)
 
-Tab4:CreateToggle({
-    Name = "Watch player",
-    Callback = function(v)
-        watching = v
-        gui.Enabled = v
-
-        if not v then
-            Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+RunService.RenderStepped:Connect(function(dt)
+    local t=getTarget()
+    if aimingTarget and t then
+        local hrp=getHRP(t)
+        if hrp then
+            local predictedPos=hrp.Position + (hrp.Velocity*0.1)
+            local targetCF=CFrame.new(Camera.CFrame.Position,predictedPos)
+            Camera.CFrame=Camera.CFrame:Lerp(targetCF,aimStrength)
         end
     end
-})
 
-RunService.RenderStepped:Connect(function()
-    if watching then
-        local t = getTarget()
-        if t and getChar(t) then
-            local hum = getChar(t):FindFirstChildOfClass("Humanoid")
-            local hrp = getHRP(t)
-
-            if hum and hrp then
-                Camera.CameraSubject = hum
-
-                local my = getHRP(LocalPlayer)
-                local dist = my and math.floor((my.Position - hrp.Position).Magnitude) or 0
-
-                local velocity = hrp.Velocity
-                local realSpeed = math.floor(Vector3.new(velocity.X,0,velocity.Z).Magnitude)
-
-                local jumpState = hum:GetState() == Enum.HumanoidStateType.Jumping and "Jumping" or "Ground"
-
-                avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..t.UserId.."&width=150&height=150&format=png"
-
-                info.Text =
-                    t.DisplayName.." [@"..t.Name.."]\n"..
-                    "Dist: "..dist.."\n"..
-                    "Speed: "..realSpeed.."\n"..
-                    "State: "..jumpState
-            end
+    if watching and t then
+        local hum=getChar(t) and getChar(t):FindFirstChildOfClass("Humanoid")
+        local hrp=getHRP(t)
+        if hum and hrp then
+            Camera.CameraSubject=hum
+            local myHRP=getHRP(LocalPlayer)
+            local dist=myHRP and math.floor((myHRP.Position-hrp.Position).Magnitude) or 0
+            local velocity=hrp.Velocity
+            local realSpeed=math.floor(Vector3.new(velocity.X,0,velocity.Z).Magnitude)
+            local jumpState=hum:GetState()==Enum.HumanoidStateType.Jumping and "Jumping" or "Ground"
+            avatar.Image="https://www.roblox.com/headshot-thumbnail/image?userId="..t.UserId.."&width=150&height=150&format=png"
+            info.Text=t.DisplayName.." [@"..t.Name.."]\nDist: "..dist.."\nSpeed: "..realSpeed.."\nState: "..jumpState
         end
+    elseif gui.Enabled then
+        info.Text=""
+        avatar.Image=""
     end
 end)
