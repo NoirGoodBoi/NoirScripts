@@ -1,5 +1,6 @@
 getgenv().keybinds = {
-    m1reset = Enum.KeyCode.R
+    m1reset = Enum.KeyCode.R,
+    emotedash = Enum.KeyCode.T
 }
 
 local u, r, b, f = "Slaphello", "M1-Reset-And-Emote-Dash-TSB-OLD-", "main", "M1R&ED TSB"
