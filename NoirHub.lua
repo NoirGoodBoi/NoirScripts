@@ -2387,6 +2387,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
+    Name = "Evade (Elderwyrm Hub)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vraigos/Elderwyrm-Hub-X/refs/heads/main/Scripts/Evade/Overhaul.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
     Name = "AK Gaming Ez Hub",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hehej97/AkGamingEzv2.1/refs/heads/main/AKGaming.lua"))()
@@ -2550,6 +2557,13 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateSection("Script Hub")
+
+ScriptsTab:CreateButton({
+    Name = "Ghost Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/blabla6767yoo-cmyk/Scripts/refs/heads/main/Ghost%20Hub%20Key%20Bypass"))()
+    end,
+})
 
 ScriptsTab:CreateButton({
     Name = "Anon Hub",
@@ -2756,20 +2770,6 @@ ScriptsTab:CreateButton({
     Name = "Replication UI",
     Callback = function()
         loadstring(game:HttpGet("https://pastebin.com/raw/tMYrf22E"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Server VIP I",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithExility/ZenikazeHub/refs/heads/main/ZenikazeV3.1"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Server VIP II",
-    Callback = function()
-        loadstring(game:HttpGet("https://gist.githubusercontent.com/Tesker-103/ed48b3ae8120b0c040584b661cbda063/raw/210408b3f107dc740a4c9b832bfa647f92aa25d1/FreePrivateServerGUI"))()
     end,
 })
 
