@@ -90,14 +90,18 @@ task.wait(1)
 gui:Destroy()
 blur:Destroy()
 
+local Window
+
 if Rayfield then
-    local Window = Rayfield:CreateWindow({
+    Window = Rayfield:CreateWindow({
         Name = "Noir Hub",
         LoadingTitle = "Loading NoirHub...",
         LoadingSubtitle = "Script By Noir_Adono",
         ConfigurationSaving = {Enabled = false}
     })
 end
+
+repeat task.wait() until Window
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
