@@ -147,7 +147,7 @@ local conn
 conn = RunService.RenderStepped:Connect(function()
     local pulse = math.sin(tick()*2)*15
     nh.Size = UDim2.new(0,140 + pulse,0,140 + pulse)
-    nh.Rotation += 1.2
+    nh.Rotation += 1.5
     glow1.Rotation = nh.Rotation
     glow2.Rotation = nh.Rotation
     local zoom = 1 + math.sin(tick()*2)*0.05
