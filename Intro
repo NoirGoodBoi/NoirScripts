@@ -1,0 +1,152 @@
+-- ScriptIntro.lua
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- ===== GUI INTRO =====
+local gui = Instance.new("ScreenGui")
+gui.Parent = player:WaitForChild("PlayerGui")
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+
+-- FLASH
+local flash = Instance.new("Frame", gui)
+flash.Size = UDim2.new(1,0,1,0)
+flash.BackgroundColor3 = Color3.new(1,1,1)
+flash.BackgroundTransparency = 1
+TweenService:Create(flash, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+task.wait(0.1)
+TweenService:Create(flash, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+
+-- BACKGROUND
+local bg = Instance.new("Frame", gui)
+bg.Size = UDim2.new(1,0,1,0)
+bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
+bg.BackgroundTransparency = 0.15
+
+-- BLUR
+local blur = Instance.new("BlurEffect", Lighting)
+blur.Size = 0
+TweenService:Create(blur, TweenInfo.new(1.5), {Size = 20}):Play()
+
+-- LOGO CONTAINER
+local logo = Instance.new("Frame", bg)
+logo.Size = UDim2.new(0,260,0,260)
+logo.Position = UDim2.new(0.5,0,0.5,0)
+logo.AnchorPoint = Vector2.new(0.5,0.5)
+logo.BackgroundTransparency = 1
+
+-- HALO 2 VÒNG
+local function createHalo(size, transparency)
+    local f = Instance.new("Frame", logo)
+    f.Size = UDim2.new(0,size,0,size)
+    f.Position = UDim2.new(0.5,0,0.5,0)
+    f.AnchorPoint = Vector2.new(0.5,0.5)
+    f.BackgroundColor3 = Color3.fromRGB(0,180,255)
+    f.BackgroundTransparency = transparency
+    f.BorderSizePixel = 0
+    local uic = Instance.new("UICorner", f)
+    uic.CornerRadius = UDim.new(1,0)
+    local stroke = Instance.new("UIStroke", f)
+    stroke.Thickness = 6
+    stroke.Color = Color3.fromRGB(0,200,255)
+    stroke.Transparency = transparency - 0.3
+    return f
+end
+
+local halo1 = createHalo(260,0.85)
+local halo2 = createHalo(220,0.9)
+
+-- NH LOGO
+local nh = Instance.new("TextLabel", logo)
+nh.Size = UDim2.new(0,140,0,140)
+nh.Position = UDim2.new(0.5,0,0.3,0)
+nh.AnchorPoint = Vector2.new(0.5,0.5)
+nh.BackgroundTransparency = 1
+nh.Text = "NH"
+nh.TextScaled = true
+nh.Font = Enum.Font.GothamBlack
+nh.TextColor3 = Color3.fromRGB(0,200,255)
+nh.TextTransparency = 1
+nh.ZIndex = 10
+
+-- GLOW
+local glow1 = nh:Clone()
+glow1.Parent = logo
+glow1.TextTransparency = 0.7
+glow1.ZIndex = 9
+local glow2 = nh:Clone()
+glow2.Parent = logo
+glow2.TextTransparency = 0.85
+glow2.ZIndex = 8
+
+-- TEXT NOIR HUB
+local title = Instance.new("TextLabel", logo)
+title.Size = UDim2.new(1,0,0.25,0)
+title.Position = UDim2.new(0,0,0.6,0)
+title.BackgroundTransparency = 1
+title.Text = "NOIR HUB"
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.new(1,1,1)
+title.TextTransparency = 1
+
+-- PARTICLES
+local particles = {}
+for i=1,30 do
+    local p = Instance.new("Frame", bg)
+    p.Size = UDim2.new(0,4,0,4)
+    p.Position = UDim2.new(math.random(),0,math.random(),0)
+    p.BackgroundColor3 = Color3.fromRGB(0,200,255)
+    p.BackgroundTransparency = 0.6
+    p.BorderSizePixel = 0
+    table.insert(particles,p)
+end
+
+-- FADE IN TEXT
+TweenService:Create(nh, TweenInfo.new(1), {TextTransparency = 0}):Play()
+TweenService:Create(title, TweenInfo.new(1), {TextTransparency = 0}):Play()
+
+-- ANIMATION
+local baseSize = 260
+RunService.RenderStepped:Connect(function()
+    local pulse = math.sin(tick()*2)*10
+    nh.Size = UDim2.new(0,140 + pulse,0,140 + pulse)
+    nh.Rotation += 0.1
+    glow1.Rotation = nh.Rotation
+    glow2.Rotation = nh.Rotation
+
+    local zoom = 1 + math.sin(tick()*1.5)*0.03
+    logo.Size = UDim2.new(0,baseSize*zoom,0,baseSize*zoom)
+
+    halo1.Size = UDim2.new(0,baseSize + pulse,0,baseSize + pulse)
+    halo2.Size = UDim2.new(0,baseSize - 40 + pulse,0,baseSize - 40 + pulse)
+end)
+
+-- Hàm callback khi intro kết thúc
+local function onIntroFinished()
+    if _G.IntroCallback then
+        _G.IntroCallback()
+    end
+end
+
+-- Chạy intro + fade out
+task.spawn(function()
+    task.wait(3) -- thời gian hiển thị intro
+    local fadeTime = 2
+    TweenService:Create(bg, TweenInfo.new(fadeTime), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(nh, TweenInfo.new(fadeTime), {TextTransparency = 1}):Play()
+    TweenService:Create(title, TweenInfo.new(fadeTime), {TextTransparency = 1}):Play()
+    TweenService:Create(halo1, TweenInfo.new(fadeTime), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(halo2, TweenInfo.new(fadeTime), {BackgroundTransparency = 1}):Play()
+    for _,p in pairs(particles) do
+        TweenService:Create(p, TweenInfo.new(fadeTime), {BackgroundTransparency = 1}):Play()
+    end
+    TweenService:Create(blur, TweenInfo.new(fadeTime), {Size = 0}):Play()
+    task.wait(fadeTime+0.5)
+    gui:Destroy()
+    blur:Destroy()
+    onIntroFinished()
+end)
