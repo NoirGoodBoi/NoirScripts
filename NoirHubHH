@@ -19,6 +19,7 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
+
 local MainTab = Window:CreateTab("Main", "home")
 
 MainTab:CreateSection("Server")
@@ -192,6 +193,7 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local mouse = player:GetMouse()
+local UserInputService = game:GetService("UserInputService")
 
 local PlayerTab = Window:CreateTab("Player", "user")
 
@@ -477,6 +479,192 @@ PlayerTab:CreateSlider({
     CurrentValue = 5,
     Callback = function(v)
         dashLength = v
+    end
+})
+
+local RANGE = 20
+local BEHIND_DISTANCE = 3
+local SIDE_DISTANCE = 6
+local DASH_TIME = 0.25
+
+local dashUI = nil
+
+local function getClosestTarget()
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    local root = char.HumanoidRootPart
+    local camera = workspace.CurrentCamera
+
+    local bestTarget, bestScore = nil, math.huge
+
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj ~= char then
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            local hrp = obj:FindFirstChild("HumanoidRootPart")
+
+            if hum and hrp and hum.Health > 0 then
+                local dist = (hrp.Position - root.Position).Magnitude
+                if dist <= RANGE then
+                    local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
+
+                    if onScreen then
+                        local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+                        local screenDist = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+
+                        local score = screenDist + dist * 2
+
+                        if score < bestScore then
+                            bestScore = score
+                            bestTarget = hrp
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return bestTarget
+end
+
+local function isBehind(targetRoot, myRoot)
+    local forward = targetRoot.CFrame.LookVector
+    local toMe = (myRoot.Position - targetRoot.Position).Unit
+    return forward:Dot(toMe) < -0.6
+end
+
+local function dash(root, target)
+    local startPos = root.Position
+    local look = target.CFrame.LookVector
+    local predict = target.Position + (target.Velocity or Vector3.zero) * 0.15
+
+    local endPos
+    local midPos = nil
+
+    if isBehind(target, root) then
+        endPos = predict - look * BEHIND_DISTANCE
+    else
+        local right = target.CFrame.RightVector
+        local sideDir = (math.random(0,1)==0) and right or -right
+
+        midPos = predict + sideDir * SIDE_DISTANCE
+        endPos = predict - look * BEHIND_DISTANCE
+    end
+
+    local t = 0
+    local conn
+
+    conn = RunService.RenderStepped:Connect(function(dt)
+        t += dt / DASH_TIME
+        if t >= 1 then
+            conn:Disconnect()
+            root.CFrame = CFrame.new(endPos)
+            return
+        end
+
+        local pos
+
+        if midPos then
+            local p1 = startPos:Lerp(midPos, t)
+            local p2 = midPos:Lerp(endPos, t)
+            pos = p1:Lerp(p2, t)
+        else
+            pos = startPos:Lerp(endPos, t)
+        end
+
+        root.CFrame = CFrame.new(pos)
+    end)
+end
+
+local function createDashUI()
+    if dashUI then return end
+
+    local gui = Instance.new("ScreenGui", game.CoreGui)
+    dashUI = gui
+
+    local btn = Instance.new("TextButton", gui)
+    btn.Size = UDim2.new(0,120,0,50)
+    btn.Position = UDim2.new(0.8,0,0.7,0)
+    btn.Text = "⚡ DASH"
+    btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.TextScaled = true
+
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,15)
+
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = Color3.fromRGB(0,200,255)
+    stroke.Thickness = 2
+
+    local lockBtn = Instance.new("TextButton", btn)
+    lockBtn.Size = UDim2.new(0,20,0,20)
+    lockBtn.Position = UDim2.new(1,-22,0,2)
+    lockBtn.Text = "🔓"
+    lockBtn.BackgroundTransparency = 1
+    lockBtn.TextScaled = true
+
+    local locked = false
+
+    lockBtn.MouseButton1Click:Connect(function()
+        locked = not locked
+        lockBtn.Text = locked and "🔒" or "🔓"
+    end)
+
+    local dragging, dragStart, startPos
+
+    btn.InputBegan:Connect(function(input)
+        if locked then return end
+        if input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = btn.Position
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and not locked and input.UserInputType == Enum.UserInputType.Touch then
+            local delta = input.Position - dragStart
+            btn.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    btn.MouseButton1Click:Connect(function()
+        local char = LocalPlayer.Character
+        if not char then return end
+
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if not root then return end
+
+        local target = getClosestTarget()
+        if not target then return end
+
+        dash(root, target)
+    end)
+end
+
+local function removeDashUI()
+    if dashUI then
+        dashUI:Destroy()
+        dashUI = nil
+    end
+end
+
+PlayerTab:CreateToggle({
+    Name = "Curve Dash/ Side Dash",
+    CurrentValue = false,
+    Callback = function(val)
+        if val then createDashUI() else removeDashUI() end
     end
 })
 
