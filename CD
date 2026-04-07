@@ -1,0 +1,256 @@
+-- CDash Script (MAIN)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- ===== CONFIG =====
+local RANGE = 30
+local BEHIND_DISTANCE = 4.5
+local DASH_TIME = 0.4
+
+-- ===== TARGET =====
+local function getClosestTarget()
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    local root = char.HumanoidRootPart
+    local camera = workspace.CurrentCamera
+
+    local bestTarget, bestScore = nil, math.huge
+
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj ~= char then
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            local hrp = obj:FindFirstChild("HumanoidRootPart")
+
+            if hum and hrp and hum.Health > 0 then
+                local dist = (hrp.Position - root.Position).Magnitude
+                if dist <= RANGE then
+                    local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
+
+                    if onScreen then
+                        local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+                        local screenDist = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+
+                        local score = screenDist + dist * 2
+
+                        if score < bestScore then
+                            bestScore = score
+                            bestTarget = hrp
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return bestTarget
+end
+
+local function isBehind(targetRoot, myRoot)
+    local forward = targetRoot.CFrame.LookVector
+    local toMe = (myRoot.Position - targetRoot.Position).Unit
+    return forward:Dot(toMe) < -0.6
+end
+
+-- ===== TRAIL =====
+local function createRainbowTrail(root)
+    local att0 = Instance.new("Attachment", root)
+    local att1 = Instance.new("Attachment", root)
+
+    att0.Position = Vector3.new(0, 0.5, 0)
+    att1.Position = Vector3.new(0, -0.5, 0)
+
+    local trail = Instance.new("Trail")
+    trail.Attachment0 = att0
+    trail.Attachment1 = att1
+    trail.Lifetime = 0.3
+    trail.MinLength = 0.1
+    trail.FaceCamera = true
+
+    trail.WidthScale = NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 0.8),
+        NumberSequenceKeypoint.new(1, 0)
+    }
+
+    trail.Parent = root
+
+    local hue = 0
+    local conn
+
+    conn = RunService.RenderStepped:Connect(function(dt)
+        if not trail or not trail.Parent then
+            if conn then conn:Disconnect() end
+            return
+        end
+
+        hue += dt * 2
+
+        local function c(o)
+            return Color3.fromHSV((hue + o) % 1, 1, 1)
+        end
+
+        trail.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, c(0)),
+            ColorSequenceKeypoint.new(0.2, c(0.2)),
+            ColorSequenceKeypoint.new(0.4, c(0.4)),
+            ColorSequenceKeypoint.new(0.6, c(0.6)),
+            ColorSequenceKeypoint.new(0.8, c(0.8)),
+            ColorSequenceKeypoint.new(1, c(1))
+        }
+    end)
+
+    return trail, att0, att1, conn
+end
+
+-- ===== DASH =====
+local function dash(root, target)
+    local trail, att0, att1, trailConn = createRainbowTrail(root)
+
+    local startPos = root.Position
+    local look = target.CFrame.LookVector
+    local predict = target.Position + (target.Velocity or Vector3.zero) * 0.2
+
+    local endPos
+    local midPos = nil
+
+    if isBehind(target, root) then
+        endPos = predict - look * BEHIND_DISTANCE
+    else
+        local right = target.CFrame.RightVector
+
+        -- Mind V2
+        local vel = target.Velocity
+        local moveDir = Vector3.new(vel.X, 0, vel.Z)
+
+        local sideDir
+
+        if moveDir.Magnitude > 1 then
+            moveDir = moveDir.Unit
+            local dot = right:Dot(moveDir)
+
+            if dot > 0 then
+                sideDir = -right
+            else
+                sideDir = right
+            end
+        else
+            sideDir = (math.random(0,1)==0) and right or -right
+        end
+
+        local curve = math.random(15, 20)
+
+        midPos = predict + sideDir * curve
+        endPos = predict - look * BEHIND_DISTANCE
+    end
+
+    local t = 0
+    local conn
+
+    conn = RunService.RenderStepped:Connect(function(dt)
+        t += dt / DASH_TIME
+
+        if t >= 1 then
+            conn:Disconnect()
+
+            task.delay(0.3, function()
+                if trail then trail:Destroy() end
+                if att0 then att0:Destroy() end
+                if att1 then att1:Destroy() end
+                if trailConn then trailConn:Disconnect() end
+            end)
+
+            root.CFrame = CFrame.new(endPos)
+            return
+        end
+
+        local smoothT = t * t * (3 - 2 * t)
+
+        local pos
+        if midPos then
+            local p1 = startPos:Lerp(midPos, smoothT)
+            local p2 = midPos:Lerp(endPos, smoothT)
+            pos = p1:Lerp(p2, smoothT)
+        else
+            pos = startPos:Lerp(endPos, smoothT)
+        end
+
+        root.CFrame = CFrame.new(pos)
+    end)
+end
+
+-- ===== UI =====
+local gui = Instance.new("ScreenGui", game.CoreGui)
+_G.CDashUI = gui
+
+local btn = Instance.new("TextButton", gui)
+btn.Size = UDim2.new(0,120,0,50)
+btn.Position = UDim2.new(0.8,0,0.7,0)
+btn.Text = " CDash"
+btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+btn.TextColor3 = Color3.fromRGB(255,255,255)
+btn.TextScaled = true
+
+Instance.new("UICorner", btn).CornerRadius = UDim.new(0,15)
+
+local stroke = Instance.new("UIStroke", btn)
+stroke.Color = Color3.fromRGB(0,200,255)
+stroke.Thickness = 2
+
+local lockBtn = Instance.new("TextButton", btn)
+lockBtn.Size = UDim2.new(0,20,0,20)
+lockBtn.Position = UDim2.new(1,-22,0,2)
+lockBtn.Text = ""
+lockBtn.BackgroundTransparency = 1
+lockBtn.TextScaled = true
+
+local locked = false
+
+lockBtn.MouseButton1Click:Connect(function()
+    locked = not locked
+    lockBtn.Text = locked and "" or ""
+end)
+
+local dragging, dragStart, startPos
+
+btn.InputBegan:Connect(function(input)
+    if locked then return end
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = btn.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and not locked and input.UserInputType == Enum.UserInputType.Touch then
+        local delta = input.Position - dragStart
+        btn.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+btn.MouseButton1Click:Connect(function()
+    local char = LocalPlayer.Character
+    if not char then return end
+
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+    local target = getClosestTarget()
+    if not target then return end
+
+    dash(root, target)
+end)
