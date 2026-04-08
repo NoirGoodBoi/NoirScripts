@@ -1978,7 +1978,7 @@ local DeathCheck = true
 local FOVRadius = 100
 local Smoothness = 0.4
 local AimPart = "Head"
-local Prediction = 0.06
+local Prediction = 0.12
 
 local CoreGui = game:GetService("CoreGui")
 
@@ -2085,7 +2085,7 @@ Taba:CreateSlider({
 Name="Prediction",
 Range={0,0.5},
 Increment=0.01,
-CurrentValue=0.06
+CurrentValue=0.12,
 Callback=function(v)
 Prediction=v
 end
