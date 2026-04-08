@@ -188,7 +188,7 @@ _G.CDashUI = gui
 local btn = Instance.new("TextButton", gui)
 btn.Size = UDim2.new(0,120,0,50)
 btn.Position = UDim2.new(0.8,0,0.7,0)
-btn.Text = " CDash"
+btn.Text = "⚡CDash"
 btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
 btn.TextColor3 = Color3.fromRGB(255,255,255)
 btn.TextScaled = true
@@ -210,7 +210,7 @@ local locked = false
 
 lockBtn.MouseButton1Click:Connect(function()
     locked = not locked
-    lockBtn.Text = locked and "" or ""
+    lockBtn.Text = locked and "🔒" or "🔓"
 end)
 
 local dragging, dragStart, startPos
