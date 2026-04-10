@@ -1978,7 +1978,7 @@ local DeathCheck = true
 local FOVRadius = 100
 local Smoothness = 0.4
 local AimPart = "Head"
-local Prediction = 0.06
+local Prediction = 0.12
 
 local CoreGui = game:GetService("CoreGui")
 
@@ -2085,7 +2085,7 @@ Taba:CreateSlider({
 Name="Prediction",
 Range={0,0.5},
 Increment=0.01,
-CurrentValue=0.06
+CurrentValue=0.12,
 Callback=function(v)
 Prediction=v
 end
@@ -2448,16 +2448,9 @@ ScriptsTab:CreateButton({
 ScriptsTab:CreateSection("Games")
 
 ScriptsTab:CreateButton({
-    Name = "Jujutsu Shenanigans (TBO)",
+    Name = "Jujutsu Shenanigans",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/cool5013/TBO/main/TBOscript"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Jujutsu Shenanigans II",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/Jujutsu-Shenanigans/refs/heads/main/hai.lua"))()
     end,
 })
 
@@ -2483,16 +2476,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "The Strongest Battleground (TThanh Hub)",
+    Name = "The Strongest Battleground",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/kaimm2/TSB/refs/heads/main/Tthanh%20Tong%20Hop%20Tech.txt"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "The Strongest Battleground II",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/TheStrongestBattlegrounds/refs/heads/main/main.lua"))()
     end,
 })
 
@@ -2500,20 +2486,6 @@ ScriptsTab:CreateButton({
     Name = "Evade (Elderwyrm Hub)",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Vraigos/Elderwyrm-Hub-X/refs/heads/main/Scripts/Evade/Overhaul.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Evade",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/evade/refs/heads/main/shabi.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Fish It",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/fishit/refs/heads/main/nice.lua"))()
     end,
 })
 
@@ -2539,51 +2511,16 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Forsaken I",
+    Name = "Forsaken",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Snowt69/SNT-HUB/refs/heads/main/Forsaken"))()
     end,
 })
 
 ScriptsTab:CreateButton({
-    Name = "Forsaken II",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/Forsaken/refs/heads/main/null.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Bite By Night",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/BiteBynight/refs/heads/main/ty.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Rivals",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/rivals/refs/heads/main/loot.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Arsenal",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/Arsenal/refs/heads/main/nah.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Murder Mystery 2 I",
+    Name = "Murder Mystery 2",
     Callback = function()
         loadstring(game:HttpGet("https://pastefy.app/wwfom1bX/raw", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Murder Mystery 2 II",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/mm2/refs/heads/main/bawe.lua", true))()
     end,
 })
 
@@ -2609,16 +2546,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "99 Night In The Forest I",
+    Name = "99 Night In The Forest",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/loader.lua", true))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "99 Night In The Forest II",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/99Nights/refs/heads/main/shiba.lua"))()
     end,
 })
 
@@ -2630,16 +2560,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Deadrail (Ringta)",
+    Name = "Deadrail",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/erewe23/deadrailsring.github.io/refs/heads/main/ringta.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Deadrail II",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/Dead-Rails/refs/heads/main/hola.lua"))()
     end,
 })
 
@@ -2651,65 +2574,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Blox Fruit",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/bloxfruit/refs/heads/main/main.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Sailor Piece",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/SailorPiece/refs/heads/main/heh.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Steal A Brainrot",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/stealabrainrot/refs/heads/main/shiba.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Blade Ball I",
+    Name = "Blade Ball",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/AgentX771/ArgonHubX/main/Loader.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Blade Ball II",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/test2/refs/heads/main/bladeball.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Adopt Me",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/testadp/main/adpt.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Bee Swarm Simulator",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/BeeSwarmSimulator/refs/heads/main/loot.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Brookhaven RP",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/Brookhaven-RP/refs/heads/main/wsp.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Aura-Ascension",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/Aura-Ascension/refs/heads/main/looot.lua"))()
     end,
 })
 
@@ -2728,16 +2595,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Doors I",
+    Name = "Doors",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Iliankytb/Iliankytb/main/NewBestDoorsScriptIliankytb"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Doors II",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptjame/Doors/refs/heads/main/wwsp.lua"))()
     end,
 })
 
