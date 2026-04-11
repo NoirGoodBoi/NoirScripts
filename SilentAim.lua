@@ -4,6 +4,7 @@ local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
+-- GUI
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 pcall(function() gui.Parent = gethui() end)
@@ -94,11 +95,36 @@ highlight.FillTransparency = 1
 highlight.OutlineColor = Color3.fromRGB(60,255,120)
 highlight.Parent = gui
 
+-- STATE
 local enabled = false
 local target = nil
 local aimMode = "Character"
 local minimized = false
 
+-- ===== TEAM CHECK =====
+local function isSameTeam(model)
+	local plr = Players:GetPlayerFromCharacter(model)
+
+	if plr then
+		if LP.Team and plr.Team and plr.Team == LP.Team then
+			return true
+		end
+	end
+
+	local npcTeam = model:FindFirstChild("Team")
+	if npcTeam and LP.Team and npcTeam.Value == LP.Team then
+		return true
+	end
+
+	local npcColor = model:FindFirstChild("TeamColor")
+	if npcColor and LP.TeamColor and npcColor.Value == LP.TeamColor then
+		return true
+	end
+
+	return false
+end
+
+-- ===== CHARACTER CHECK =====
 local function aliveChar(plr)
 	local c = plr.Character
 	if not c then return end
@@ -109,30 +135,71 @@ local function aliveChar(plr)
 	end
 end
 
+-- ===== TARGET SYSTEM =====
 local function getTarget()
 	local center = Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)
-	local closest = nil
-	local shortest = 120
 
+	local closestPlayer = nil
+	local closestNPC = nil
+
+	local playerDist = 120
+	local npcDist = 120
+
+	-- PLAYER PRIORITY
 	for _,p in pairs(Players:GetPlayers()) do
 		if p ~= LP then
-			local c,hum,hrp = aliveChar(p)
-			if c then
-				local pos,visible = Camera:WorldToViewportPoint(hrp.Position)
-				if visible then
-					local dist = (Vector2.new(pos.X,pos.Y)-center).Magnitude
-					if dist < shortest then
-						shortest = dist
-						closest = p
+			local c = p.Character
+			if c and not isSameTeam(c) then
+				local hum = c:FindFirstChildOfClass("Humanoid")
+				local hrp = c:FindFirstChild("HumanoidRootPart")
+
+				if hum and hrp and hum.Health > 0 then
+					local pos,visible = Camera:WorldToViewportPoint(hrp.Position)
+					if visible then
+						local dist = (Vector2.new(pos.X,pos.Y)-center).Magnitude
+						if dist < playerDist then
+							playerDist = dist
+							closestPlayer = {
+								model = c,
+								hum = hum,
+								hrp = hrp
+							}
+						end
 					end
 				end
 			end
 		end
 	end
 
-	return closest
+	if closestPlayer then return closestPlayer end
+
+	-- NPC FALLBACK
+	for _,v in pairs(workspace:GetDescendants()) do
+		if v:IsA("Model") and v ~= LP.Character and not isSameTeam(v) then
+			local hum = v:FindFirstChildOfClass("Humanoid")
+			local hrp = v:FindFirstChild("HumanoidRootPart")
+
+			if hum and hrp and hum.Health > 0 then
+				local pos,visible = Camera:WorldToViewportPoint(hrp.Position)
+				if visible then
+					local dist = (Vector2.new(pos.X,pos.Y)-center).Magnitude
+					if dist < npcDist then
+						npcDist = dist
+						closestNPC = {
+							model = v,
+							hum = hum,
+							hrp = hrp
+						}
+					end
+				end
+			end
+		end
+	end
+
+	return closestNPC
 end
 
+-- UI EVENTS
 dropdown.MouseButton1Click:Connect(function()
 	list.Visible = not list.Visible
 end)
@@ -174,55 +241,48 @@ toggle.MouseButton1Click:Connect(function()
 
 	if enabled then
 		target = getTarget()
-
 		if target then
 			toggle.Text = "On"
 			toggle.BackgroundColor3 = Color3.fromRGB(60,170,90)
 		else
 			enabled = false
 		end
-
 	else
 		toggle.Text = "Off"
 		toggle.BackgroundColor3 = Color3.fromRGB(80,80,85)
 		target = nil
 		highlight.Adornee = nil
 
-		local c,h = aliveChar(LP)
-		if h then
-			h.AutoRotate = true
-		end
+		local _,h = aliveChar(LP)
+		if h then h.AutoRotate = true end
 	end
 end)
 
+-- MAIN LOOP
 RunService.RenderStepped:Connect(function()
+	if not enabled or not target then return end
 
-	if not enabled then return end
-	if not target then return end
+	local tc = target.model
+	local th = target.hum
+	local thrp = target.hrp
 
-	local tc,th,thrp = aliveChar(target)
-	local myc,myh,myhrp = aliveChar(LP)
-
-	if not tc then
+	local _,myh,myhrp = aliveChar(LP)
+	if not tc or not th or th.Health <= 0 then
 		target = nil
 		enabled = false
 		toggle.Text = "Off"
 		highlight.Adornee = nil
 
-		if myh then
-			myh.AutoRotate = true
-		end
-
+		if myh then myh.AutoRotate = true end
 		return
 	end
 
-	highlight.Adornee = target.Character
+	highlight.Adornee = tc
 
 	local myPos = myhrp.Position
 	local targetPos = thrp.Position
 
 	if aimMode == "Character" then
-
 		myh.AutoRotate = false
 		myhrp.CFrame = CFrame.new(
 			myPos,
@@ -230,14 +290,12 @@ RunService.RenderStepped:Connect(function()
 		)
 
 	elseif aimMode == "Camera" then
-
 		Camera.CFrame = CFrame.new(
 			Camera.CFrame.Position,
 			targetPos
 		)
 
 	elseif aimMode == "Both" then
-
 		myh.AutoRotate = false
 		myhrp.CFrame = CFrame.new(
 			myPos,
@@ -245,17 +303,9 @@ RunService.RenderStepped:Connect(function()
 		)
 
 		local camPos = Camera.CFrame.Position
-		local offset =
-			myhrp.CFrame.RightVector * 3 +
-			Vector3.new(0,2,0)
-
+		local offset = myhrp.CFrame.RightVector * 3 + Vector3.new(0,2,0)
 		local newPos = camPos + offset
 
-		Camera.CFrame = CFrame.new(
-			newPos,
-			targetPos
-		)
-
+		Camera.CFrame = CFrame.new(newPos, targetPos)
 	end
-
 end)
