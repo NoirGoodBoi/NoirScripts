@@ -2389,13 +2389,6 @@ GameTab:CreateButton({
     end,
 })
 
-GameTab:CreateButton({
-    Name = "Uma Racing",
-    Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/UPDATE-1.0-Uma-Racing-Simple-And-Open-Source-63947"))()
-    end,
-})
-
 GameTab:CreateSection("Nextbot")
 
 GameTab:CreateButton({
@@ -2530,6 +2523,15 @@ GameTab:CreateButton({
     end,
 })
 
+GameTab:CreateSection("Racer")
+
+GameTab:CreateButton({
+    Name = "Uma Racing",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/UPDATE-1.0-Uma-Racing-Simple-And-Open-Source-63947"))()
+    end,
+})
+
 GameTab:CreateSection("RNG")
 
 GameTab:CreateButton({
@@ -2633,7 +2635,7 @@ GameTab:CreateButton({
     end,
 })
 
-GameTab:CreateSection("Misc.")
+GameTab:CreateSection("Story.")
 
 GameTab:CreateButton({
     Name = "Break In 1",
@@ -2648,6 +2650,8 @@ GameTab:CreateButton({
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EnesXVC/Breakin2/main/script"))()
     end,
 })
+
+GameTab:CreateSection("i dont know :)")
 
 GameTab:CreateButton({
     Name = "Fling Things And People (key: ...)",
@@ -2706,13 +2710,6 @@ ScriptsTab:CreateButton({
     Name = "Hitbox Extender (aimbot)",
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/AAPVdev/scripts/refs/heads/main/UI_LimbExtender.lua'))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "SilentAimNPC by Noir",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAimNPC"))()
     end,
 })
 
