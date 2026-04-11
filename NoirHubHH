@@ -1322,6 +1322,15 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
+local espSettings = {
+    UseOutline = false,
+    UseFill = false,
+    Color = Color3.fromRGB(0,255,0),
+    ShowHitbox = false,
+    HitboxTransparency = 0.5,
+    HitboxColor = Color3.fromRGB(255,0,0),
+}
+
 local function getESPColor(plr)
     if plr.Team ~= nil and LocalPlayer.Team ~= nil then
         if plr.Team == LocalPlayer.Team then
@@ -1330,378 +1339,324 @@ local function getESPColor(plr)
             return Color3.fromRGB(255, 0, 0)
         end
     end
-
     return espSettings.Color
 end
 
 local ESP = Window:CreateTab("Visual","eye")
 
 ESP:CreateSection("Player")
+
 local espEnabled = false
 local espConnections = {}
 local espInstances = {}
 local nameMode = 2
 
-local espSettings = {
-UseOutline = false,
-UseFill = false,
-Color = Color3.fromRGB(0,255,0),
-ShowHitbox = false,
-HitboxTransparency = 0.5,
-HitboxColor = Color3.fromRGB(255,0,0),
-}
-
 local function getName(plr)
-
-if nameMode == 1 then
-return "@"..plr.Name
-elseif nameMode == 2 then
-return plr.DisplayName
-else
-return plr.DisplayName.." (@"..plr.Name..")"
-end
-
+    if nameMode == 1 then
+        return "@"..plr.Name
+    elseif nameMode == 2 then
+        return plr.DisplayName
+    else
+        return plr.DisplayName.." (@"..plr.Name..")"
+    end
 end
 
 local function removeAllESP()
+    for _,gui in pairs(espInstances) do
+        if gui and gui.Parent then
+            gui:Destroy()
+        end
+    end
 
-for _,gui in pairs(espInstances) do
-if gui and gui.Parent then
-gui:Destroy()
-end
-end
+    for _,conn in pairs(espConnections) do
+        conn:Disconnect()
+    end
 
-for _,conn in pairs(espConnections) do
-conn:Disconnect()
-end
-
-espInstances = {}
-espConnections = {}
-
+    espInstances = {}
+    espConnections = {}
 end
 
 local function createESP(plr)
+    if plr == LocalPlayer then return end
+    if not plr.Character then return end
 
-if plr == LocalPlayer then return end
-if not plr.Character then return end
+    local head = plr.Character:FindFirstChild("Head")
+    local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
 
-local head = plr.Character:FindFirstChild("Head")
-local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+    if not head or not hrp then return end
 
-if not head or not hrp then return end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NoirESP"
+    billboard.AlwaysOnTop = true
+    billboard.Size = UDim2.new(0,200,0,50)
+    billboard.StudsOffset = Vector3.new(0,2,0)
+    billboard.Parent = head
 
-local billboard = Instance.new("BillboardGui")
-billboard.Name = "NoirESP"
-billboard.AlwaysOnTop = true
-billboard.Size = UDim2.new(0,200,0,50)
-billboard.StudsOffset = Vector3.new(0,2,0)
-billboard.Parent = head
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1,0,1,0)
+    txt.BackgroundTransparency = 1
+    txt.Font = Enum.Font.SourceSansBold
+    txt.TextSize = 14
+    txt.TextStrokeTransparency = 0.5
+    txt.Parent = billboard
 
-local txt = Instance.new("TextLabel")
-txt.Size = UDim2.new(1,0,1,0)
-txt.BackgroundTransparency = 1
-txt.Font = Enum.Font.SourceSansBold
-txt.TextSize = 14
-txt.TextColor3 = Color3.new(1,1,1)
-txt.TextStrokeTransparency = 0.5
-txt.Parent = billboard
+    local conn = RunService.RenderStepped:Connect(function()
 
-local conn = RunService.RenderStepped:Connect(function()
+        if not plr.Character 
+        or not plr.Character:FindFirstChild("HumanoidRootPart") 
+        or not LocalPlayer.Character 
+        or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            txt.Visible = false
+            return
+        end
 
-if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        txt.Visible = true
 
-local dist = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+        local dist = (LocalPlayer.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
 
-txt.Text = getName(plr).." | "..math.floor(dist).."m"
+        txt.Text = getName(plr).." | "..math.floor(dist).."m"
+        txt.TextColor3 = getESPColor(plr)
 
-end
+    end)
 
-end)
-
-table.insert(espInstances,billboard)
-table.insert(espConnections,conn)
-
+    table.insert(espInstances, billboard)
+    table.insert(espConnections, conn)
 end
 
 ESP:CreateToggle({
-Name = "Player ESP",
-CurrentValue = false,
-Callback = function(state)
+    Name = "Player ESP",
+    CurrentValue = false,
+    Callback = function(state)
 
-espEnabled = state
-removeAllESP()
+        espEnabled = state
+        removeAllESP()
 
-if not state then return end
+        if not state then return end
 
-for _,plr in pairs(Players:GetPlayers()) do
+        for _,plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
 
-if plr ~= LocalPlayer then
+                if plr.Character then
+                    createESP(plr)
+                end
 
-if plr.Character then
-createESP(plr)
-end
+                table.insert(espConnections,
+                    plr.CharacterAdded:Connect(function()
+                        if espEnabled then
+                            task.wait(0.5)
+                            createESP(plr)
+                        end
+                    end)
+                )
+            end
+        end
 
-table.insert(espConnections,
-plr.CharacterAdded:Connect(function()
+        table.insert(espConnections,
+            Players.PlayerAdded:Connect(function(plr)
+                plr.CharacterAdded:Connect(function()
+                    if espEnabled then
+                        task.wait(0.5)
+                        createESP(plr)
+                    end
+                end)
+            end)
+        )
 
-if espEnabled then
-task.wait(0.5)
-createESP(plr)
-end
-
-end))
-
-end
-
-end
-
-table.insert(espConnections,
-Players.PlayerAdded:Connect(function(plr)
-
-plr.CharacterAdded:Connect(function()
-
-if espEnabled then
-task.wait(0.5)
-createESP(plr)
-end
-
-end)
-
-end))
-
-end
+    end
 })
 
 ESP:CreateDropdown({
-Name = "ESP Name Mode",
-Options = {"@Username","DisplayName","Display + @Username"},
-CurrentOption = {"Display + @Username"},
-MultipleOptions = false,
-Callback = function(opt)
+    Name = "ESP Name Mode",
+    Options = {"@Username","DisplayName","Display + @Username"},
+    CurrentOption = {"Display + @Username"},
+    MultipleOptions = false,
+    Callback = function(opt)
 
-local o = opt[1]
+        local o = opt[1]
 
-if o == "@Username" then
-nameMode = 1
-elseif o == "DisplayName" then
-nameMode = 2
-else
-nameMode = 3
-end
+        if o == "@Username" then
+            nameMode = 1
+        elseif o == "DisplayName" then
+            nameMode = 2
+        else
+            nameMode = 3
+        end
 
-end
+    end
 })
 
 ESP:CreateSection("Highlight")
 
 local function createHighlight(char)
-
-if char and not char:FindFirstChild("ESPHighlight") then
-
-local h = Instance.new("Highlight")
-h.Name = "ESPHighlight"
-h.Adornee = char
-h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-h.Parent = char
-
-end
-
+    if char and not char:FindFirstChild("ESPHighlight") then
+        local h = Instance.new("Highlight")
+        h.Name = "ESPHighlight"
+        h.Adornee = char
+        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        h.Parent = char
+    end
 end
 
 local function updateHighlight(char)
+    local h = char and char:FindFirstChild("ESPHighlight")
+    if h then
+        local plr = Players:GetPlayerFromCharacter(char)
+        local color = plr and getESPColor(plr) or espSettings.Color
 
-local h = char and char:FindFirstChild("ESPHighlight")
-if h then
-
-h.FillTransparency = espSettings.UseFill and 0.5 or 1
-h.OutlineTransparency = espSettings.UseOutline and 0 or 1
-h.FillColor = espSettings.Color
-h.OutlineColor = espSettings.Color
-
-end
-
+        h.FillTransparency = espSettings.UseFill and 0.5 or 1
+        h.OutlineTransparency = espSettings.UseOutline and 0 or 1
+        h.FillColor = color
+        h.OutlineColor = color
+    end
 end
 
 local function createHitbox(char)
+    local hrp = char:FindFirstChild("HumanoidRootPart")
 
-local hrp = char:FindFirstChild("HumanoidRootPart")
-
-if hrp and not hrp:FindFirstChild("ESPHitbox") then
-
-local box = Instance.new("BoxHandleAdornment")
-box.Name = "ESPHitbox"
-box.Adornee = hrp
-box.Size = hrp.Size * 2
-box.AlwaysOnTop = true
-box.Color3 = espSettings.HitboxColor
-box.Transparency = espSettings.HitboxTransparency
-box.Parent = hrp
-
-end
-
+    if hrp and not hrp:FindFirstChild("ESPHitbox") then
+        local box = Instance.new("BoxHandleAdornment")
+        box.Name = "ESPHitbox"
+        box.Adornee = hrp
+        box.Size = hrp.Size * 2
+        box.AlwaysOnTop = true
+        box.Color3 = espSettings.HitboxColor
+        box.Transparency = espSettings.HitboxTransparency
+        box.Parent = hrp
+    end
 end
 
 local function updateHitbox(char)
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local box = hrp and hrp:FindFirstChild("ESPHitbox")
 
-local hrp = char:FindFirstChild("HumanoidRootPart")
-local box = hrp and hrp:FindFirstChild("ESPHitbox")
+    if box then
+        local plr = Players:GetPlayerFromCharacter(char)
+        local color = plr and getESPColor(plr) or espSettings.HitboxColor
 
-if box then
-
-box.Color3 = espSettings.HitboxColor
-box.Transparency = espSettings.HitboxTransparency
-
-end
-
+        box.Color3 = color
+        box.Transparency = espSettings.HitboxTransparency
+    end
 end
 
 local function applyESP(player)
+    if player.Character then
+        createHighlight(player.Character)
+        updateHighlight(player.Character)
 
-if player.Character then
+        if espSettings.ShowHitbox then
+            createHitbox(player.Character)
+            updateHitbox(player.Character)
+        end
+    end
 
-createHighlight(player.Character)
-updateHighlight(player.Character)
+    player.CharacterAdded:Connect(function(char)
+        task.wait(1)
 
-if espSettings.ShowHitbox then
-createHitbox(player.Character)
-updateHitbox(player.Character)
-end
+        createHighlight(char)
+        updateHighlight(char)
 
-end
-
-player.CharacterAdded:Connect(function(char)
-
-task.wait(1)
-
-createHighlight(char)
-updateHighlight(char)
-
-if espSettings.ShowHitbox then
-createHitbox(char)
-updateHitbox(char)
-end
-
-end)
-
+        if espSettings.ShowHitbox then
+            createHitbox(char)
+            updateHitbox(char)
+        end
+    end)
 end
 
 for _,p in ipairs(Players:GetPlayers()) do
-if p ~= LocalPlayer then
-applyESP(p)
-end
+    if p ~= LocalPlayer then
+        applyESP(p)
+    end
 end
 
 Players.PlayerAdded:Connect(function(p)
-if p ~= LocalPlayer then
-applyESP(p)
-end
+    if p ~= LocalPlayer then
+        applyESP(p)
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    for _,p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            updateHighlight(p.Character)
+            updateHitbox(p.Character)
+        end
+    end
 end)
 
 ESP:CreateToggle({
-Name = "Highlight Outline",
-CurrentValue = false,
-Callback = function(v)
+    Name = "Highlight Outline",
+    CurrentValue = false,
+    Callback = function(v)
+        espSettings.UseOutline = v
 
-espSettings.UseOutline = v
-
-for _,p in ipairs(Players:GetPlayers()) do
-if p.Character then updateHighlight(p.Character) end
-end
-
-end
+        for _,p in ipairs(Players:GetPlayers()) do
+            if p.Character then updateHighlight(p.Character) end
+        end
+    end
 })
 
 ESP:CreateToggle({
-Name = "Highlight Fill",
-CurrentValue = false,
-Callback = function(v)
+    Name = "Highlight Fill",
+    CurrentValue = false,
+    Callback = function(v)
+        espSettings.UseFill = v
 
-espSettings.UseFill = v
-
-for _,p in ipairs(Players:GetPlayers()) do
-if p.Character then updateHighlight(p.Character) end
-end
-
-end
+        for _,p in ipairs(Players:GetPlayers()) do
+            if p.Character then updateHighlight(p.Character) end
+        end
+    end
 })
 
 ESP:CreateColorPicker({
-Name = "Highlight Color",
-Color = espSettings.Color,
-Callback = function(c)
-
-espSettings.Color = c
-
-for _,p in ipairs(Players:GetPlayers()) do
-if p.Character then updateHighlight(p.Character) end
-end
-
-end
+    Name = "Highlight Color (fallback)",
+    Color = espSettings.Color,
+    Callback = function(c)
+        espSettings.Color = c
+    end
 })
 
 ESP:CreateSection("Hitbox")
 
 ESP:CreateToggle({
-Name = "Show Hitbox",
-CurrentValue = false,
-Callback = function(v)
+    Name = "Show Hitbox",
+    CurrentValue = false,
+    Callback = function(v)
+        espSettings.ShowHitbox = v
 
-espSettings.ShowHitbox = v
-
-for _,p in ipairs(Players:GetPlayers()) do
-
-if p.Character then
-
-if v then
-createHitbox(p.Character)
-else
-
-local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-
-if hrp and hrp:FindFirstChild("ESPHitbox") then
-hrp.ESPHitbox:Destroy()
-end
-
-end
-
-end
-
-end
-
-end
+        for _,p in ipairs(Players:GetPlayers()) do
+            if p.Character then
+                if v then
+                    createHitbox(p.Character)
+                else
+                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp and hrp:FindFirstChild("ESPHitbox") then
+                        hrp.ESPHitbox:Destroy()
+                    end
+                end
+            end
+        end
+    end
 })
 
 ESP:CreateColorPicker({
-Name = "Hitbox Color",
-Color = espSettings.HitboxColor,
-Callback = function(c)
-
-espSettings.HitboxColor = c
-
-for _,p in ipairs(Players:GetPlayers()) do
-if p.Character then updateHitbox(p.Character) end
-end
-
-end
+    Name = "Hitbox Color (fallback)",
+    Color = espSettings.HitboxColor,
+    Callback = function(c)
+        espSettings.HitboxColor = c
+    end
 })
 
 ESP:CreateSlider({
-Name = "Hitbox Transparency",
-Range = {0,1},
-Increment = 0.1,
-CurrentValue = espSettings.HitboxTransparency,
-Callback = function(v)
-
-espSettings.HitboxTransparency = v
-
-for _,p in ipairs(Players:GetPlayers()) do
-if p.Character then updateHitbox(p.Character) end
-end
-
-end
+    Name = "Hitbox Transparency",
+    Range = {0,1},
+    Increment = 0.1,
+    CurrentValue = espSettings.HitboxTransparency,
+    Callback = function(v)
+        espSettings.HitboxTransparency = v
+    end
 })
 
-ESP:CreateSection("Misc.")
+ESP:CreateSection("X-Ray")
 
 local xrayEnabled = false
 local saved = {}
@@ -1759,13 +1714,14 @@ ESP:CreateSlider({
     end
 })
 
-local showHealth = false
+ESP:CreateSection("Tracer")
+
 local showTracer = false
 local tracerDistance = 2000
 
-local ESPs = {}
 local Tracers = {}
 local Boxes = {}
+local HealthBars = {}
 
 local function getESPColor(plr)
     if plr.Team and LocalPlayer.Team then
@@ -1787,47 +1743,18 @@ local function createBoxESP(player)
     Boxes[player] = box
 end
 
-local function createHealthESP(player)
-    if ESPs[player] then return end
+local function createHealthBar(player)
+    if HealthBars[player] then return end
 
-    local char = player.Character
-    if not char then return end
+    local bar = Drawing.new("Square")
+    bar.Filled = true
+    bar.Thickness = 1
+    bar.Visible = false
 
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    if not hrp or not humanoid then return end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Size = UDim2.new(0, 60, 0, 8)
-    billboard.Adornee = hrp
-    billboard.AlwaysOnTop = true
-
-    local bg = Instance.new("Frame")
-    bg.Size = UDim2.new(1,0,1,0)
-    bg.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    bg.BorderSizePixel = 0
-    bg.Parent = billboard
-
-    local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(1,0,1,0)
-    bar.BorderSizePixel = 0
-    bar.Parent = bg
-
-    billboard.Parent = LocalPlayer.PlayerGui
-
-    ESPs[player] = {
-        humanoid = humanoid,
-        bar = bar,
-        billboard = billboard
-    }
+    HealthBars[player] = bar
 end
 
 local function removeESP(player)
-    if ESPs[player] then
-        ESPs[player].billboard:Destroy()
-        ESPs[player] = nil
-    end
-
     if Tracers[player] then
         Tracers[player]:Remove()
         Tracers[player] = nil
@@ -1837,21 +1764,18 @@ local function removeESP(player)
         Boxes[player]:Remove()
         Boxes[player] = nil
     end
+
+    if HealthBars[player] then
+        HealthBars[player]:Remove()
+        HealthBars[player] = nil
+    end
 end
 
 local function setupPlayer(plr)
     if plr == LocalPlayer then return end
 
-    plr.CharacterAdded:Connect(function()
-        task.wait(1)
-        createHealthESP(plr)
-        createBoxESP(plr)
-    end)
-
-    if plr.Character then
-        createHealthESP(plr)
-        createBoxESP(plr)
-    end
+    createBoxESP(plr)
+    createHealthBar(plr)
 end
 
 for _, plr in pairs(Players:GetPlayers()) do
@@ -1874,29 +1798,13 @@ RunService.RenderStepped:Connect(function()
         if player ~= LocalPlayer and player.Character then
             
             local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-            if not hrp then continue end
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+
+            if not hrp or not humanoid then continue end
 
             local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
             local dist = (myHRP.Position - hrp.Position).Magnitude
             local color = getESPColor(player)
-
-            local data = ESPs[player]
-            if data and data.humanoid then
-                if showHealth and dist <= 2000 then
-                    local hp = data.humanoid.Health / data.humanoid.MaxHealth
-
-                    data.bar.Size = UDim2.new(hp,0,1,0)
-                    data.bar.BackgroundColor3 = Color3.fromRGB(
-                        255 - (hp * 255),
-                        hp * 255,
-                        0
-                    )
-
-                    data.billboard.Enabled = true
-                else
-                    data.billboard.Enabled = false
-                end
-            end
 
             if showTracer and onScreen and dist <= tracerDistance then
                 
@@ -1920,9 +1828,33 @@ RunService.RenderStepped:Connect(function()
                 local box = Boxes[player]
                 if box then
                     box.Size = Vector2.new(size, size * 1.4)
-                    box.Position = Vector2.new(pos.X - size/2, pos.Y - size)
+                    box.Position = Vector2.new(pos.X - size/2, pos.Y - size + 5) -- hạ xuống
                     box.Color = color
                     box.Visible = true
+                end
+
+                createHealthBar(player)
+
+                local hb = HealthBars[player]
+                if hb then
+                    local hp = humanoid.Health / humanoid.MaxHealth
+
+                    local fullHeight = size * 1.4
+                    local barHeight = fullHeight * hp
+
+                    hb.Size = Vector2.new(3, barHeight)
+                    hb.Position = Vector2.new(
+                        pos.X - size/2 - 6,
+                        pos.Y - size + 5 + (fullHeight - barHeight)
+                    )
+
+                    hb.Color = Color3.fromRGB(
+                        255 - (hp * 255),
+                        hp * 255,
+                        0
+                    )
+
+                    hb.Visible = true
                 end
 
             else
@@ -1933,19 +1865,15 @@ RunService.RenderStepped:Connect(function()
                 if Boxes[player] then
                     Boxes[player].Visible = false
                 end
+
+                if HealthBars[player] then
+                    HealthBars[player].Visible = false
+                end
             end
 
         end
     end
 end)
-
-ESP:CreateToggle({
-    Name = "Health Bar [ error! ]",
-    CurrentValue = false,
-    Callback = function(v)
-        showHealth = v
-    end
-})
 
 ESP:CreateToggle({
     Name = "Tracer",
@@ -1978,7 +1906,9 @@ local DeathCheck = true
 local FOVRadius = 100
 local Smoothness = 0.4
 local AimPart = "Head"
-local Prediction = 0.12
+local Prediction = 0
+local OffsetX = 0
+local OffsetY = 0
 
 local CoreGui = game:GetService("CoreGui")
 
@@ -2003,7 +1933,6 @@ stroke.Color = Color3.fromRGB(0,255,0)
 local corner = Instance.new("UICorner",FOVCircle)
 corner.CornerRadius = UDim.new(1,0)
 
--- TAB
 local Taba = Window:CreateTab("Aimbot","target")
 
 Taba:CreateSection("Aimbot")
@@ -2101,12 +2030,32 @@ AimPart=v
 end
 })
 
+Taba:CreateSection("Crosshair Offset")
+
+Taba:CreateSlider({
+Name="Offset X",
+Range={-300,300},
+Increment=1,
+CurrentValue=0,
+Callback=function(v)
+OffsetX = v
+end
+})
+
+Taba:CreateSlider({
+Name="Offset Y",
+Range={-300,300},
+Increment=1,
+CurrentValue=0,
+Callback=function(v)
+OffsetY = v
+end
+})
+
 local NPCList={}
 
 local function RefreshNPCs()
-
 NPCList={}
-
 for _,obj in pairs(workspace:GetDescendants()) do
 if obj:IsA("Model") then
 if obj:FindFirstChildOfClass("Humanoid") and obj:FindFirstChild("HumanoidRootPart") then
@@ -2116,7 +2065,6 @@ end
 end
 end
 end
-
 end
 
 RefreshNPCs()
@@ -2151,7 +2099,6 @@ return
 end
 
 local part=hrp
-
 if AimPart=="Head" and char:FindFirstChild("Head") then
 part=char.Head
 end
@@ -2159,13 +2106,16 @@ end
 local pos,onScreen=Camera:WorldToViewportPoint(part.Position)
 if not onScreen then return end
 
-local center=Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)
+local center = Vector2.new(
+Camera.ViewportSize.X/2 + OffsetX,
+Camera.ViewportSize.Y/2 + OffsetY
+)
+
 local dist=(Vector2.new(pos.X,pos.Y)-center).Magnitude
 
 if dist<=shortest then
 
 if WallCheck then
-
 local origin=Camera.CFrame.Position
 local direction=(part.Position-origin).Unit*1000
 
@@ -2179,12 +2129,9 @@ if result and result.Instance and result.Instance:IsDescendantOf(char) then
 closest=part
 shortest=dist
 end
-
 else
-
 closest=part
 shortest=dist
-
 end
 
 end
@@ -2206,10 +2153,14 @@ end
 end
 
 return closest
-
 end
 
 RunService.RenderStepped:Connect(function()
+
+FOVCircle.Position = UDim2.new(
+0, Camera.ViewportSize.X/2 + OffsetX,
+0, Camera.ViewportSize.Y/2 + OffsetY
+)
 
 if not (AimbotEnabled or NPCAimbotEnabled) then return end
 if not Camera then return end
@@ -2217,17 +2168,25 @@ if not Camera then return end
 local part=GetClosestTarget()
 
 if part then
-
 local targetPos=part.Position
 local velocity=part.AssemblyLinearVelocity or Vector3.new()
-
 targetPos=targetPos+(velocity*Prediction)
 
-local camPos=Camera.CFrame.Position
-local newCF=CFrame.new(camPos,targetPos)
+local camPos = Camera.CFrame.Position
 
-Camera.CFrame=Camera.CFrame:Lerp(newCF,math.clamp(Smoothness,0,1))
+local offsetScreen = Vector2.new(
+Camera.ViewportSize.X/2 + OffsetX,
+Camera.ViewportSize.Y/2 + OffsetY
+)
 
+local ray = Camera:ViewportPointToRay(offsetScreen.X, offsetScreen.Y)
+local offsetCF = CFrame.new(camPos, camPos + ray.Direction * 1000)
+
+local targetCF = CFrame.new(camPos, targetPos)
+
+local finalCF = offsetCF:Lerp(targetCF, math.clamp(Smoothness,0,1))
+
+Camera.CFrame = finalCF
 end
 
 end)
