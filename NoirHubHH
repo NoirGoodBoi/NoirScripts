@@ -1907,8 +1907,6 @@ local FOVRadius = 100
 local Smoothness = 0.4
 local AimPart = "Head"
 local Prediction = 0
-local OffsetX = 0
-local OffsetY = 0
 
 local CoreGui = game:GetService("CoreGui")
 
@@ -2027,28 +2025,6 @@ CurrentOption="Head",
 MultipleOptions=false,
 Callback=function(v)
 AimPart=v
-end
-})
-
-Taba:CreateSection("Crosshair Offset")
-
-Taba:CreateSlider({
-Name="Offset X",
-Range={-300,300},
-Increment=1,
-CurrentValue=0,
-Callback=function(v)
-OffsetX = v
-end
-})
-
-Taba:CreateSlider({
-Name="Offset Y",
-Range={-300,300},
-Increment=1,
-CurrentValue=0,
-Callback=function(v)
-OffsetY = v
 end
 })
 
