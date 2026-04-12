@@ -193,6 +193,7 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local mouse = player:GetMouse()
+local LP = Players.LocalPlayer
 
 local PlayerTab = Window:CreateTab("Player", "user")
 
@@ -703,6 +704,32 @@ PlayerTab:CreateButton({
     end,
 })
 
+--hip
+local currentHip = 0
+
+local function applyHip()
+    local char = LP.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.HipHeight = currentHip
+    end
+end
+
+LP.CharacterAdded:Connect(function()
+    task.wait(1)
+    applyHip()
+end)
+
+MainTab:CreateSlider({
+    Name = "Hip Height",
+    Range = {-10, 300},
+    Increment = 1,
+    CurrentValue = 0,
+    Callback = function(v)
+        currentHip = v
+        applyHip()
+    end
+})
+
 PlayerTab:CreateSection("Map")
 
 --minimap
@@ -1114,6 +1141,8 @@ local oldClockTime = Lighting.ClockTime
 local oldFogEnd = Lighting.FogEnd
 local oldGlobalShadows = Lighting.GlobalShadows
 local fullbrightValue = 5
+local disabledEffects = {}
+local connections = {}
 
 FPSTab:CreateToggle({
     Name = "Fullbright",
@@ -1252,60 +1281,57 @@ FPSTab:CreateToggle({
 
 local ultraDisabled = {}
 
+---
+local function disableEffects(obj)
+    if obj:IsA("ParticleEmitter")
+    or obj:IsA("Trail")
+    or obj:IsA("Smoke")
+    or obj:IsA("Fire")
+    or obj:IsA("Sparkles") then
+
+        disabledEffects[obj] = obj.Enabled
+        obj.Enabled = false
+
+    elseif obj:IsA("PostEffect") then
+        disabledEffects[obj] = obj.Enabled
+        obj.Enabled = false
+    end
+end
+
+local function enableEffects()
+    for obj, state in pairs(disabledEffects) do
+        if obj and obj.Parent then
+            pcall(function()
+                obj.Enabled = state
+            end)
+        end
+    end
+    disabledEffects = {}
+end
+
 FPSTab:CreateToggle({
     Name = "Ultra Boost FPS",
     CurrentValue = false,
     Callback = function(v)
 
         if v then
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
             Lighting.GlobalShadows = false
 
-            workspace.Terrain.WaterWaveSize = 0
-            workspace.Terrain.WaterWaveSpeed = 0
-            workspace.Terrain.WaterReflectance = 0
-            workspace.Terrain.WaterTransparency = 1
-
-            for _, obj in pairs(game:GetDescendants()) do
-
-                if obj:IsA("BasePart") then
-                    ultraDisabled[obj] = obj.Material
-                    obj.Material = Enum.Material.SmoothPlastic
-
-                elseif obj:IsA("Texture") or obj:IsA("Decal") then
-                    ultraDisabled[obj] = obj.Transparency
-                    obj.Transparency = 1
-
-                elseif obj:IsA("ParticleEmitter")
-                or obj:IsA("Trail")
-                or obj:IsA("Smoke")
-                or obj:IsA("Fire")
-                or obj:IsA("Sparkles") then
-
-                    ultraDisabled[obj] = obj.Enabled
-                    obj.Enabled = false
-                end
+            for _, obj in ipairs(game:GetDescendants()) do
+                disableEffects(obj)
             end
+
+            connections.added = game.DescendantAdded:Connect(disableEffects)
 
         else
             Lighting.GlobalShadows = true
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
 
-            for obj, val in pairs(ultraDisabled) do
-                pcall(function()
-                    if obj then
-                        if obj:IsA("BasePart") then
-                            obj.Material = val
-                        elseif obj:IsA("Texture") or obj:IsA("Decal") then
-                            obj.Transparency = val
-                        else
-                            obj.Enabled = val
-                        end
-                    end
-                end)
+            enableEffects()
+
+            if connections.added then
+                connections.added:Disconnect()
+                connections.added = nil
             end
-
-            ultraDisabled = {}
         end
     end,
 })
@@ -2220,8 +2246,8 @@ LimbTab:CreateSection("Settings")
 
 LimbTab:CreateSlider({
     Name = "Limb Size",
-    Range = {5,100},
-    Increment = 0.5,
+    Range = {5,500},
+    Increment = 1,
     CurrentValue = le:Get("LIMB_SIZE"),
     Callback = function(v)
         le:Set("LIMB_SIZE", v)
