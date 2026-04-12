@@ -11,14 +11,14 @@ local Window = Rayfield:CreateWindow({
 
 Rayfield:Notify({
     Title = "Loaded...!",
-    Content = "Wait a second!"
-    Duration = 3,
+    Content = "Loading successful ! 🤫🧏",
+    Duration = 2,
     Image = 4483362458
 })
 
 Rayfield:Notify({
-    Title = "Load Successed!",
-    Content = "Thanks to use Script by me & Binbeo :)))"
+    Title = "Welcome !",
+    Content = "Thanks to use Script by me & Binbeo 👻🤡",
     Duration = 5,
     Image = 4483362458
 })
