@@ -3,10 +3,24 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Rayfield:CreateWindow({
     Name = "Noir Hub",
     LoadingTitle = "Loading NoirHub...",
-    LoadingSubtitle = "Script By Noir_Adono",
+    LoadingSubtitle = "Script By Noir & Binbeo",
     ConfigurationSaving = {
         Enabled = false,
     }
+})
+
+Rayfield:Notify({
+    Title = "Loaded...!",
+    Content = "Wait a second!"
+    Duration = 3,
+    Image = 4483362458
+})
+
+Rayfield:Notify({
+    Title = "Load Successed!",
+    Content = "Thanks to use Script by me & Binbeo :)))"
+    Duration = 5,
+    Image = 4483362458
 })
 
 local Players = game:GetService("Players")
@@ -193,7 +207,6 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local mouse = player:GetMouse()
-local LP = Players.LocalPlayer
 
 local PlayerTab = Window:CreateTab("Player", "user")
 
@@ -702,32 +715,6 @@ PlayerTab:CreateButton({
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/Shift_Lock"))()
     end,
-})
-
---hip
-local currentHip = 0
-
-local function applyHip()
-    local char = LP.Character
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.HipHeight = currentHip
-    end
-end
-
-LP.CharacterAdded:Connect(function()
-    task.wait(1)
-    applyHip()
-end)
-
-MainTab:CreateSlider({
-    Name = "Hip Height",
-    Range = {-10, 300},
-    Increment = 1,
-    CurrentValue = 0,
-    Callback = function(v)
-        currentHip = v
-        applyHip()
-    end
 })
 
 PlayerTab:CreateSection("Map")
