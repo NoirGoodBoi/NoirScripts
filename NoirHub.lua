@@ -1,4 +1,4 @@
--- ===== FINAL INTRO UPDATED =====
+
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
