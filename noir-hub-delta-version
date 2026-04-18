@@ -225,6 +225,7 @@ PlayerTab:CreateToggle({
 local dashLength = 5
 local dashTime = 0.05
 local yBoost = 20
+local dashByCamera = false
 
 local dashGui = nil
 
@@ -239,11 +240,18 @@ local function Dash()
     bg.MaxTorque = Vector3.new(0, 1e5, 0)
     bg.CFrame = hrp.CFrame
 
-    local look = hrp.CFrame.LookVector
-    local dir = Vector3.new(look.X, 0, look.Z).Unit
+    local dir
+
+    if dashByCamera then
+        local cam = workspace.CurrentCamera
+        local look = cam.CFrame.LookVector
+        dir = Vector3.new(look.X, 0, look.Z).Unit
+    else
+        local look = hrp.CFrame.LookVector
+        dir = Vector3.new(look.X, 0, look.Z).Unit
+    end
 
     local speed = dashLength / dashTime
-
     bv.Velocity = (dir * speed) + Vector3.new(0, yBoost, 0)
 
     bv.Parent = hrp
@@ -256,7 +264,9 @@ local function Dash()
 end
 
 local function createDashButton()
-    if dashGui then return end
+    if game.CoreGui:FindFirstChild("NoirDashUI") then
+        game.CoreGui.NoirDashUI:Destroy()
+    end
 
     dashGui = Instance.new("ScreenGui")
     dashGui.Name = "NoirDashUI"
@@ -274,9 +284,7 @@ local function createDashButton()
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = btn
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
 
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 2
@@ -286,9 +294,7 @@ local function createDashButton()
     btn.Active = true
     btn.Draggable = true
 
-    btn.MouseButton1Click:Connect(function()
-        Dash()
-    end)
+    btn.MouseButton1Click:Connect(Dash)
 end
 
 local function removeDashButton()
@@ -307,6 +313,14 @@ PlayerTab:CreateToggle({
         else
             removeDashButton()
         end
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "Dash Theo Camera",
+    CurrentValue = false,
+    Callback = function(v)
+        dashByCamera = v
     end
 })
 
