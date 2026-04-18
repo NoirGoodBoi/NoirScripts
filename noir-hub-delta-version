@@ -775,20 +775,43 @@ PlayerTab:CreateToggle({
     end
 })
 
+--hip
 local floatEnabled = false
-local floatHeight = 0
+local floatHeight = 20
 
-PlayerTab:CreateToggle({
-    Name = "Float (Hip Height)",
+local bp = nil
+
+Tab:CreateToggle({
+    Name = "Platform Float",
     CurrentValue = false,
     Callback = function(Value)
         floatEnabled = Value
+
+        local char = plr.Character
+        if char then
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+
+            if hrp then
+                if Value then
+                    bp = Instance.new("BodyPosition")
+                    bp.MaxForce = Vector3.new(0, math.huge, 0)
+                    bp.P = 10000
+                    bp.D = 1000
+                    bp.Parent = hrp
+                else
+                    if bp then
+                        bp:Destroy()
+                        bp = nil
+                    end
+                end
+            end
+        end
     end
 })
 
-PlayerTab:CreateSlider({
+Tab:CreateSlider({
     Name = "Float Height",
-    Range = {0, 50},
+    Range = {0, 300},
     Increment = 1,
     CurrentValue = 0,
     Callback = function(Value)
@@ -798,26 +821,16 @@ PlayerTab:CreateSlider({
 
 task.spawn(function()
     while task.wait() do
-        if floatEnabled then
+        if floatEnabled and bp then
             local char = plr.Character
             if char then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.HipHeight = floatHeight
-                end
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    while task.wait() do
-        if not floatEnabled then
-            local char = plr.Character
-            if char then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.HipHeight = 0
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    bp.Position = Vector3.new(
+                        hrp.Position.X,
+                        floatHeight,
+                        hrp.Position.Z
+                    )
                 end
             end
         end
