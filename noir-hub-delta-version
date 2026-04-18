@@ -245,14 +245,19 @@ local function Dash()
     if dashByCamera then
         local cam = workspace.CurrentCamera
         local look = cam.CFrame.LookVector
-        dir = Vector3.new(look.X, 0, look.Z).Unit
+        dir = look.Unit
     else
         local look = hrp.CFrame.LookVector
         dir = Vector3.new(look.X, 0, look.Z).Unit
     end
 
     local speed = dashLength / dashTime
-    bv.Velocity = (dir * speed) + Vector3.new(0, yBoost, 0)
+
+    if dashByCamera then
+        bv.Velocity = dir * speed
+    else
+        bv.Velocity = (dir * speed) + Vector3.new(0, yBoost, 0)
+    end
 
     bv.Parent = hrp
     bg.Parent = hrp
