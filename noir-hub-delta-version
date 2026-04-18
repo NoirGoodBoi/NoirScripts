@@ -24,6 +24,180 @@ Rayfield:Notify({
 })
 
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local Stats = game:GetService("Stats")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+local MainTab = Window:CreateTab("Main", "home")
+
+MainTab:CreateSection("Server")
+
+local AllIDs = {}
+local foundAnything = ""
+
+MainTab:CreateButton({
+   Name = "Rejoin Server",
+   Callback = function()
+      TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+   end,
+})
+
+MainTab:CreateButton({
+   Name = "Server Hop",
+   Callback = function()
+
+      local Site
+      if foundAnything == "" then
+         Site = HttpService:JSONDecode(game:HttpGet(
+            "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+      else
+         Site = HttpService:JSONDecode(game:HttpGet(
+            "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100&cursor="..foundAnything))
+      end
+
+      if Site.nextPageCursor then
+         foundAnything = Site.nextPageCursor
+      end
+
+      for i,v in pairs(Site.data) do
+         local ID = tostring(v.id)
+         if tonumber(v.playing) < tonumber(v.maxPlayers) and ID ~= game.JobId then
+
+            local Possible = true
+            for _,Existing in pairs(AllIDs) do
+               if ID == Existing then
+                  Possible = false
+               end
+            end
+
+            if Possible then
+               table.insert(AllIDs, ID)
+               TeleportService:TeleportToPlaceInstance(game.PlaceId, ID)
+               break
+            end
+
+         end
+      end
+
+   end,
+})
+
+MainTab:CreateButton({
+   Name = "Join Server Small",
+   Callback = function()
+
+      local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
+      local servers = HttpService:JSONDecode(game:HttpGet(url))
+
+      local lowest = nil
+      local players = math.huge
+
+      for _,v in pairs(servers.data) do
+         if v.playing < players and v.id ~= game.JobId then
+            players = v.playing
+            lowest = v.id
+         end
+      end
+
+      if lowest then
+         TeleportService:TeleportToPlaceInstance(game.PlaceId, lowest)
+      end
+
+   end,
+})
+
+MainTab:CreateButton({
+   Name = "Join Server Fast",
+   Callback = function()
+
+      local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"
+      local servers = HttpService:JSONDecode(game:HttpGet(url))
+
+      for _,v in pairs(servers.data) do
+         if v.playing < v.maxPlayers and v.id ~= game.JobId then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, v.id)
+            break
+         end
+      end
+
+   end,
+})
+
+MainTab:CreateSection("Information")
+
+MainTab:CreateLabel("Username: " .. LocalPlayer.Name)
+MainTab:CreateLabel("DisplayName: " .. LocalPlayer.DisplayName)
+MainTab:CreateLabel("UserId: " .. LocalPlayer.UserId)
+MainTab:CreateLabel("Account Age: " .. LocalPlayer.AccountAge .. " days")
+
+local PingLabel = MainTab:CreateLabel("Ping: ...")
+RunService.Heartbeat:Connect(function()
+    PingLabel:Set("Ping: " .. tostring(math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())) .. " ms")
+end)
+
+local joinTime = tick()
+local TimePlayedLabel = MainTab:CreateLabel("Time Played: 0s")
+RunService.RenderStepped:Connect(function()
+    local elapsed = math.floor(tick() - joinTime)
+    local mins = math.floor(elapsed / 60)
+    local secs = elapsed % 60
+    TimePlayedLabel:Set(string.format("Time Played: %d min %02d s", mins, secs))
+end)
+
+local PosLabel = MainTab:CreateLabel("Position: ...")
+RunService.RenderStepped:Connect(function()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local pos = hrp.Position
+        PosLabel:Set(string.format("Position: %.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z))
+    else
+        PosLabel:Set("Position: -")
+    end
+end)
+
+pcall(function()
+    local info = MarketplaceService:GetProductInfo(game.PlaceId)
+    MainTab:CreateLabel("Game Name: " .. info.Name)
+end)
+
+MainTab:CreateLabel("PlaceId: " .. game.PlaceId)
+MainTab:CreateLabel("GameId: " .. game.GameId)
+MainTab:CreateLabel("JobId: " .. game.JobId)
+MainTab:CreateLabel("Game Version: " .. game.PlaceVersion)
+
+local PlayerCountLabel = MainTab:CreateLabel("Players: " .. #Players:GetPlayers())
+
+Players.PlayerAdded:Connect(function()
+    PlayerCountLabel:Set("Players: " .. #Players:GetPlayers())
+end)
+
+Players.PlayerRemoving:Connect(function()
+    PlayerCountLabel:Set("Players: " .. #Players:GetPlayers())
+end)
+
+MainTab:CreateSection("Player")
+
+MainTab:CreateLabel("Players:")
+
+local function AddPlayerLabels()
+    for _, player in pairs(Players:GetPlayers()) do
+        MainTab:CreateLabel(player.DisplayName .. " [@" .. player.Name .. "]")
+    end
+end
+
+AddPlayerLabels()
+
+Players.PlayerAdded:Connect(function(player)
+    MainTab:CreateLabel(player.DisplayName .. " [@" .. player.Name .. "]")
+end)
+
+local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
