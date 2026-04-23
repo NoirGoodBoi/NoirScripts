@@ -775,56 +775,6 @@ PlayerTab:CreateToggle({
     end
 })
 
---hip
-local floatEnabled = false
-local floatHeight = 0
-
-PlayerTab:CreateToggle({
-    Name = "Float (Hip Height)",
-    CurrentValue = false,
-    Callback = function(Value)
-        floatEnabled = Value
-    end
-})
-
-PlayerTab:CreateSlider({
-    Name = "Float Height",
-    Range = {0, 300},
-    Increment = 1,
-    CurrentValue = 0,
-    Callback = function(Value)
-        floatHeight = Value
-    end
-})
-
-task.spawn(function()
-    while task.wait() do
-        if floatEnabled then
-            local char = plr.Character
-            if char then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.HipHeight = floatHeight
-                end
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    while task.wait() do
-        if not floatEnabled then
-            local char = plr.Character
-            if char then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.HipHeight = 0
-                end
-            end
-        end
-    end
-end)
-
 PlayerTab:CreateSection("Camera")
 
 -- Third Person Force Toggle
