@@ -12,7 +12,7 @@ if not gui.Parent then gui.Parent = LP.PlayerGui end
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0,165,0,75)
-frame.Position = UDim2.new(0,40,0,180)
+frame.Position = UDim2.new(0,20,0,20)
 frame.BackgroundColor3 = Color3.fromRGB(25,25,28)
 frame.BorderSizePixel = 0
 frame.Active = true
