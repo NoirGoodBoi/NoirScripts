@@ -7,8 +7,8 @@ local LocalPlayer = Players.LocalPlayer
 
 -- ===== CONFIG =====
 local RANGE = 30
-local BEHIND_DISTANCE = 4.5
-local DASH_TIME = 0.4
+local BEHIND_DISTANCE = 3.5
+local DASH_TIME = 0.25
 
 -- ===== TARGET =====
 local function getClosestTarget()
@@ -188,7 +188,7 @@ _G.CDashUI = gui
 local btn = Instance.new("TextButton", gui)
 btn.Size = UDim2.new(0,120,0,50)
 btn.Position = UDim2.new(0.8,0,0.7,0)
-btn.Text = "⚡CDash"
+btn.Text = "⚡Curve"
 btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
 btn.TextColor3 = Color3.fromRGB(255,255,255)
 btn.TextScaled = true
