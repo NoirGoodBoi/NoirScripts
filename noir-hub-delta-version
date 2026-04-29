@@ -849,6 +849,164 @@ PlayerTab:CreateSlider({
     end
 })
 
+PlayerTab:CreateSection("Performance")
+
+local statsGui = nil
+local fpsFrame = nil
+local memFrame = nil
+
+local function destroyStats()
+    if statsGui then
+        statsGui:Destroy()
+        statsGui = nil
+    end
+end
+
+local function getPingColor(ping)
+    if ping <= 50 then
+        return Color3.fromRGB(0, 255, 0)
+    elseif ping <= 100 then
+        return Color3.fromRGB(255, 255, 0)
+    elseif ping <= 200 then
+        return Color3.fromRGB(255, 165, 0)
+    else
+        return Color3.fromRGB(255, 0, 0)
+    end
+end
+
+local function getFPSColor(fps)
+    if fps >= 60 then
+        return Color3.fromRGB(0, 255, 0)
+    elseif fps >= 30 then
+        return Color3.fromRGB(255, 255, 0)
+    else
+        return Color3.fromRGB(255, 0, 0)
+    end
+end
+
+local function getMemoryColor(mem)
+    if mem <= 1000 then
+        return Color3.fromRGB(0, 255, 0)
+    elseif mem <= 2000 then
+        return Color3.fromRGB(255, 255, 0)
+    else
+        return Color3.fromRGB(255, 0, 0)
+    end
+end
+
+local function createStats()
+    destroyStats()
+
+    statsGui = Instance.new("ScreenGui")
+    statsGui.Name = "NoirStats"
+    statsGui.IgnoreGuiInset = true
+    statsGui.ResetOnSpawn = false
+    statsGui.Parent = game:GetService("CoreGui")
+
+    fpsFrame = Instance.new("TextLabel")
+    fpsFrame.Size = UDim2.new(0, 180, 0, 28)
+    fpsFrame.Position = UDim2.new(0, 10, 0, 60)
+    fpsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    fpsFrame.BackgroundTransparency = 0.5
+    fpsFrame.TextColor3 = Color3.fromRGB(255, 255, 255)
+    fpsFrame.Font = Enum.Font.SourceSansBold
+    fpsFrame.TextSize = 14
+    fpsFrame.Text = ""
+    fpsFrame.Visible = false
+    fpsFrame.Parent = statsGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = fpsFrame
+
+    memFrame = Instance.new("TextLabel")
+    memFrame.Size = UDim2.new(0, 180, 0, 28)
+    memFrame.Position = UDim2.new(0, 10, 0, 93)
+    memFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    memFrame.BackgroundTransparency = 0.5
+    memFrame.TextColor3 = Color3.fromRGB(255, 255, 255)
+    memFrame.Font = Enum.Font.SourceSansBold
+    memFrame.TextSize = 14
+    memFrame.Text = ""
+    memFrame.Visible = false
+    memFrame.Parent = statsGui
+
+    local corner2 = Instance.new("UICorner")
+    corner2.CornerRadius = UDim.new(0, 6)
+    corner2.Parent = memFrame
+
+    local stats = game:GetService("Stats")
+    local lastUpdate = 0
+
+    game:GetService("RunService").RenderStepped:Connect(function(dt)
+        if fpsFrame and fpsFrame.Visible then
+            local pingStat = stats.Network.ServerStatsItem:FindFirstChild("Data Ping")
+            local ping = pingStat and math.floor(pingStat:GetValue()) or 0
+            local fps = math.floor(1 / dt)
+            
+            local pingColor = getPingColor(ping)
+            local fpsColor = getFPSColor(fps)
+            
+            fpsFrame.Text = string.format("Ping: <font color='rgb(%d,%d,%d)'>%dms</font> | FPS: <font color='rgb(%d,%d,%d)'>%d</font>",
+                pingColor.R * 255, pingColor.G * 255, pingColor.B * 255, ping,
+                fpsColor.R * 255, fpsColor.G * 255, fpsColor.B * 255, fps)
+            fpsFrame.RichText = true
+        end
+
+        if memFrame and memFrame.Visible then
+            local mem = math.floor(stats:GetTotalMemoryUsageMb())
+            local memColor = getMemoryColor(mem)
+            
+            memFrame.Text = string.format("Memory: <font color='rgb(%d,%d,%d)'>%d MB</font>",
+                memColor.R * 255, memColor.G * 255, memColor.B * 255, mem)
+            memFrame.RichText = true
+        end
+    end)
+end
+
+local fpsToggle = false
+local memToggle = false
+
+PlayerTab:CreateToggle({
+    Name = "Show FPS & Ping",
+    CurrentValue = false,
+    Callback = function(v)
+        fpsToggle = v
+
+        if not statsGui then
+            createStats()
+        end
+
+        if fpsFrame then
+            fpsFrame.Visible = v
+        end
+
+        if not fpsToggle and not memToggle then
+            destroyStats()
+        end
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "Show Memory",
+    CurrentValue = false,
+    Callback = function(v)
+        memToggle = v
+
+        if not statsGui then
+            createStats()
+        end
+
+        if memFrame then
+            memFrame.Visible = v
+        end
+
+        if not fpsToggle and not memToggle then
+            destroyStats()
+        end
+    end
+})
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
