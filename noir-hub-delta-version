@@ -654,7 +654,7 @@ end
 PlayerTab:CreateSection("Protection")
 
 PlayerTab:CreateToggle({
-    Name = "Anti Fling (Nâng cấp)",
+    Name = "Anti Fling",
     CurrentValue = false,
     Callback = function(v) Toggles.AntiFling = v end
 })
@@ -738,13 +738,13 @@ RunService.Heartbeat:Connect(function()
                 local isFling = false
                 local reason = ""
                 
-                if deltaVel > 150 then
+                if deltaVel > 1000 then
                     isFling = true
                     reason = "đột biến vận tốc"
-                elseif velJump > 100 and currentVel.Magnitude > 80 then
+                elseif velJump > 1000 and currentVel.Magnitude > 80 then
                     isFling = true
                     reason = "tăng tốc đột ngột"
-                elseif posJump > 40 and dt < 0.1 then
+                elseif posJump > 100 and dt < 0.1 then
                     isFling = true
                     reason = "dịch chuyển đột ngột"
                 end
