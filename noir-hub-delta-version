@@ -32,6 +32,7 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local mouse = player:GetMouse()
+local VirtualUser = game:GetService("VirtualUser")
 
 local PlayerTab = Window:CreateTab("Player", "user")
 
@@ -561,220 +562,6 @@ PlayerTab:CreateButton({
     end,
 })
 
-PlayerTab:CreateSection("Map")
-
---minimap
-local MapGui, MapFrame, InfoPanel = nil, nil, nil
-local MapObjects = {}
-local MapEnabled = false
-local RenderConnection
-
-local Zoom = 4
-local SmoothYaw = 0
-local CurrentTarget = nil
-local TPMode = false
-
-local function createMap()
-    MapGui = Instance.new("ScreenGui")
-    MapGui.IgnoreGuiInset = true
-    MapGui.ResetOnSpawn = false
-    MapGui.Parent = game.CoreGui
-
-    MapFrame = Instance.new("Frame")
-    MapFrame.Size = UDim2.new(0,150,0,150)
-    MapFrame.Position = UDim2.new(1,-160,0,10)
-    MapFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    MapFrame.BackgroundTransparency = 0.4
-    MapFrame.BorderSizePixel = 0
-    MapFrame.ClipsDescendants = true
-    MapFrame.Parent = MapGui
-    Instance.new("UICorner", MapFrame)
-
-    local tpBtn = Instance.new("TextButton")
-    tpBtn.Size = UDim2.new(0,150,0,30)
-    tpBtn.Position = UDim2.new(1,-160,0,165)
-    tpBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    tpBtn.TextColor3 = Color3.new(1,1,1)
-    tpBtn.Text = "TP: OFF"
-    tpBtn.Parent = MapGui
-    Instance.new("UICorner", tpBtn)
-
-    tpBtn.MouseButton1Click:Connect(function()
-        TPMode = not TPMode
-        tpBtn.Text = TPMode and "TP: ON" or "TP: OFF"
-    end)
-
-    InfoPanel = Instance.new("Frame")
-    InfoPanel.Size = UDim2.new(0,170,0,95)
-    InfoPanel.Position = UDim2.new(1,-340,0,10)
-    InfoPanel.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    InfoPanel.BackgroundTransparency = 0.3
-    InfoPanel.Visible = false
-    InfoPanel.Parent = MapGui
-    Instance.new("UICorner", InfoPanel)
-
-    local nameLabel = Instance.new("TextLabel")
-    nameLabel.Name = "PlayerName"
-    nameLabel.Size = UDim2.new(1,0,0.4,0)
-    nameLabel.BackgroundTransparency = 1
-    nameLabel.TextColor3 = Color3.new(1,1,1)
-    nameLabel.TextScaled = true
-    nameLabel.Parent = InfoPanel
-
-    local hp = Instance.new("TextLabel")
-    hp.Name = "HP"
-    hp.Size = UDim2.new(1,0,0.3,0)
-    hp.Position = UDim2.new(0,0,0.4,0)
-    hp.BackgroundTransparency = 1
-    hp.TextColor3 = Color3.new(0,1,0)
-    hp.TextScaled = true
-    hp.Parent = InfoPanel
-
-    local dist = Instance.new("TextLabel")
-    dist.Name = "Distance"
-    dist.Size = UDim2.new(1,0,0.3,0)
-    dist.Position = UDim2.new(0,0,0.7,0)
-    dist.BackgroundTransparency = 1
-    dist.TextColor3 = Color3.new(1,1,0)
-    dist.TextScaled = true
-    dist.Parent = InfoPanel
-end
-
-local function createDot(player)
-    if MapObjects[player] then return end
-
-    local dot = Instance.new("ImageButton")
-    dot.Size = UDim2.new(0,20,0,20)
-    dot.AnchorPoint = Vector2.new(0.5,0.5)
-    dot.BackgroundTransparency = 1
-    dot.Parent = MapFrame
-
-    dot.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=150&height=150&format=png"
-    Instance.new("UICorner", dot)
-
-    dot.MouseButton1Click:Connect(function()
-        if TPMode then
-            local myChar = LocalPlayer.Character
-            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
-
-            local char = player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-            if myHRP and hrp then
-                myHRP.CFrame = hrp.CFrame + Vector3.new(0,3,0)
-            end
-            return
-        end
-
-        if CurrentTarget == player then
-            CurrentTarget = nil
-            InfoPanel.Visible = false
-        else
-            CurrentTarget = player
-            InfoPanel.Visible = true
-            InfoPanel.PlayerName.Text = player.DisplayName.." (@"..player.Name..")"
-        end
-    end)
-
-    MapObjects[player] = dot
-end
-
-local function updateDots(dt)
-    if not MapEnabled then return end
-
-    local char = LocalPlayer.Character
-    local center = char and char:FindFirstChild("HumanoidRootPart")
-    if not center then return end
-
-    local targetYaw = math.atan2(Camera.CFrame.LookVector.Z, Camera.CFrame.LookVector.X)
-    SmoothYaw = SmoothYaw + (targetYaw - SmoothYaw) * math.clamp(dt * 8, 0, 1)
-
-    for player, dot in pairs(MapObjects) do
-        local char = player.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-        if hrp then
-            local offset = (hrp.Position - center.Position) / Zoom
-
-            local rx = offset.X*math.cos(SmoothYaw) + offset.Z*math.sin(SmoothYaw)
-            local rz = -offset.X*math.sin(SmoothYaw) + offset.Z*math.cos(SmoothYaw)
-
-            if math.abs(rx) <= 70 and math.abs(rz) <= 70 then
-                dot.Visible = true
-                dot.Position = UDim2.new(0.5, rx, 0.5, rz)
-            else
-                dot.Visible = false
-            end
-        else
-            dot.Visible = false
-        end
-
-        if player == CurrentTarget then
-            dot.ImageColor3 = Color3.fromRGB(255,100,100)
-        else
-            dot.ImageColor3 = Color3.fromRGB(255,255,255)
-        end
-    end
-
-    if CurrentTarget and InfoPanel.Visible then
-        local myChar = LocalPlayer.Character
-        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
-
-        local char = CurrentTarget.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            InfoPanel.HP.Text = "HP: "..math.floor(hum.Health)
-        else
-            InfoPanel.HP.Text = "HP: N/A"
-        end
-        if myHRP and hrp then
-            local dist = (hrp.Position - myHRP.Position).Magnitude
-            InfoPanel.Distance.Text = "Dist: "..math.floor(dist).."m"
-        else
-            InfoPanel.Distance.Text = "Dist: N/A"
-        end
-    end
-end
-
-local function initMap()
-    createMap()
-    for _,p in pairs(Players:GetPlayers()) do
-        createDot(p)
-    end
-    Players.PlayerAdded:Connect(createDot)
-    Players.PlayerRemoving:Connect(function(p)
-        if MapObjects[p] then
-            MapObjects[p]:Destroy()
-            MapObjects[p] = nil
-        end
-
-        if CurrentTarget == p then
-            CurrentTarget = nil
-            InfoPanel.Visible = false
-        end
-    end)
-    RenderConnection = RunService.RenderStepped:Connect(updateDots)
-end
-
-PlayerTab:CreateToggle({
-    Name = "MiniMap",
-    CurrentValue = false,
-    Callback = function(state)
-        MapEnabled = state
-        if state then
-            if not MapGui then initMap() end
-            MapGui.Enabled = true
-        else
-            if MapGui then MapGui.Enabled = false end
-            if RenderConnection then
-                RenderConnection:Disconnect()
-                RenderConnection = nil
-            end
-        end
-    end
-})
-
 PlayerTab:CreateSection("Camera")
 
 -- Third Person Force Toggle
@@ -814,42 +601,225 @@ PlayerTab:CreateButton({
     end
 })
 
---Lock cam
-local locked = false
-local savedCFrame
-local conn
+local Toggles = {
+    AntiFling = false,
+    AntiVoid = false,
+    SafePosition = false,
+    SmartAntiTP = false,
+    AntiStun = false
+}
+
+local LastSafePos = nil
+local AntiAFKActive = false
+
+local AntiFlingData = {
+    LastVelocity = nil,
+    LastPosition = nil,
+    LastTime = nil,
+    FlingCount = 0,
+    LastAlertTime = 0
+}
+
+local function getChar()
+    return LocalPlayer.Character
+end
+
+local function getHum()
+    local char = getChar()
+    return char and char:FindFirstChildOfClass("Humanoid")
+end
+
+local function getHRP()
+    local char = getChar()
+    return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+local function fixCharacter(hum, root)
+    if not hum or not root then return end
+
+    if hum.PlatformStand 
+    or hum:GetState() == Enum.HumanoidStateType.Physics
+    or hum:GetState() == Enum.HumanoidStateType.Ragdoll then
+        
+        hum.PlatformStand = false
+        hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+        root.AssemblyAngularVelocity = Vector3.zero
+
+        if root.Orientation.Z > 45 or root.Orientation.Z < -45 then
+            root.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(0, 0, 1))
+        end
+    end
+end
+
+PlayerTab:CreateSection("Protection")
 
 PlayerTab:CreateToggle({
-    Name = "Lock Camera",
+    Name = "Anti Fling (Nâng cấp)",
     CurrentValue = false,
-    Callback = function(Value)
-        locked = Value
-        if locked then
-            savedCFrame = Camera.CFrame
-            conn = RunService.RenderStepped:Connect(function()
-                if locked and savedCFrame then
-                    Camera.CFrame = savedCFrame
-                end
-            end)
-        else
-            if conn then conn:Disconnect() conn = nil end
-            savedCFrame = nil
-        end
-    end,
+    Callback = function(v) Toggles.AntiFling = v end
 })
 
---FOV
-PlayerTab:CreateSlider({
-    Name = "Field Of View",
-    Range = {30,120},
-    Increment = 1,
-    CurrentValue = Camera.FieldOfView,
-    Callback = function(v)
-        Camera.FieldOfView = v
+PlayerTab:CreateToggle({
+    Name = "Anti Stun",
+    CurrentValue = false,
+    Callback = function(v) Toggles.AntiStun = v end
+})
+
+PlayerTab:CreateButton({
+    Name = "Anti AFK",
+    Callback = function()
+        if AntiAFKActive then return end
+        AntiAFKActive = true
+        
+        local success, err = pcall(function()
+            for _, v in pairs(getconnections(LocalPlayer.Idled)) do
+                v:Disable()
+            end
+            
+            task.spawn(function()
+                while AntiAFKActive do
+                    task.wait(30)
+                    pcall(function()
+                        if VirtualUser then
+                            VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                            task.wait(0.1)
+                            VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                        end
+                    end)
+                end
+            end)
+        end)
+        
+        if success then
+            Rayfield:Notify({Title = "Anti AFK", Content = "Đã bật chống AFK", Duration = 2})
+        else
+            AntiAFKActive = false
+            Rayfield:Notify({Title = "Lỗi", Content = "Chống AFK thất bại", Duration = 2})
+        end
     end
 })
 
-PlayerTab:CreateSection("Performance")
+PlayerTab:CreateToggle({
+    Name = "Anti Void",
+    CurrentValue = false,
+    Callback = function(v) Toggles.AntiVoid = v end
+})
+
+PlayerTab:CreateToggle({
+    Name = "Safe Position (Chống kéo)",
+    CurrentValue = false,
+    Callback = function(v) Toggles.SafePosition = v end
+})
+
+PlayerTab:CreateToggle({
+    Name = "Smart Anti TP",
+    CurrentValue = false,
+    Callback = function(v) Toggles.SmartAntiTP = v end
+})
+
+RunService.Heartbeat:Connect(function()
+    local char = getChar()
+    local hum = getHum()
+    local hrp = getHRP()
+    if not char or not hum or not hrp then return end
+
+    if Toggles.AntiFling then
+        local now = tick()
+        local currentVel = hrp.AssemblyLinearVelocity
+        local currentPos = hrp.Position
+        
+        if AntiFlingData.LastVelocity and AntiFlingData.LastTime then
+            local dt = now - AntiFlingData.LastTime
+            if dt > 0 and dt < 0.2 then  -- Chỉ check trong khoảng ngắn
+                local deltaVel = (currentVel - AntiFlingData.LastVelocity).Magnitude
+                local velJump = currentVel.Magnitude - AntiFlingData.LastVelocity.Magnitude
+                local posJump = (currentPos - AntiFlingData.LastPosition).Magnitude
+                
+                local isFling = false
+                local reason = ""
+                
+                if deltaVel > 150 then
+                    isFling = true
+                    reason = "đột biến vận tốc"
+                elseif velJump > 100 and currentVel.Magnitude > 80 then
+                    isFling = true
+                    reason = "tăng tốc đột ngột"
+                elseif posJump > 40 and dt < 0.1 then
+                    isFling = true
+                    reason = "dịch chuyển đột ngột"
+                end
+                
+                if isFling then
+                    hrp.AssemblyLinearVelocity = Vector3.zero
+                    hrp.AssemblyAngularVelocity = Vector3.zero
+                    hrp.CFrame = CFrame.new(AntiFlingData.LastPosition or currentPos)
+                    
+                    hrp.Anchored = true
+                    task.spawn(function()
+                        task.wait(0.1)
+                        if hrp then hrp.Anchored = false end
+                    end)
+                    
+                    AntiFlingData.FlingCount = AntiFlingData.FlingCount + 1
+                    if now - AntiFlingData.LastAlertTime > 3 then
+                        AntiFlingData.LastAlertTime = now
+                        Rayfield:Notify({
+                            Title = "⚠️ Anti Fling",
+                            Content = "Đã chặn fling! (" .. reason .. ")",
+                            Duration = 1.5
+                        })
+                    end
+                    
+                    currentVel = Vector3.zero
+                end
+            end
+        end
+        
+        AntiFlingData.LastVelocity = currentVel
+        AntiFlingData.LastPosition = currentPos
+        AntiFlingData.LastTime = now
+    end
+
+    if Toggles.AntiVoid and hrp.Position.Y < -10 then
+        hrp.CFrame = CFrame.new(hrp.Position.X, 20, hrp.Position.Z)
+        hrp.AssemblyLinearVelocity = Vector3.zero
+    end
+
+    if Toggles.SafePosition then
+        LastSafePos = LastSafePos or hrp.Position
+        local dist = (hrp.Position - LastSafePos).Magnitude
+        
+        if dist < 30 then
+            LastSafePos = hrp.Position
+        elseif dist > 80 then
+            hrp.CFrame = CFrame.new(LastSafePos)
+            hrp.AssemblyLinearVelocity = Vector3.zero
+        end
+    end
+
+    if Toggles.SmartAntiTP then
+        if LastSafePos and (hrp.Position - LastSafePos).Magnitude > 100 then
+            hrp.CFrame = CFrame.new(LastSafePos)
+            hrp.AssemblyLinearVelocity = Vector3.zero
+        end
+    end
+
+    if Toggles.AntiStun then
+        fixCharacter(hum, hrp)
+    end
+end)
+
+local FPSTab = Window:CreateTab("FPS", "gauge")
+
+
+FPSTab:CreateButton({
+    Name = "UniverHub FPS Booster",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Uranus197/-Univers-Hub-Graphics-Script-/refs/heads/main/UniversHub"))()
+    end,
+})
+
+FPSTab:CreateSection("Performance")
 
 local statsGui = nil
 local fpsFrame = nil
@@ -936,7 +906,6 @@ local function createStats()
     corner2.Parent = memFrame
 
     local stats = game:GetService("Stats")
-    local lastUpdate = 0
 
     game:GetService("RunService").RenderStepped:Connect(function(dt)
         if fpsFrame and fpsFrame.Visible then
@@ -967,7 +936,7 @@ end
 local fpsToggle = false
 local memToggle = false
 
-PlayerTab:CreateToggle({
+FPSTab:CreateToggle({
     Name = "Show FPS & Ping",
     CurrentValue = false,
     Callback = function(v)
@@ -987,7 +956,7 @@ PlayerTab:CreateToggle({
     end
 })
 
-PlayerTab:CreateToggle({
+FPSTab:CreateToggle({
     Name = "Show Memory",
     CurrentValue = false,
     Callback = function(v)
@@ -2731,6 +2700,7 @@ local followSpeed = 20
 local orbiting = false
 local orbitRadius = 10
 local orbitSpeed = 30
+local orbitHeight = 0
 local orbitAngle = 0
 
 local function getChar(p) return p and p.Character end
@@ -2778,7 +2748,16 @@ local function getFarthest()
     return best
 end
 
-Tab4:CreateSection("Teleport")
+Tab4:CreateSection("Random")
+
+Tab4:CreateButton({ Name="TP nearest player", Callback=function() teleportTo(getNearest()) end })
+Tab4:CreateButton({ Name="TP farthest player", Callback=function() teleportTo(getFarthest()) end })
+Tab4:CreateButton({ Name="TP random player", Callback=function()
+    local list=getAllTargets()
+    if #list>0 then teleportTo(list[math.random(1,#list)]) end
+end })
+
+Tab4:CreateSection("List")
 
 local playerDropdown = Tab4:CreateDropdown({
     Name = "Player List",
@@ -2806,13 +2785,6 @@ end
 Tab4:CreateButton({ Name="Refresh player list", Callback=refreshPlayers })
 refreshPlayers()
 
-Tab4:CreateButton({ Name="TP nearest player", Callback=function() teleportTo(getNearest()) end })
-Tab4:CreateButton({ Name="TP farthest player", Callback=function() teleportTo(getFarthest()) end })
-Tab4:CreateButton({ Name="TP random player", Callback=function()
-    local list=getAllTargets()
-    if #list>0 then teleportTo(list[math.random(1,#list)]) end
-end })
-
 Tab4:CreateButton({ Name="Teleport to player", Callback=function()
     local t=getTarget()
     teleportTo(t)
@@ -2821,7 +2793,7 @@ end })
 Tab4:CreateToggle({ Name="Teleport loop (target)", CurrentValue=false, Callback=function(v) loopTeleport=v end })
 
 Tab4:CreateToggle({ Name="Follow player", Callback=function(v) following=v end })
-Tab4:CreateSlider({ Name="Follow speed", Range={5,100}, Increment=5, CurrentValue=20, Callback=function(v) followSpeed=v end })
+Tab4:CreateSlider({ Name="Follow speed", Range={5,1000}, Increment=5, CurrentValue=20, Callback=function(v) followSpeed=v end })
 
 Tab4:CreateSection("Aim Camera")
 
@@ -2831,8 +2803,9 @@ Tab4:CreateSlider({ Name="Aim strength", Range={0.1,1}, Increment=0.05, CurrentV
 Tab4:CreateSection("Orbit")
 
 Tab4:CreateToggle({ Name="Orbit player", CurrentValue=false, Callback=function(v) orbiting=v end })
-Tab4:CreateSlider({ Name="Orbit radius", Range={1,100}, Increment=1, CurrentValue=10, Callback=function(v) orbitRadius=v end })
-Tab4:CreateSlider({ Name="Orbit speed", Range={1,100}, Increment=1, CurrentValue=30, Callback=function(v) orbitSpeed=v end })
+Tab4:CreateSlider({ Name="Orbit radius", Range={1,1000}, Increment=1, CurrentValue=10, Callback=function(v) orbitRadius=v end })
+Tab4:CreateSlider({ Name="Orbit speed", Range={1,1000}, Increment=1, CurrentValue=30, Callback=function(v) orbitSpeed=v end })
+Tab4:CreateSlider({ Name="Orbit height (Y)", Range={-200,200}, Increment=1, CurrentValue=0, Callback=function(v) orbitHeight=v end })
 
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Enabled=false
@@ -2900,9 +2873,10 @@ RunService.Heartbeat:Connect(function(dt)
     end
 
     if orbiting and hrp1 and hrp2 then
-        orbitAngle += orbitSpeed*dt
-        local offset = Vector3.new(math.cos(orbitAngle)*orbitRadius,0,math.sin(orbitAngle)*orbitRadius)
-        hrp1.CFrame=CFrame.new(hrp2.Position+offset, hrp2.Position)
+        local angularSpeed = orbitSpeed / math.max(orbitRadius, 0.1) -- tránh chia 0
+        orbitAngle = orbitAngle + angularSpeed * dt
+        local offset = Vector3.new(math.cos(orbitAngle) * orbitRadius, orbitHeight, math.sin(orbitAngle) * orbitRadius)
+        hrp1.CFrame = CFrame.new(hrp2.Position + offset, hrp2.Position)
     end
 end)
 
