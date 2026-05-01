@@ -1552,7 +1552,7 @@ ESP:CreateSlider({
     end
 })
 
-ESP:CreatSection("NPC")
+ESP:CreateSection("NPC")
 
 local Settings = {
     EspName = true,
