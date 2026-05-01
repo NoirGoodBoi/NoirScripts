@@ -1552,6 +1552,153 @@ ESP:CreateSlider({
     end
 })
 
+ESP:CreatSection("NPC")
+
+local Settings = {
+    EspName = true,
+    Outline = true,
+    Fill = true,
+    TracerBox = true
+}
+
+local Colors = {
+    Default = Color3.fromRGB(0, 255, 255),
+    Team = Color3.fromRGB(255, 255, 0),
+    Enemy = Color3.fromRGB(255, 165, 0)
+}
+
+local function IsPlayer(model)
+    if Players:GetPlayerFromCharacter(model) then
+        return true
+    end
+    return false
+end
+
+local function GetColor(npc)
+    if npc:FindFirstChild("TeamColor") then
+        return (npc.TeamColor == LocalPlayer.TeamColor) and Colors.Team or Colors.Enemy
+    end
+    return Colors.Default
+end
+
+local function ApplyNPC_ESP(npc)
+    if IsPlayer(npc) then return end
+    if not npc:FindFirstChild("HumanoidRootPart") then return end
+
+    local NameTag = Drawing.new("Text")
+    local Tracer = Drawing.new("Line")
+    local Box = Drawing.new("Square")
+    
+    local hl = Instance.new("Highlight")
+    hl.Parent = npc
+    hl.Adornee = npc
+
+    local renderLoop
+    renderLoop = RunService.RenderStepped:Connect(function()
+        if not npc or not npc.Parent or not npc:FindFirstChild("Humanoid") or npc.Humanoid.Health <= 0 then
+            NameTag:Remove()
+            Tracer:Remove()
+            Box:Remove()
+            hl:Destroy()
+            renderLoop:Disconnect()
+            return
+        end
+
+        local color = GetColor(npc)
+        local hrp = npc.HumanoidRootPart
+        local vector, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+
+        hl.Enabled = (Settings.Outline or Settings.Fill)
+        hl.OutlineColor = color
+        hl.FillColor = color
+        hl.OutlineTransparency = Settings.Outline and 0 or 1
+        hl.FillTransparency = Settings.Fill and 0.5 or 1
+
+        if onScreen then
+            if Settings.EspName then
+                NameTag.Visible = true
+                NameTag.Text = npc.Name
+                NameTag.Position = Vector2.new(vector.X, vector.Y - (2500 / vector.Z) / 2 - 20)
+                NameTag.Color = color
+                NameTag.Center = true
+                NameTag.Outline = true
+                NameTag.Size = 14
+            else
+                NameTag.Visible = false
+            end
+
+            if Settings.TracerBox then
+                local sizeX = 2200 / vector.Z
+                local sizeY = 3200 / vector.Z
+                
+                Box.Visible = true
+                Box.Size = Vector2.new(sizeX, sizeY)
+                Box.Position = Vector2.new(vector.X - sizeX / 2, vector.Y - sizeY / 2)
+                Box.Color = color
+                Box.Thickness = 1
+                Box.Filled = false
+
+                Tracer.Visible = true
+                Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                Tracer.To = Vector2.new(vector.X, vector.Y + sizeY / 2)
+                Tracer.Color = color
+                Tracer.Thickness = 1
+            else
+                Box.Visible = false
+                Tracer.Visible = false
+            end
+        else
+            NameTag.Visible = false
+            Box.Visible = false
+            Tracer.Visible = false
+        end
+    end)
+end
+
+local function ScanNPCs()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and v:FindFirstChild("Humanoid") and v ~= LocalPlayer.Character then
+            ApplyNPC_ESP(v)
+        end
+    end
+
+    workspace.DescendantAdded:Connect(function(v)
+        if v:IsA("Model") then
+            task.wait(0.2)
+            if v:FindFirstChild("Humanoid") and v ~= LocalPlayer.Character then
+                ApplyNPC_ESP(v)
+            end
+        end
+    end)
+end
+
+ESP:CreateToggle({
+   Name = "Esp Name (NPC)",
+   CurrentValue = true,
+   Callback = function(Value) Settings.EspName = Value end,
+})
+
+ESP:CreateToggle({
+   Name = "Highlight Outline",
+   CurrentValue = true,
+   Callback = function(Value) Settings.Outline = Value end,
+})
+
+ESP:CreateToggle({
+   Name = "Highlight Fill",
+   CurrentValue = true,
+   Callback = function(Value) Settings.Fill = Value end,
+})
+
+ESP:CreateToggle({
+   Name = "Tracer + Box 2D",
+   CurrentValue = true,
+   Callback = function(Value) Settings.TracerBox = Value end,
+})
+
+ScanNPCs()
+
+--
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
