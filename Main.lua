@@ -2320,9 +2320,9 @@ local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 ScriptsTab:CreateSection("Script")
 
 ScriptsTab:CreateButton({
-    Name = "Fly GUI V4",
+    Name = "Noir Fly",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/linhmcfake/Script/refs/heads/main/FLYGUIV4"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/Noir_Fly"))()
     end,
 })
 
@@ -2334,16 +2334,9 @@ ScriptsTab:CreateButton({
 })
 
 ScriptsTab:CreateButton({
-    Name = "Funny by Noir",
+    Name = "Fly GUI V4",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirFunny.lua"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Wallhop",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/linhmcfake/Script/refs/heads/main/FLYGUIV4"))()
     end,
 })
 
@@ -2351,6 +2344,27 @@ ScriptsTab:CreateButton({
     Name = "SilentAim by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/SilentAim.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Funny by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirScripts/main/NoirFunny.lua"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Wallhop by Noir",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/wallhop"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Wallhop",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script"))()
     end,
 })
 
