@@ -811,7 +811,6 @@ end)
 
 local FPSTab = Window:CreateTab("FPS", "gauge")
 
-
 FPSTab:CreateButton({
     Name = "UniverHub FPS Booster",
     Callback = function()
@@ -2464,26 +2463,19 @@ GameTab:CreateButton({
 
 local ScriptsTab = Window:CreateTab("Scripts", "file-text")
 
-ScriptsTab:CreateSection("Script")
+ScriptsTab:CreateSection("By Noir")
+
+ScriptsTab:CreateButton({
+    Name = "Noir Hub Universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirSrc/refs/heads/main/Script/Universal/NH-Universal.lua"))()
+    end,
+})
 
 ScriptsTab:CreateButton({
     Name = "Noir Fly",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/Noir_Fly"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Fly GUI V3",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/fly_gui_v3"))()
-    end,
-})
-
-ScriptsTab:CreateButton({
-    Name = "Fly GUI V4",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/linhmcfake/Script/refs/heads/main/FLYGUIV4"))()
     end,
 })
 
@@ -2505,6 +2497,22 @@ ScriptsTab:CreateButton({
     Name = "Wallhop by Noir",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/wallhop"))()
+    end,
+})
+
+ScriptsTab:CreateSection("Script")
+
+ScriptsTab:CreateButton({
+    Name = "Fly GUI V3",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirGui/main/fly_gui_v3"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = "Fly GUI V4",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/linhmcfake/Script/refs/heads/main/FLYGUIV4"))()
     end,
 })
 
