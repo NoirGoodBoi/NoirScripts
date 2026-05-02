@@ -1555,10 +1555,10 @@ ESP:CreateSlider({
 ESP:CreateSection("NPC")
 
 local Settings = {
-    EspName = true,
-    Outline = true,
-    Fill = true,
-    TracerBox = true
+    EspName = false,
+    Outline = false,
+    Fill = false,
+    TracerBox = false
 }
 
 local Colors = {
@@ -1707,13 +1707,13 @@ local Camera = workspace.CurrentCamera
 
 local AimbotEnabled = false
 local NPCAimbotEnabled = false
-local TeamCheck = true
+local TeamCheck = false
 local WallCheck = true
 local DeathCheck = true
-local FOVRadius = 100
-local Smoothness = 0.3
+local FOVRadius = 200
+local Smoothness = 1
 local AimPart = "Head"
-local Prediction = 0.12
+local Prediction = 0
 local LockSwitchDelay = 0.5
 
 local LockedTarget = nil
@@ -1803,7 +1803,7 @@ Tab:CreateSlider({
     Name = "Circle FOV",
     Range = {50, 300},
     Increment = 5,
-    CurrentValue = 100,
+    CurrentValue = 220,
     Callback = function(v)
         FOVRadius = v
         FOVCircle.Size = UDim2.new(0, v * 2, 0, v * 2)
@@ -1814,7 +1814,7 @@ Tab:CreateSlider({
     Name = "Smooth",
     Range = {0, 1},
     Increment = 0.05,
-    CurrentValue = 0.3,
+    CurrentValue = 1,
     Callback = function(v)
         Smoothness = v
     end
@@ -1823,8 +1823,8 @@ Tab:CreateSlider({
 Tab:CreateSlider({
     Name = "Prediction",
     Range = {0, 0.5},
-    Increment = 0.01,
-    CurrentValue = 0.12,
+    Increment = 0.01
+    CurrentValue = 0,
     Callback = function(v)
         Prediction = v
     end
